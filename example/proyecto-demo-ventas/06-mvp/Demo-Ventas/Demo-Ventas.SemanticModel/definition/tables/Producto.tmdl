@@ -1,0 +1,46 @@
+table Producto
+	lineageTag: e8670f8f-1d00-4a5e-a618-a01abe75cd9a
+
+	column 'ID Producto'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: c34c7580-33d6-444d-84d0-46f7d2f22e54
+		summarizeBy: none
+		sourceColumn: ID Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	column Producto
+		dataType: string
+		lineageTag: d27ad01c-674a-421d-aedc-9f38611fb853
+		summarizeBy: none
+		sourceColumn: Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Categoria Producto'
+		dataType: string
+		lineageTag: b483eb4a-47d1-4213-b7fc-bda210e13232
+		summarizeBy: none
+		sourceColumn: Categoria Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Producto = m
+		mode: import
+		source =
+				let
+				    Origen = #table(
+				        type table [#"ID Producto" = Int64.Type, Producto = text, #"Categoria Producto" = text],
+				        {
+				            {1, "Laptop", "Computo"},
+				            {2, "Monitor", "Computo"},
+				            {3, "Audifonos", "Accesorios"},
+				            {4, "Teclado", "Accesorios"}
+				        }
+				    )
+				in
+				    Origen
+
+	annotation PBI_ResultType = Table

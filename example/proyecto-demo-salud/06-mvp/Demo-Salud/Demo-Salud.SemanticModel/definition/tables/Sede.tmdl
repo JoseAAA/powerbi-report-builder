@@ -1,0 +1,37 @@
+table Sede
+	lineageTag: c8403541-752a-4545-8549-5071a5b645e1
+
+	column 'ID Sede'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: cba11c75-883c-4c73-adb4-a12ad591cfda
+		summarizeBy: none
+		sourceColumn: ID Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sede
+		dataType: string
+		lineageTag: c81ae24f-0a72-44ba-a67b-344903c47302
+		summarizeBy: none
+		sourceColumn: Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sede = m
+		mode: import
+		source =
+				let
+				    Origen = #table(
+				        type table [#"ID Sede" = Int64.Type, Sede = text],
+				        {
+				            {1, "Sede Norte"},
+				            {2, "Sede Centro"},
+				            {3, "Sede Sur"}
+				        }
+				    )
+				in
+				    Origen
+
+	annotation PBI_ResultType = Table

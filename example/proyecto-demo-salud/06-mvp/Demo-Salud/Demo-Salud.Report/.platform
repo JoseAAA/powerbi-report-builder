@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Demo-Salud"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9c4a0c61-1c6b-4027-89d9-358e400eb48b"
+  }
+}

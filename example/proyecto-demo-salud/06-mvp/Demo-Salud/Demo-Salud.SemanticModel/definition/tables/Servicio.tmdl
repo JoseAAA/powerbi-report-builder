@@ -1,0 +1,46 @@
+table Servicio
+	lineageTag: b4cf661f-1e23-4afb-9d6b-0b20e480fd13
+
+	column 'ID Servicio'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 202b651c-bde6-4aea-8d4b-5d5201634f6f
+		summarizeBy: none
+		sourceColumn: ID Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column Servicio
+		dataType: string
+		lineageTag: f9f87280-3ff1-403a-a28e-bf59925e9279
+		summarizeBy: none
+		sourceColumn: Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Servicio Agrupado'
+		dataType: string
+		lineageTag: 11760a6b-6d93-4bc5-8fa4-0935c1c51cc8
+		summarizeBy: none
+		sourceColumn: Servicio Agrupado
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Servicio = m
+		mode: import
+		source =
+				let
+				    Origen = #table(
+				        type table [#"ID Servicio" = Int64.Type, Servicio = text, #"Servicio Agrupado" = text],
+				        {
+				            {1, "Emergencia", "Atencion Critica"},
+				            {2, "Hospitalizacion", "Atencion Critica"},
+				            {3, "Consulta Externa", "Ambulatorio"},
+				            {4, "Quirofano", "Atencion Critica"}
+				        }
+				    )
+				in
+				    Origen
+
+	annotation PBI_ResultType = Table

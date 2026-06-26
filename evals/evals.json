@@ -1,0 +1,19 @@
+{
+  "skill_name": "powerbi-report-builder",
+  "evals": [
+    {
+      "id": 1,
+      "name": "marca-nueva-sin-activa",
+      "prompt": "Quiero crear un reporte de Power BI nuevo para mi empresa de retail. No se bien por donde, supongo que primero los colores. Te paso el logo despues.",
+      "expected_output": "Al no haber marca activa, NO inventa ni asume ninguna marca; explica que captura la marca del usuario, pide el logo / manual / hex (o lo extrae del logo cuando lo reciba), confirma los hex y luego genera un theme.json valido con instrucciones de importacion. Propone guardar la marca como <empresa>.json activa.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "marca-guardada-confirmacion",
+      "prompt": "Crea el theme para mi reporte nuevo.",
+      "expected_output": "Busca un archivo con activa:true en assets/marca/ (ignorando ejemplos/). Si existe, cita sus colores reales y pide confirmacion antes de generar; si no existe, pasa a capturar la marca. No usa ningun ejemplo como si fuera la marca del usuario.",
+      "files": ["assets/marca/_plantilla-marca.json"]
+    }
+  ]
+}

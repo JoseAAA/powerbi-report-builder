@@ -1,0 +1,9 @@
+﻿ID Servicio,Servicio,Servicio Agrupado
+1,Emergencia,Atencion Critica
+2,Hospitalizacion,Atencion Critica
+3,Consulta Externa,Ambulatorio
+4,Quirofano,Atencion Critica
+5,Hemodialisis,Ambulatorio
+6,Farmacia,Soporte
+7,Laboratorio,Soporte
+8,Imagenes,Soporte

@@ -1,0 +1,38 @@
+table Region
+	lineageTag: 2b039e95-de31-4b99-9dc6-b329ead7929a
+
+	column 'ID Region'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 4254fc87-9ccf-4551-8109-1336d9b1f133
+		summarizeBy: none
+		sourceColumn: ID Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: e096aabb-1457-4281-93a0-2869e4bb5ff6
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Region = m
+		mode: import
+		source =
+				let
+				    Origen = #table(
+				        type table [#"ID Region" = Int64.Type, Region = text],
+				        {
+				            {1, "Norte"},
+				            {2, "Centro"},
+				            {3, "Sur"},
+				            {4, "Oriente"}
+				        }
+				    )
+				in
+				    Origen
+
+	annotation PBI_ResultType = Table

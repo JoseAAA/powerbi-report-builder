@@ -1,0 +1,20 @@
+# Power BI Project (PBIP) — cache y settings locales (default de Power BI)
+# Son locales, enormes (cache.abf) y causan conflictos (localSettings.json).
+**/.pbi/
+
+# Marcas de usuario (confidenciales): NUNCA se versionan.
+# Solo se versionan la plantilla y los ejemplos genericos.
+assets/marca/*.json
+!assets/marca/_plantilla-marca.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Salidas temporales de prueba
+/tmp/

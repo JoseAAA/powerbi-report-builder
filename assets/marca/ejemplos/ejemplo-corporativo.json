@@ -1,0 +1,72 @@
+{
+  "marca": "Empresa Ejemplo",
+  "version": "1.0",
+  "activa": false,
+  "fechaCreacion": "2026-06-14",
+  "descripcion": "Marca de EJEMPLO generica que muestra como se ve un archivo de marca completo y bien llenado. NO es la marca por defecto del skill: una instalacion nueva NO trae ninguna marca activa. Para tu empresa, copia ../_plantilla-marca.json, llenalo y pon activa=true en ese archivo.",
+  "origen": "Paleta corporativa de ejemplo (azul dominante con acentos calidos), solo para ilustrar la estructura. Reemplazala por la marca real de tu empresa.",
+
+  "colores": {
+    "primario": "#1B4D77",
+    "primarioOscuro": "#00355F",
+    "secundario": "#1987EC",
+    "acentos": ["#E25822", "#50C878", "#E1C955"],
+
+    "paletaDatos": [
+      "#1B4D77",
+      "#E25822",
+      "#50C878",
+      "#1987EC",
+      "#E1C955",
+      "#6B7A8F",
+      "#1076AA",
+      "#9C5BA8"
+    ],
+    "_comentarioPaleta": "8 colores. Color 1 = protagonista (navy corporativo). Orden alternado por contraste y luminosidad para diferenciacion segura en daltonismo (serie 1 oscura vs serie 2 clara/calida).",
+
+    "semaforo": {
+      "bueno": "#2E8B57",
+      "neutral": "#E1A30B",
+      "malo": "#C0392B"
+    },
+
+    "texto": {
+      "principal": "#252423",
+      "secundario": "#605E5C",
+      "atenuado": "#8A8886"
+    },
+
+    "fondo": {
+      "pagina": "#F5F6F8",
+      "visual": "#FFFFFF",
+      "grid": "#DBE3EA",
+      "secundario": "#EAEFF4"
+    },
+
+    "rampa": {
+      "maximo": "#1B4D77",
+      "centro": "#84A9C0",
+      "minimo": "#DCE6EF",
+      "nulo": "#B3B0AD"
+    }
+  },
+
+  "tipografia": {
+    "familia": "Segoe UI",
+    "familiaTitulos": "Segoe UI Semibold",
+    "_nota": "Segoe UI es segura (instalada por defecto en Windows). Si una empresa adopta una fuente corporativa no estandar, usar la mas parecida de: Segoe UI, Arial, Calibri, Tahoma, Verdana; nunca una fuente exotica que haga fallback feo en la maquina del lector.",
+    "tamanos": {
+      "callout": 34,
+      "title": 14,
+      "header": 12,
+      "label": 10
+    }
+  },
+
+  "modo": "claro",
+
+  "logo": {
+    "ruta": null,
+    "_nota": "Si tienes el logo, coloca el PNG junto a este archivo y pon aqui la ruta relativa. El scaffold del .pbip lo copiara a Report/StaticResources/RegisteredResources/ y lo referenciara en la pagina."
+  }
+}

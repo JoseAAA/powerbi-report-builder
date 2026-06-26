@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compilar scripts (sintaxis)
+        run: python -m py_compile scripts/*.py
+
+      - name: Validar manifiestos del plugin
+        run: |
+          python -m json.tool .claude-plugin/plugin.json > /dev/null
+          python -m json.tool .claude-plugin/marketplace.json > /dev/null
+
+      - name: Smoke test end-to-end (bootstrap con marca de ejemplo)
+        run: |
+          python scripts/init_proyecto.py --nombre "CI-Demo" --dominio ventas \
+            --marca assets/marca/ejemplos/ejemplo-corporativo.json --salida /tmp/ci
+          python scripts/validar_modelo.py "/tmp/ci/proyecto-ci-demo/06-mvp/CI-Demo/CI-Demo.SemanticModel"
+          python scripts/validar_pbip.py   "/tmp/ci/proyecto-ci-demo/06-mvp/CI-Demo/CI-Demo.Report"
+
+      - name: Validar ejemplos versionados (modelo R1-R11 + reporte P1-P7)
+        run: |
+          python scripts/validar_modelo.py "example/proyecto-demo-ventas/06-mvp/Demo-Ventas/Demo-Ventas.SemanticModel"
+          python scripts/validar_pbip.py   "example/proyecto-demo-ventas/06-mvp/Demo-Ventas/Demo-Ventas.Report"
+          python scripts/validar_modelo.py "example/proyecto-demo-salud/06-mvp/Demo-Salud/Demo-Salud.SemanticModel"
+          python scripts/validar_pbip.py   "example/proyecto-demo-salud/06-mvp/Demo-Salud/Demo-Salud.Report"
+
+      - name: Sin fugas de datos personales en el repo
+        run: |
+          ! grep -rn "C:\\\\Users\\\\" --include="*.m" --include="*.json" example/ scripts/

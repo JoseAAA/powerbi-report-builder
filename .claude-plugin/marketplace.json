@@ -1,0 +1,11 @@
+{
+  "name": "powerbi-report-builder-marketplace",
+  "owner": { "name": "Power BI Report Builder maintainers" },
+  "plugins": [
+    {
+      "name": "powerbi-report-builder",
+      "source": "./",
+      "description": "Framework end-to-end para crear y auditar dashboards de Power BI como proyecto PBIP: marca, descubrimiento, KPIs, datos+M, modelo estrella+DAX, visualizacion IBCS, MVP, rendimiento, auditoria y entrega. Brand-agnostic, citado en fuentes oficiales."
+    }
+  ]
+}
