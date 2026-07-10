@@ -3,8 +3,8 @@ name: powerbi-rendimiento
 description: >
   Fase 7 — Rendimiento y mantenimiento de un modelo de Power BI. USAR cuando el
   reporte "va lento", el modelo pesa mucho, hay que optimizar memoria/refresco,
-  preparar el modelo para que sea facil de mantener, o aplicar buenas practicas
-  VertiPaq / refresco incremental / agregaciones.
+  bajar cardinalidad, o preparar el modelo para mantenerlo facilmente (VertiPaq,
+  refresco incremental, agregaciones).
 ---
 
 # Fase 7 — Rendimiento y mantenimiento

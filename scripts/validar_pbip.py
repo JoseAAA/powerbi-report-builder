@@ -25,6 +25,7 @@ Reglas (severidad [ALTA] bloquea, exit 1):
 Solo librería estándar.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -72,13 +73,25 @@ def _validar_theme_meta(tipo, meta, hallazgos):
                     f"themeCollection.{tipo}.reportVersionAtImport sin '{sub}'"))
 
 
+def _ruta_io(ruta):
+    """En Windows, prefijo \\\\?\\ para leer árboles PBIP más allá de MAX_PATH."""
+    if os.name != "nt":
+        return ruta
+    ruta = os.path.abspath(ruta)
+    if ruta.startswith("\\\\?\\"):
+        return ruta
+    if ruta.startswith("\\\\"):  # UNC: \\server\share -> \\?\UNC\server\share
+        return "\\\\?\\UNC" + ruta[1:]
+    return "\\\\?\\" + ruta
+
+
 def main():
     if len(sys.argv) != 2:
         print(__doc__)
         return 2
-    entrada = Path(sys.argv[1])
+    entrada = Path(_ruta_io(sys.argv[1]))
     if not entrada.exists():
-        print(f"No existe la ruta: {entrada}")
+        print(f"No existe la ruta: {sys.argv[1]}")
         return 2
     report = _localizar_report(entrada)
     if not report:

@@ -161,8 +161,27 @@ def mq(name):
     return f'#"{name}"' if " " in name else name
 
 
+def ruta_io(ruta):
+    """Ruta apta para E/S en Windows aunque supere MAX_PATH (260).
+
+    El árbol .Report/.SemanticModel agrega ~90 caracteres de profundidad
+    propia (StaticResources/, definition/pages/<id>/visuals/<id>/...), así
+    que una carpeta de salida honda revienta el límite clásico. El prefijo
+    \\\\?\\ lo desactiva; en otros SO la ruta vuelve tal cual.
+    """
+    if os.name != "nt":
+        return ruta
+    ruta = os.path.abspath(ruta)
+    if ruta.startswith("\\\\?\\"):
+        return ruta
+    if ruta.startswith("\\\\"):  # UNC: \\server\share -> \\?\UNC\server\share
+        return "\\\\?\\UNC" + ruta[1:]
+    return "\\\\?\\" + ruta
+
+
 def escribir_json(ruta, obj):
     """Escribe un dict como JSON indentado y valida que reparsee."""
+    ruta = ruta_io(ruta)
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     texto = json.dumps(obj, ensure_ascii=False, indent=2)
     json.loads(texto)  # validación temprana
@@ -172,6 +191,7 @@ def escribir_json(ruta, obj):
 
 def escribir_texto(ruta, texto):
     """Escribe texto plano (TMDL) en UTF-8."""
+    ruta = ruta_io(ruta)
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     with open(ruta, "w", encoding="utf-8") as f:
         f.write(texto)
@@ -473,6 +493,7 @@ def tmdl_medidas(dom):
 \tisHidden
 \tlineageTag: {lt_tabla}
 
+\t/// Suma del numerador del indicador (columna Num del hecho). Medida base para construir cocientes; no se muestra sola.
 \tmeasure Numerador = ```
 \t\t\tVAR Resultado = SUM ( {tq(hecho)}[Num] )
 \t\t\tRETURN
@@ -482,6 +503,7 @@ def tmdl_medidas(dom):
 \t\tdisplayFolder: Indicadores
 \t\tlineageTag: {lt_num}
 
+\t/// Suma del denominador del indicador (columna Den del hecho). Medida base para construir cocientes; no se muestra sola.
 \tmeasure Denominador = ```
 \t\t\tVAR Resultado = SUM ( {tq(hecho)}[Den] )
 \t\t\tRETURN
@@ -491,6 +513,7 @@ def tmdl_medidas(dom):
 \t\tdisplayFolder: Indicadores
 \t\tlineageTag: {lt_den}
 
+\t/// Indicador principal del modelo: cociente Numerador / Denominador con DIVIDE (maneja division por cero). Se agrega correctamente a cualquier nivel.
 \tmeasure 'Indicador %' = ```
 \t\t\tVAR Num = [Numerador]
 \t\t\tVAR Den = [Denominador]
@@ -908,7 +931,7 @@ def main():
     for ruta in archivos:
         if ruta.endswith((".json", ".pbip", ".pbir", ".pbism", ".platform")):
             try:
-                with open(ruta, "r", encoding="utf-8") as f:
+                with open(ruta_io(ruta), "r", encoding="utf-8") as f:
                     json.load(f)
             except Exception as e:
                 print(f"  JSON INVÁLIDO: {ruta}  ->  {e}")

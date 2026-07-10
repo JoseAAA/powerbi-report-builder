@@ -7,9 +7,12 @@ Lee este archivo SIEMPRE antes de editar archivos de un proyecto PBIP.
 ## Contexto rápido
 
 - **PBIP** (Power BI Project) es el formato de guardado basado en carpetas y
-  texto plano. Desde 2026 es el estándar (PBIR es default en Service desde
-  enero 2026 y en Desktop desde marzo 2026). Reemplaza al .pbix binario para
-  desarrollo con Git.
+  texto plano. Reemplaza al .pbix binario para desarrollo con Git.
+- **PBIR** (enhanced report format) es **default desde enero 2026** en Power BI
+  Desktop y Service (los reportes nuevos se guardan en PBIR y los existentes se
+  convierten al editarlos). Sigue en **preview**; la **GA está planificada para
+  Q3 2026**, cuando PBIR pasará a ser el único formato soportado. _Fuente: Power BI
+  blog — "PBIR will become the default report format"._
 - **TMDL** (Tabular Model Definition Language): el modelo semántico como
   archivos de texto, uno por tabla/rol/perspectiva/cultura.
 - **PBIR** (enhanced report format): el reporte como JSONs individuales por
@@ -112,6 +115,7 @@ oficial": edita solo lo que el schema marca como variable; el resto se clona tal
 ### Medida en TMDL (dentro de tables/X.tmdl)
 
 ```tmdl
+	/// Ingreso facturado del periodo (sin impuestos). Medida principal de ventas.
 	measure 'Ventas Totales' = SUM(Ventas[Importe])
 		formatString: #,0
 		displayFolder: 01 Ventas
@@ -127,6 +131,11 @@ oficial": edita solo lo que el schema marca como variable; el resto se clona tal
 ```
 
 (Nota: el bloque ``` dentro de TMDL delimita expresiones multilinea.)
+
+**Descripciones en TMDL**: van con un comentario **`///` en la línea inmediatamente
+encima** del objeto (tabla/medida/columna), SIN línea en blanco entre el `///` y el
+objeto. Es la sintaxis oficial (no existe una propiedad `description:`). Evita los
+comentarios `//` sueltos. _(Fuente: Microsoft Learn — TMDL overview.)_
 
 ### Posición de un visual (visual.json)
 

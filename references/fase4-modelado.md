@@ -102,6 +102,20 @@ Cada VAR se evalua una sola vez (rendimiento), el codigo se lee de arriba abajo
   varias medidas/columnas (redondeo de negocio, clasificacion ABC). **GA desde
   junio 2026** (requiere compatibility level 1702+); ya puedes proponerlas sin
   reservas si el Desktop esta actualizado.
+- **Field parameters** (`FP_`): dejan que el usuario **elija en un slicer qué
+  medida o qué dimension** ve el visual (p. ej. cambiar el eje entre Producto /
+  Region / Cliente, o la metrica entre Ventas / Margen / Unidades). Uno o dos
+  field parameters reemplazan varios visuales duplicados. Nombralos `FP_Metricas`,
+  `FP_Dimensiones` y ocultalos del panel de campos. _Fuente: SQLBI / Microsoft
+  (field parameters)._
+
+### Seguridad (RLS / OLS)
+
+Si el reporte debe mostrar **datos distintos por usuario** (cada gerente su sede,
+cada vendedor su cartera) o **ocultar tablas/columnas sensibles** (salario, datos
+medicos), se define en el modelo: **RLS** (filas) y **OLS** (tablas/columnas). El
+patron recomendado es **RLS dinamico** con `USERPRINCIPALNAME()` + tabla de
+seguridad. Detalle, TMDL de roles y buenas practicas: `references/seguridad-rls.md`.
 
 ## 3. TMDL — sintaxis esencial
 

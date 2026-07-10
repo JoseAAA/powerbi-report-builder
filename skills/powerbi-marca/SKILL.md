@@ -2,10 +2,9 @@
 name: powerbi-marca
 description: >
   Fase 1 — Marca y tema visual de Power BI. USAR cuando el usuario habla de
-  colores, logo, identidad/marca de su empresa, "crea/cambia el theme", paleta,
-  modo oscuro, o sube un manual de marca / logo / presentacion (.thmx) / .pbip
-  para extraer colores. Genera un theme.json valido (con $schema oficial y
-  contraste WCAG) desde un archivo de marca reutilizable.
+  colores, logo, identidad o paleta de su empresa, pide "crea/cambia el theme",
+  modo oscuro, o sube un manual de marca / logo / presentacion (.thmx) / .pbip /
+  theme.json para extraer o aplicar colores.
 ---
 
 # Fase 1 — Marca y tema (theme.json)

@@ -24,7 +24,7 @@ references. No hay dependencias que instalar (Python estándar).
 
 O directo en terminal:
 ```bash
-python scripts/validar_modelo.py "MiReporte.SemanticModel"   # modelo/DAX: R1–R11
+python scripts/validar_modelo.py "MiReporte.SemanticModel"   # modelo/DAX: R1–R12
 python scripts/validar_pbip.py   "MiReporte.Report"          # reporte:    P1–P7
 ```
 Salen hallazgos por severidad (ALTA/MEDIA/BAJA) con el fix concreto.
@@ -33,7 +33,7 @@ Salen hallazgos por severidad (ALTA/MEDIA/BAJA) con el fix concreto.
 > "Quiero crear un dashboard de ventas para mi empresa"
 
 El orquestador te lleva por fases (marca → descubrimiento → KPIs → datos →
-modelo → visualización → MVP → entrega). O arranca la base en un comando:
+modelo → visualización → MVP → IA/Copilot → entrega). O arranca la base en un comando:
 ```bash
 python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas --marca mi-marca.json
 ```
@@ -67,7 +67,7 @@ pasos de clic.
 | `generar_datos_ejemplo.py` | CSVs de ejemplo multi-dominio + `modelo-ejemplo.m` |
 | `scaffold_pbip.py` | proyecto `.pbip` mínimo y válido (estrella + PBIR + tema) |
 | `init_proyecto.py` | bootstrap completo `proyecto-<nombre>/` (estructura + tema + datos + `.pbip`) |
-| `validar_modelo.py` | BPA-lite del modelo (R1–R11) |
+| `validar_modelo.py` | BPA-lite del modelo (R1–R12, incl. description para IA) |
 | `validar_pbip.py` | validación del reporte (P1–P7, incl. tema cableado) |
 
 ## 5. Publicar (producción)

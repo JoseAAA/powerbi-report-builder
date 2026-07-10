@@ -5,7 +5,7 @@ description: >
   "¿de donde saco los datos?", va a conectar Excel, SharePoint, SQL Server,
   Azure SQL, Synapse, Databricks o Fabric Lakehouse, decide Import vs DirectQuery
   vs Direct Lake, o necesita codigo M (query folding, parametros, refresco
-  incremental). Corre entre KPIs y Modelado.
+  incremental).
 ---
 
 # Fase Datos — Conexion a fuentes y Power Query M

@@ -3,8 +3,8 @@ name: powerbi-descubrimiento
 description: >
   Fase 2 — Descubrimiento del problema para un reporte de Power BI. USAR cuando
   el usuario va a reunirse con un area, "no sabe que pedir", quiere levantar
-  requerimientos, entender decisiones/dolores/usuarios, o preparar un taller.
-  Trata la sesion como design workshop, no como "lista de graficos".
+  requerimientos, entender decisiones/dolores/usuarios, o preparar un taller. NO
+  usar si los KPIs ya estan definidos (usar powerbi-kpis).
 ---
 
 # Fase 2 — Descubrimiento (design workshop)

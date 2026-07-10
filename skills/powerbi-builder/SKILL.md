@@ -1,14 +1,14 @@
 ---
 name: powerbi-builder
 description: >
-  Orquestador para crear o mejorar un reporte/dashboard de Power BI como proyecto
-  PBIP. USAR como punto de entrada cuando el usuario quiere "crear un dashboard",
-  "armar un reporte de Power BI", no sabe por donde empezar, o sube archivos
-  .pbip/.tmdl/.pbir/theme.json sin una fase clara. Detecta PERFIL (guiado/experto)
-  y NIVEL (basico/intermedio/complejo) y enruta al skill especializado de la fase:
-  powerbi-marca, powerbi-descubrimiento, powerbi-kpis, powerbi-datos-m,
-  powerbi-modelado-dax, powerbi-visualizacion, powerbi-mvp, powerbi-rendimiento,
-  powerbi-auditoria, powerbi-entrega. NO usar para Excel/Power Query puro ni SQL de fuentes.
+  Orquestador y punto de entrada para crear, mejorar o auditar un reporte/dashboard
+  de Power BI como proyecto PBIP. USAR cuando el usuario quiere "crear un dashboard",
+  "armar/mejorar un reporte de Power BI", no sabe por donde empezar, sube archivos
+  .pbip/.tmdl/.pbir/theme.json sin una fase clara, o su pedido abarca varias fases.
+  Enruta a la fase: powerbi-marca, powerbi-descubrimiento, powerbi-kpis,
+  powerbi-datos-m, powerbi-modelado-dax, powerbi-visualizacion, powerbi-mvp,
+  powerbi-rendimiento, powerbi-ia-copilot, powerbi-auditoria, powerbi-entrega. NO usar
+  para Excel/Power Query puro ni SQL de fuentes fuera de Power BI.
 ---
 
 # Power BI Report Builder — Orquestador
@@ -51,6 +51,7 @@ independientes (un usuario de negocio puede pedir un dashboard complejo).
 | "Disena la pagina", "cuenta una historia", .pbir | **powerbi-visualizacion** |
 | "Datos de ejemplo", "un .pbip base", "MVP rapido", arrancar un proyecto | **powerbi-mvp** |
 | "Optimiza", "va lento", mantenimiento, VertiPaq | **powerbi-rendimiento** |
+| "Prepara el modelo para Copilot/IA", sinonimos, descripciones, Q&A, "Approved for Copilot" | **powerbi-ia-copilot** |
 | Una carpeta PBIP completa ("audita mi proyecto") | **powerbi-auditoria** |
 | "Publicar", "subir a producción", versionar/GitHub, conectar al Service | **powerbi-entrega** |
 

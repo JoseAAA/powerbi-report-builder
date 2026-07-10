@@ -19,10 +19,13 @@ Aplica un subconjunto de reglas inspiradas en el Best Practice Analyzer
   R9  Columnas dateTime fuera del calendario (separar fecha/hora baja cardinalidad)
   R10 Relaciones bidireccionales (crossFilteringBehavior bothDirections)
   R11 Columnas calculadas (preferir Power Query M o medidas)
+  R12 Medidas sin description (comentario /// encima del measure, sintaxis TMDL
+      oficial; Copilot/IA y agentes LLM la leen — "Prepare data for AI" de Microsoft)
 
 Salida: reporte por consola con severidad [ALTA]/[MEDIA]/[BAJA] y código de
 salida 1 si hay hallazgos de severidad ALTA.
 """
+import os
 import re
 import sys
 from pathlib import Path
@@ -44,6 +47,9 @@ def extraer_medidas(texto, archivo):
             i += 1
             continue
         nombre = m.group("nombre").strip().strip("'")
+        # description en TMDL = comentario /// en la(s) linea(s) inmediatamente
+        # encima del measure (sin linea en blanco entre medio). Sintaxis oficial.
+        tiene_desc = i > 0 and lineas[i - 1].strip().startswith("///")
         resto = m.group("resto").strip()
         expr_lineas = []
         if resto.startswith("```"):
@@ -64,6 +70,7 @@ def extraer_medidas(texto, archivo):
             "nombre": nombre,
             "expresion": "\n".join(expr_lineas).strip(),
             "props": props,
+            "tiene_desc": tiene_desc,
             "archivo": archivo,
         })
         i = j
@@ -87,13 +94,26 @@ def extraer_columnas(texto):
     return cols
 
 
+def _ruta_io(ruta):
+    """En Windows, prefijo \\\\?\\ para leer árboles PBIP más allá de MAX_PATH."""
+    if os.name != "nt":
+        return ruta
+    ruta = os.path.abspath(ruta)
+    if ruta.startswith("\\\\?\\"):
+        return ruta
+    if ruta.startswith("\\\\"):  # UNC: \\server\share -> \\?\UNC\server\share
+        return "\\\\?\\UNC" + ruta[1:]
+    return "\\\\?\\" + ruta
+
+
 def main():
     if len(sys.argv) != 2:
         print(__doc__)
         return 2
-    raiz = Path(sys.argv[1])
+    mostrar = sys.argv[1]  # ruta tal como la pasó el usuario, para mensajes
+    raiz = Path(_ruta_io(sys.argv[1]))
     if not raiz.exists():
-        print(f"No existe la ruta: {raiz}")
+        print(f"No existe la ruta: {mostrar}")
         return 2
 
     archivos = sorted(raiz.rglob("*.tmdl"))
@@ -191,9 +211,15 @@ def main():
         for c in meta["calculadas"]:
             hallazgos.append(("MEDIA", "R11", f"Columna calculada {tabla}[{c}]: evalua moverla a Power Query (M) o a una medida"))
 
-    print(f"Modelo: {raiz}  |  Archivos .tmdl: {len(archivos)}  |  Medidas: {len(todas)}")
+    # R12 medidas sin description (clave para Copilot/IA y agentes LLM que leen el modelo).
+    # En TMDL la description es un comentario /// encima del measure (sintaxis oficial).
+    for m in todas:
+        if not m.get("tiene_desc"):
+            hallazgos.append(("BAJA", "R12", f"Medida '{m['nombre']}' sin description (/// encima del measure): agrega una frase de negocio (Copilot/IA la usa; ver preparar-datos-ia.md)"))
+
+    print(f"Modelo: {mostrar}  |  Archivos .tmdl: {len(archivos)}  |  Medidas: {len(todas)}")
     if not hallazgos:
-        print("OK  Sin hallazgos en las reglas automatizadas (R1-R11).")
+        print("OK  Sin hallazgos en las reglas automatizadas (R1-R12).")
         return 0
     orden = {"ALTA": 0, "MEDIA": 1, "BAJA": 2}
     for sev, regla, msg in sorted(hallazgos, key=lambda h: orden[h[0]]):

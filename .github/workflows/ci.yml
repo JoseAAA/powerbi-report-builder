@@ -18,6 +18,9 @@ jobs:
       - name: Compilar scripts (sintaxis)
         run: python -m py_compile scripts/*.py
 
+      - name: Consistencia del repo (skills / reglas / TMDL / references)
+        run: python scripts/check_consistencia.py
+
       - name: Validar manifiestos del plugin
         run: |
           python -m json.tool .claude-plugin/plugin.json > /dev/null
@@ -30,7 +33,7 @@ jobs:
           python scripts/validar_modelo.py "/tmp/ci/proyecto-ci-demo/06-mvp/CI-Demo/CI-Demo.SemanticModel"
           python scripts/validar_pbip.py   "/tmp/ci/proyecto-ci-demo/06-mvp/CI-Demo/CI-Demo.Report"
 
-      - name: Validar ejemplos versionados (modelo R1-R11 + reporte P1-P7)
+      - name: Validar ejemplos versionados (modelo R1-R12 + reporte P1-P7)
         run: |
           python scripts/validar_modelo.py "example/proyecto-demo-ventas/06-mvp/Demo-Ventas/Demo-Ventas.SemanticModel"
           python scripts/validar_pbip.py   "example/proyecto-demo-ventas/06-mvp/Demo-Ventas/Demo-Ventas.Report"

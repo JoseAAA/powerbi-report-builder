@@ -85,7 +85,26 @@ Lee primero `references/formatos-pbip.md`. Operaciones seguras:
 - Página oculta "Guía" con definiciones de cada KPI: barata de hacer y
   evita el 80% de las preguntas de "¿esto qué significa?".
 
-## 7. Novedades 2026 (usalas cuando aporten)
+## 7. Checklist pre-flight de diseño (números duros)
+
+Revisa esto ANTES de dar una página por terminada — son reglas verificables, no
+opiniones (útiles también en auditoría):
+
+- [ ] **Grilla de 8 px**: toda `position` (x, y, width, height) múltiplo de 8.
+- [ ] **≤ 6-8 visuales** por página; si no cabe el mensaje, va a otra página.
+- [ ] **1 mensaje por página**; el título es el hallazgo, no el tema.
+- [ ] **Nada de pie/donut con > 5 porciones** (usa barras ordenadas o treemap).
+- [ ] **Barras/columnas parten de cero** (no truncar el eje para dramatizar).
+- [ ] **Contraste WCAG** ≥ 4.5:1 texto normal, ≥ 3:1 texto grande/callouts.
+- [ ] **Matrices/tablas**: densidad útil, sin > ~15-20% de celdas vacías (si sobra
+      hueco, el visual está mal elegido o mal filtrado).
+- [ ] **Test del ojo entornado (squint test)**: al desenfocar, ¿se ve primero lo más
+      importante? Si todo pesa igual, falta jerarquía.
+- [ ] **Interacciones y orden de tabulación** revisados; alt text en visuales clave.
+
+_Fuente: Microsoft (pre-flight de diseño, skills-for-fabric) · IBCS · WCAG._
+
+## 8. Novedades 2026 (usalas cuando aporten)
 
 - **Visual calculations (GA mayo 2026):** calculos sobre el resultado visible del visual (running total, % del total, moving average) sin crear medidas ni columnas. Para calculos de presentacion que no se reusan; deja en el modelo las medidas reutilizables.
 - **Style presets en el theme:** estilos nombrados por tipo de visual (card destacada vs normal, textbox titulo/callout/cuerpo) aplicables desde el dropdown de estilo. Ver fase1-branding.

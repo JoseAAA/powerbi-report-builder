@@ -3,7 +3,7 @@ name: powerbi-mvp
 description: >
   Fase 6 — MVP rapido: datos de ejemplo + .pbip base. USAR cuando el usuario
   quiere "datos de ejemplo", "un .pbip base", "arrancar ya sin la fuente real",
-  un proyecto Power BI minimo para abrir y modificar, o un MVP/demo. Multi-dominio.
+  un proyecto Power BI minimo para abrir y modificar, un MVP o una demo.
 ---
 
 # Fase 6 — MVP rapido (datos de ejemplo + .pbip base)
@@ -22,7 +22,7 @@ Objetivo: que el usuario abra y toque algo en minutos, sin esperar la fuente rea
 Para arrancar un proyecto completo de una empresa nueva:
 `python "${CLAUDE_PLUGIN_ROOT}/scripts/init_proyecto.py" --nombre "<X>" --dominio <d> --marca <m>|--tema <t>|--sin-marca`
 (exige elegir el tema: los colores del usuario nunca se ignoran en silencio).
-Al terminar, valida: `validar_modelo.py` (R1–R11) y `validar_pbip.py` (P1–P7).
+Al terminar, valida: `validar_modelo.py` (R1–R12) y `validar_pbip.py` (P1–P7).
 
 Detalle y como adaptar a un negocio: `${CLAUDE_PLUGIN_ROOT}/references/datos-ejemplo-y-m.md`.
 

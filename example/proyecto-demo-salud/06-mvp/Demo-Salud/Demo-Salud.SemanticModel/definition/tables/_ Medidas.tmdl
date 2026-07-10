@@ -2,6 +2,7 @@ table '_ Medidas'
 	isHidden
 	lineageTag: a35a3c03-4b41-419c-805a-4aa4a0d4f1b3
 
+	/// Suma del numerador del indicador (columna Num del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Numerador = ```
 			VAR Resultado = SUM ( Indicadores[Num] )
 			RETURN
@@ -11,6 +12,7 @@ table '_ Medidas'
 		displayFolder: Indicadores
 		lineageTag: a11cc1e2-6554-483c-a7a8-8c05dc01f9ee
 
+	/// Suma del denominador del indicador (columna Den del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Denominador = ```
 			VAR Resultado = SUM ( Indicadores[Den] )
 			RETURN
@@ -20,6 +22,7 @@ table '_ Medidas'
 		displayFolder: Indicadores
 		lineageTag: 7e01027a-1299-4569-8778-15c721a64c13
 
+	/// Indicador principal del modelo: cociente Numerador / Denominador con DIVIDE (maneja division por cero). Se agrega correctamente a cualquier nivel.
 	measure 'Indicador %' = ```
 			VAR Num = [Numerador]
 			VAR Den = [Denominador]

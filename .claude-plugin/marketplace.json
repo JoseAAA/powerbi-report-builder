@@ -5,7 +5,7 @@
     {
       "name": "powerbi-report-builder",
       "source": "./",
-      "description": "Framework end-to-end para crear y auditar dashboards de Power BI como proyecto PBIP: marca, descubrimiento, KPIs, datos+M, modelo estrella+DAX, visualizacion IBCS, MVP, rendimiento, auditoria y entrega. Brand-agnostic, citado en fuentes oficiales."
+      "description": "Framework end-to-end para crear y auditar dashboards de Power BI como proyecto PBIP: marca, descubrimiento, KPIs, datos+M, modelo estrella+DAX, RLS/OLS, visualizacion IBCS, MVP, rendimiento, IA/Copilot, auditoria y entrega. Brand-agnostic, citado en fuentes oficiales."
     }
   ]
 }

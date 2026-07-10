@@ -53,7 +53,12 @@ El `.pbip` base usa datos **inline** (sirve para publicar la demo). Para producc
 1. Reemplaza el origen inline por la **fuente real** (skill `powerbi-datos-m` /
    `generar_conexion_m.py`: SQL, SharePoint, Databricks, Fabric), **parametrizada**.
 2. Credenciales + **refresco programado** (+ gateway si on-premise).
-3. Si aplica: **RLS** (seguridad por rol) y **refresco incremental** (`RangeStart`/`RangeEnd`).
+3. Si aplica: **RLS/OLS** (seguridad por usuario; patron dinamico con
+   `USERPRINCIPALNAME()` — ver `references/seguridad-rls.md`) y **refresco
+   incremental** (`RangeStart`/`RangeEnd`). **Prueba el RLS** iniciando sesion como
+   el usuario real (para externos, "Ver como rol" no basta).
+4. **Modelo listo para IA/Copilot** antes de exponerlo: descripciones, sinonimos y
+   "Approved for Copilot" (ver `references/preparar-datos-ia.md`).
 
 ## Conectar por MCP (opcional, avanzado)
 
@@ -65,8 +70,8 @@ o las capacidades agénticas de **Fabric/Power BI**). El agente llama funciones
 ## Antes de publicar: valida
 
 ```bash
-python scripts/validar_modelo.py "<...>.SemanticModel"   # modelo (R1–R11)
-python scripts/validar_pbip.py   "<...>.Report"          # reporte (P1–P6)
+python scripts/validar_modelo.py "<...>.SemanticModel"   # modelo (R1–R12)
+python scripts/validar_pbip.py   "<...>.Report"          # reporte (P1–P7)
 ```
 
 ## Fundamento (oficial)

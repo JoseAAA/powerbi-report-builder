@@ -35,10 +35,14 @@ python scripts/init_proyecto.py --nombre "Demo" --dominio ventas --marca assets/
 #    Variantes: --tema theme.json | --sin-marca (neutro EXPLÍCITO)
 #    Sin elección → error con instrucciones (así nunca se ignoran tus colores).
 
-# 6) Validar modelo (R1–R11) y reporte (P1–P7)
+# 6) Validar modelo (R1–R12) y reporte (P1–P7)
 python scripts/validar_modelo.py "C:/demo/proyecto-demo/06-mvp/Demo/Demo.SemanticModel"
 python scripts/validar_pbip.py   "C:/demo/proyecto-demo/06-mvp/Demo/Demo.Report"
 #    Esperado: "OK  Sin hallazgos ..." (exit 0)
+
+# 7) Consistencia del repo (skills, rangos de reglas, TMDL, references)
+python scripts/check_consistencia.py
+#    Esperado: "OK  Consistencia del repo: sin fallas." (exit 0)
 ```
 
 ### Bonus — el validador SÍ detecta fallas
@@ -81,6 +85,6 @@ python scripts/scaffold_pbip.py --nombre "../fuera" --dominio ventas --salida C:
 
 ## Checklist
 
-- [ ] Nivel 1 completo: 8 scripts corren; validadores OK en limpio y detectan en malo.
+- [ ] Nivel 1 completo: los 9 scripts corren; validadores OK en limpio y detectan en malo; `check_consistencia.py` en verde.
 - [ ] Nivel 2: el `.pbip` abre, colores del tema aplicados.
 - [ ] Nivel 3: el plugin enruta por perfil/nivel y respeta los colores del usuario.

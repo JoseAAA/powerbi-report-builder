@@ -148,8 +148,37 @@ def config_basico(args):
     }
 
 
+# ---------- validacion ----------
+_COLOR_KEYS = ("good", "neutral", "bad", "texto", "texto2", "texto3", "texto4",
+               "fondoVisual", "fondoSecundario", "fondoPagina", "tableAccent",
+               "maximum", "center", "minimum", "null")
+
+
+def validar_colores_cfg(cfg):
+    """Falla ANTES de escribir si algun color no es un hex valido.
+    Evita que un valor como 'azul' se cuele al theme.json (Power BI lo rechaza)."""
+    malos = []
+    for i, c in enumerate(cfg.get("paleta", [])):
+        try:
+            hex_to_rgb(c)
+        except ValueError:
+            malos.append(f"paleta[{i}]='{c}'")
+    for k in _COLOR_KEYS:
+        v = cfg.get(k)
+        if v is None:
+            continue
+        try:
+            hex_to_rgb(v)
+        except ValueError:
+            malos.append(f"{k}='{v}'")
+    if malos:
+        raise ValueError(
+            "color(es) no valido(s) (usa hex tipo #1B4D77): " + ", ".join(malos))
+
+
 # ---------- construccion del tema ----------
 def construir_tema(cfg, no_auto_contraste=False):
+    validar_colores_cfg(cfg)
     reporte = []
     texto = cfg["texto"]
     if not no_auto_contraste:

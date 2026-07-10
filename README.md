@@ -8,8 +8,9 @@
 
 ## ¿Qué hace?
 
-Guía (y ejecuta) **6 fases**. Se adapta a quién lo usa: modo guiado (no técnico,
-cero jerga, pasos de clic) o modo experto (edita archivos, listo para Git).
+Guía (y ejecuta) el **flujo completo por fases**. Se adapta a quién lo usa: modo
+guiado (no técnico, cero jerga, pasos de clic) o modo experto (edita archivos,
+listo para Git).
 
 1. **Marca** — lee un **archivo de marca guardado y reutilizable**
    (`assets/marca/`), te dice qué colores tiene tu empresa y, si no son los
@@ -20,12 +21,15 @@ cero jerga, pasos de clic) o modo experto (edita archivos, listo para Git).
 2. **Descubrimiento** — design workshop con plantilla de agenda y dinámicas.
 3. **KPIs/OKRs** — ficha por indicador, validada contra datos (✅/⚠️/❌).
 4. **Modelado y DAX** — estrella, **nomenclatura de negocio** (sin `DIM_/FACT_`,
-   con citas), VAR/RETURN, calculation groups, DAX UDF (GA 2026), patrón Num/Den,
-   y un validador BPA-lite.
+   con citas), VAR/RETURN, calculation groups, DAX UDF (GA 2026), field parameters,
+   patrón Num/Den, `description` en cada medida, **RLS/OLS**, y un validador BPA-lite.
 5. **Visualización** — storytelling IBCS + patrón Z, style presets y visual
    calculations (2026); edita PBIR directamente.
 6. **MVP rápido** — genera **datos de ejemplo + código M para pegar** y un
    **proyecto `.pbip` base** listo para abrir y modificar.
+7. **IA / Copilot** — deja el modelo **AI-ready** (descripciones, sinónimos, "Prep
+   data for AI", Approved for Copilot) para que Copilot y los agentes LLM/MCP
+   respondan bien.
 
 Trabaja sobre el formato **PBIP** (TMDL + PBIR), estándar de Power BI 2026.
 
@@ -58,7 +62,7 @@ multi-agente) y podrán usar scripts y references igual. Sin dependencias.
 - **Solo validar / auditar (experto):** ¿tu reporte sigue las buenas prácticas?
   Apunta el skill `powerbi-auditoria` a tu carpeta PBIP, o corre directo:
   `python scripts/validar_modelo.py <...>.SemanticModel` y
-  `python scripts/validar_pbip.py <...>.Report` → hallazgos por severidad (R1–R11 / P1–P6).
+  `python scripts/validar_pbip.py <...>.Report` → hallazgos por severidad (R1–R12 / P1–P7).
 - **Crear de cero (una idea → reporte):** el orquestador `powerbi-builder` te lleva
   fase por fase; o arranca la base en un comando:
   `python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas`.
@@ -93,13 +97,14 @@ powerbi-report-builder/                 # plugin (la raíz del repo)
 │   ├── powerbi-visualizacion/          # Fase 5
 │   ├── powerbi-mvp/                    # Fase 6
 │   ├── powerbi-rendimiento/            # Fase 7
+│   ├── powerbi-ia-copilot/            # preparar el modelo para IA/Copilot
 │   ├── powerbi-auditoria/              # auditar un PBIP existente
 │   └── powerbi-entrega/               # publicar / Git / Service / producción
 ├── references/                         # conocimiento citado (plantillas vivas)
 │   ├── formatos-pbip.md · nomenclatura.md · mantenimiento-de-plantillas.md
-│   ├── fase1-branding.md … fase5-visualizacion.md
+│   ├── fase1-branding.md … fase5-visualizacion.md · seguridad-rls.md
 │   ├── datos-fuentes-y-m.md · datos-ejemplo-y-m.md · rendimiento-y-mantenimiento.md
-│   └── entrega-git-y-mcp.md
+│   └── preparar-datos-ia.md · entrega-git-y-mcp.md
 ├── assets/
 │   ├── marca/ (_plantilla-marca.json · ejemplos/ejemplo-corporativo.json · README.md)
 │   ├── ejemplos/                       # acumulación por uso
@@ -108,8 +113,9 @@ powerbi-report-builder/                 # plugin (la raíz del repo)
     ├── generar_theme.py · editar_theme.py   # marca → theme.json (WCAG)
     ├── generar_conexion_m.py                # M por fuente (sql/sharepoint/databricks/…)
     ├── generar_datos_ejemplo.py · scaffold_pbip.py   # datos + .pbip base (multi-dominio)
-    ├── validar_modelo.py · validar_pbip.py  # BPA-lite modelo (R1–R11) + reporte (P1–P6)
-    └── init_proyecto.py                     # bootstrap proyecto-<nombre>/
+    ├── validar_modelo.py · validar_pbip.py  # BPA-lite modelo (R1–R12) + reporte (P1–P7)
+    ├── init_proyecto.py                     # bootstrap proyecto-<nombre>/
+    └── check_consistencia.py                # guarda de invariantes del repo (CI)
 ```
 
 ## Frameworks y fuentes
@@ -117,6 +123,8 @@ powerbi-report-builder/                 # plugin (la raíz del repo)
 - Formato PBIP/TMDL/PBIR y theme schema (Microsoft Learn + `powerbi-desktop-samples`)
 - Nomenclatura: Tabular Editor (2026), Chris Webb, SQLBI, Microsoft
 - BPA del equipo Power BI CAT; DAX UDF (GA jun 2026); visual calculations (GA 2026)
+- IA/Copilot: Microsoft "Prepare your data for AI" (AI instructions, verified answers, AI data schemas)
+- Seguridad: RLS/OLS (Microsoft Learn RLS guidance)
 - IBCS® / fórmula SUCCESS; esquema estrella (Kimball)
 
 ## Licencia

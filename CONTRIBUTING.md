@@ -14,7 +14,7 @@ Gracias por mejorar este framework. Reglas cortas y no negociables:
 4. **Nada de datos privados** de ninguna empresa: ni marcas reales, ni rutas
    locales absolutas, ni caché `.pbi/` (el CI lo revisa).
 5. **Verde antes del PR**: `python -m py_compile scripts/*.py`, y los
-   validadores sobre los ejemplos (`validar_modelo.py` R1–R11 y
+   validadores sobre los ejemplos (`validar_modelo.py` R1–R12 y
    `validar_pbip.py` P1–P7) deben pasar. Guía completa: `docs/pruebas.md`.
 6. **Español neutro** en contenido orientado al usuario; términos técnicos
    estándar (measure, star schema, query folding) en su forma habitual.

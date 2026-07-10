@@ -3,7 +3,44 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
-## 2026-07
+## 2026-07-10 (sin release)
+
+- **Fix rutas largas en Windows (MAX_PATH 260)**: `scaffold_pbip.py` fallaba con
+  `FileNotFoundError` al escribir el árbol `.Report/.SemanticModel` (que agrega
+  ~90 caracteres de profundidad propia) cuando la carpeta de salida era honda;
+  los validadores fallaban igual al leer. Ahora los tres scripts
+  (`scaffold_pbip.py`, `validar_modelo.py`, `validar_pbip.py`) normalizan la ruta
+  con el prefijo `\\?\` en Windows (incl. UNC). Detectado con el smoke test de CI
+  corrido en Windows con salida profunda. _Fuente: docs de Microsoft sobre
+  "Maximum Path Length Limitation" (Win32)._
+
+## 2026-07 (v0.4.0)
+
+- **Nuevo módulo IA / Copilot** (`references/preparar-datos-ia.md` + skill
+  `powerbi-ia-copilot`): deja el modelo **AI-ready** para que respondan bien Copilot
+  y los agentes LLM/MCP — descripciones, sinónimos/linguistic, y las 3 funciones
+  oficiales "Prep data for AI" (AI instructions, verified answers, AI data schemas) +
+  "Approved for Copilot". _Fuente: Microsoft Learn "Prepare your data for AI"._
+- **Descripción en cada medida** como estándar, con la sintaxis TMDL **oficial `///`**
+  (comentario encima del measure, no una propiedad `description:`): `scaffold_pbip.py`
+  y ambos ejemplos la generan; nueva regla **R12** en `validar_modelo.py` (medida sin
+  `///`). Es el metadato que leen Copilot y los agentes. _Fuente: Microsoft Learn —
+  TMDL overview (descriptions con `///`) + Copilot semantic models._
+- **Fix de validación de color**: `generar_theme.py` ahora RECHAZA hex inválidos
+  (p. ej. `--primario azul`) antes de escribir, en vez de colar `"azul"` al
+  `theme.json` (que Power BI rechazaría). Detectado probando entradas inválidas.
+- **Seguridad RLS/OLS** (`references/seguridad-rls.md`): patrón recomendado RLS
+  dinámico con `USERPRINCIPALNAME()`, OLS para columnas sensibles, y cómo probarlo
+  (usuarios externos). Cableado en `powerbi-modelado-dax` y en la entrega.
+  _Fuente: Microsoft Learn (RLS guidance) + Tabular Editor._
+- **Field parameters** añadidos a `fase4-modelado.md` (elegir métrica/dimensión en
+  un slicer). _Fuente: SQLBI / Microsoft._
+- **Precisión PBIR**: default desde enero 2026 (Desktop y Service), **aún en preview**,
+  GA planificada Q3 2026 (antes decía "Desktop desde marzo"). _Fuente: Power BI blog._
+- **Consistencia de docs**: `validar_pbip` es P1–**P7** (no P1–P6) en README, AGENTS,
+  auditoría y entrega; `validar_modelo` es R1–**R12**.
+
+## 2026-07 (v0.3.0)
 
 - **Fix definitivo "no respeta mis colores"**: `init_proyecto.py` ahora EXIGE elegir
   tema (`--marca` / `--tema` nuevo / `--sin-marca` explícito) — se eliminó el default

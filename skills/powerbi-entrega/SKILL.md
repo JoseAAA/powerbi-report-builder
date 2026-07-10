@@ -1,11 +1,10 @@
 ---
 name: powerbi-entrega
 description: >
-  Entrega y producción de un reporte Power BI: publicar al Power BI Service,
-  versionar con Git/GitHub, conectar la rama main al workspace (Fabric Git
-  integration), deployment pipelines, y pasar de MVP (datos de ejemplo) a datos
-  reales. USAR cuando el usuario dice "publicar", "subir a producción", "versionar
-  en GitHub", "conectar con el Service", "deployment", o pregunta cómo entregar.
+  Entrega y producción de un reporte Power BI. USAR cuando el usuario dice
+  "publicar", "subir a producción", "versionar en GitHub", "conectar con el
+  Service", "deployment pipelines", "Fabric Git integration", pregunta cómo
+  entregar, o cómo pasar de un MVP a datos reales (RLS, refresco, gateway).
 ---
 
 # Entrega y producción

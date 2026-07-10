@@ -4,7 +4,7 @@ Esta carpeta usa **muestras públicas y oficiales** (sin datos de ninguna empres
 Dos tipos de ejemplo:
 
 1. **Generados por este framework** (limpios por construcción: modelo estrella,
-   nomenclatura de negocio, Auto date/time apagado, validados R1–R11). Genera uno con:
+   nomenclatura de negocio, Auto date/time apagado, description en medidas, validados R1–R12). Genera uno con:
    ```
    python ../scripts/init_proyecto.py --nombre "Demo Ventas" --dominio ventas
    ```
