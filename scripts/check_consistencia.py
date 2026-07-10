@@ -15,6 +15,8 @@ Verifica, sin dependencias (solo stdlib):
   C5  No quedan rangos de reglas desactualizados ("R1-R11"/"P1-P6") en la
       documentacion de estado actual (el CHANGELOG historico se excluye).
   C6  Cada 'references/<x>.md' citada en AGENTS.md existe en disco.
+  C7  Portabilidad: AGENTS.md existe y los punteros por agente (CLAUDE.md,
+      GEMINI.md) existen y referencian AGENTS.md (una sola fuente de verdad).
 
 Uso:  python scripts/check_consistencia.py
 Salida: lista de fallas y exit 1 si hay alguna; exit 0 si todo consistente.
@@ -100,8 +102,18 @@ if agents.exists():
         if not (RAIZ / ref).exists():
             fallas.append(f"C6 AGENTS.md cita '{ref}' pero el archivo no existe")
 
+# C7: portabilidad multi-agente (AGENTS.md + punteros por proveedor)
+if not agents.exists():
+    fallas.append("C7 falta AGENTS.md (guia canonica multi-agente)")
+for puntero in ("CLAUDE.md", "GEMINI.md"):
+    p = RAIZ / puntero
+    if not p.exists():
+        fallas.append(f"C7 falta el puntero {puntero} (portabilidad del agente)")
+    elif "AGENTS.md" not in _leer(p):
+        fallas.append(f"C7 {puntero} no referencia AGENTS.md (evita duplicar la guia)")
+
 # --- salida ---
-print(f"Skills: {len(skills)} | Chequeos: C1-C6")
+print(f"Skills: {len(skills)} | Chequeos: C1-C7")
 if not fallas:
     print("OK  Consistencia del repo: sin fallas.")
     sys.exit(0)

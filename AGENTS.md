@@ -1,9 +1,13 @@
 # AGENTS.md — Power BI Report Builder
 
-Guía para agentes de IA (Codex, Gemini CLI, OpenCode, Cursor, Claude Code…).
-Este repo es un **framework para crear y auditar dashboards de Power BI como
+Guía para agentes de IA (Codex, Gemini CLI, Antigravity, OpenCode, Cursor, Claude
+Code…). Este repo es un **framework para crear y auditar dashboards de Power BI como
 proyecto PBIP** (TMDL + PBIR). En Claude Code además funciona como plugin con
 skills (`skills/`); en cualquier otro agente, esta guía basta para operar.
+
+Punteros por agente: `CLAUDE.md` (Claude Code) y `GEMINI.md` (Gemini CLI /
+Antigravity) apuntan aquí; Codex, OpenCode y Cursor leen este `AGENTS.md` directo.
+Una sola fuente de verdad, sin contenido duplicado.
 
 ## Qué hace el proyecto
 

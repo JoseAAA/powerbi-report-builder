@@ -1,10 +1,19 @@
-# Power BI Report Builder — Skill para Claude
+# Power BI Report Builder
 
-> 🇪🇸 Asistente experto end-to-end para crear reportes de Power BI con las
-> mejores prácticas actuales (2026): desde el problema de negocio hasta los
-> archivos PBIP, incluyendo datos de ejemplo y un proyecto `.pbip` base.
-> 🇬🇧 *End-to-end expert skill for building Power BI reports with current best
-> practices — from business discovery to a runnable PBIP project. Content in Spanish.*
+> 🇪🇸 **Framework end-to-end para crear y auditar reportes de Power BI** con las
+> mejores prácticas actuales (2026): del problema de negocio a los archivos PBIP
+> (TMDL + PBIR), con datos de ejemplo y un `.pbip` base. **Funciona con cualquier
+> agente de IA** — Claude Code, Codex, Gemini CLI, OpenCode, Cursor… — y también
+> **sin agente** (scripts Python, solo librería estándar, cero dependencias).
+> 🇬🇧 *End-to-end framework to build and audit Power BI reports with current best
+> practices. Works with any AI coding agent (Claude Code, Codex, Gemini CLI,
+> OpenCode, Cursor) and standalone via Python. Content in Spanish.*
+
+**Portabilidad:** el conocimiento vive en Markdown citado (`references/`), el trabajo
+determinista en **Python stdlib** (`scripts/`), y la guía para el agente en
+**[AGENTS.md](AGENTS.md)** (estándar que leen Codex, Gemini CLI, OpenCode, Cursor…).
+En **Claude Code** además es un plugin con skills especializados por fase. Ningún
+script depende de un agente concreto.
 
 ## ¿Qué hace?
 
@@ -35,32 +44,54 @@ Trabaja sobre el formato **PBIP** (TMDL + PBIR), estándar de Power BI 2026.
 
 ## Sistema de marca (genérico, para cualquier empresa)
 
-El skill **no trae ninguna marca activa por defecto**. En la Fase 1 captura la
+El framework **no trae ninguna marca activa por defecto**. En la Fase 1 captura la
 identidad de *tu* empresa (logo, presentación/`.thmx`, manual, `.pbip` o hex) y
 la guarda una sola vez como `assets/marca/<empresa>.json` con `"activa": true`,
 para no volver a preguntarla. La carpeta `assets/marca/ejemplos/` trae marcas de
 **ejemplo** (`activa: false`) solo como referencia de cómo se llena el archivo.
 
-## Instalación
+## Instalación (elige tu agente)
 
-Es un **plugin de Claude Code** que empaqueta varios skills especializados (uno por
-fase) más scripts y assets compartidos.
+Requisito único: **Python 3.8+** (para los scripts). No hay que instalar nada más.
 
-**Claude Code (desde GitHub):**
+**Con Claude Code** — plugin con skills especializados por fase:
 ```
 /plugin marketplace add JoseAAA/powerbi-report-builder
 /plugin install powerbi-report-builder@powerbi-report-builder-marketplace
 ```
-Para desarrollo local, en vez de la primera línea apunta al repo clonado:
-`/plugin marketplace add /ruta/a/powerbi-report-builder`. El skill de entrada es
-`powerbi-builder` (orquestador); los demás se activan solos según la fase.
+Para desarrollo local, en vez de la primera línea: `/plugin marketplace add
+/ruta/a/powerbi-report-builder`. Entrada: `powerbi-builder` (orquestador); el resto
+se activa solo según la fase.
 
-**Claude.ai / Desktop:** cada carpeta de `skills/<nombre>/` puede subirse como skill
+**Con Codex, Gemini CLI, OpenCode, Cursor… (cualquier agente)** — clona el repo y
+abre tu agente en la carpeta; leerá **[AGENTS.md](AGENTS.md)**, la guía canónica
+(reglas, tabla de scripts, mapa de references) y sabrá operar igual:
+```
+git clone https://github.com/JoseAAA/powerbi-report-builder.git
+```
+
+**Sin agente** — usa los scripts directamente (ver `docs/guia-de-uso.md`), p. ej.
+`python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas --sin-marca`.
+
+**Claude.ai / Desktop:** cada carpeta `skills/<nombre>/` puede subirse como skill
 individual; `powerbi-builder` es el punto de entrada.
 
-**Otros agentes (Codex, Gemini CLI, OpenCode, Cursor…):** clona el repo y abre tu
-agente en esta carpeta: leerán **[AGENTS.md](AGENTS.md)** (la guía canónica
-multi-agente) y podrán usar scripts y references igual. Sin dependencias.
+### Compatibilidad por agente
+
+Cada agente lee su archivo de contexto; todos apuntan a la **misma** guía canónica
+(`AGENTS.md`), así que el comportamiento es el mismo en todos:
+
+| Agente | Archivo que lee | Cómo opera |
+|---|---|---|
+| **Claude Code** | `CLAUDE.md` → `AGENTS.md` | plugin con skills por fase + scripts |
+| **Codex** (OpenAI) | `AGENTS.md` (nativo) | guía + scripts |
+| **Gemini CLI / Antigravity** | `GEMINI.md` → `AGENTS.md` | guía + scripts |
+| **OpenCode** | `AGENTS.md` (nativo) | guía + scripts |
+| **Cursor** | `AGENTS.md` | guía + scripts |
+| **Sin agente** | — | `python scripts/*.py` |
+
+Los archivos `CLAUDE.md` y `GEMINI.md` son punteros finos a `AGENTS.md` (una sola
+fuente de verdad, sin contenido duplicado). Ningún script depende de un agente.
 
 ## Cómo se usa (3 perfiles)
 
@@ -72,7 +103,7 @@ multi-agente) y podrán usar scripts y references igual. Sin dependencias.
   fase por fase; o arranca la base en un comando:
   `python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas`.
 - **No técnico (modo guiado):** describe lo que quieres en lenguaje de negocio
-  ("un reporte de ventas para mi jefe"); el skill edita por dentro y te entrega el
+  ("un reporte de ventas para mi jefe"); el agente edita por dentro y te entrega el
   `.pbip` listo, con pasos de clic.
 
 ## Uso (prompts que lo activan)

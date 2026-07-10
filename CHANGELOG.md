@@ -3,6 +3,18 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-10 — portabilidad multi-agente (sin release)
+
+- **README reposicionado**: ya no es "Skill para Claude"; es un **framework
+  multi-proveedor** (Claude Code, Codex, Gemini CLI, Antigravity, OpenCode, Cursor
+  y sin agente). Nueva tabla de compatibilidad por agente.
+- **Puntero `GEMINI.md`** (para Gemini CLI / Antigravity, que leen `GEMINI.md`, no
+  `AGENTS.md`), fino y sin duplicar contenido — apunta a `AGENTS.md`. Junto con
+  `CLAUDE.md`, mantiene UNA sola fuente de verdad (patrón adaptador de ponytail).
+- **check_consistencia.py C7**: verifica que `AGENTS.md` exista y que los punteros
+  `CLAUDE.md`/`GEMINI.md` existan y lo referencien (la portabilidad no se rompe en
+  silencio). Validado: los scripts corren sin ningún entorno de agente.
+
 ## 2026-07-10 (sin release)
 
 - **Fix rutas largas en Windows (MAX_PATH 260)**: `scaffold_pbip.py` fallaba con
