@@ -3,7 +3,9 @@
   "displayName": "Power BI Report Builder",
   "version": "0.4.0",
   "description": "Framework end-to-end para crear dashboards de Power BI como proyecto PBIP (TMDL+PBIR): marca/tema, descubrimiento, KPIs, datos+Power Query M, modelo estrella+DAX, RLS/OLS, visualizacion IBCS, MVP y modelo listo para IA/Copilot. Brand-agnostic, multi-empresa, citado en fuentes oficiales (Microsoft/SQLBI/Kimball/IBCS) y eficiente en tokens.",
-  "author": { "name": "Power BI Report Builder maintainers" },
+  "author": { "name": "JoseAAA", "url": "https://github.com/JoseAAA" },
+  "homepage": "https://github.com/JoseAAA/powerbi-report-builder",
+  "repository": "https://github.com/JoseAAA/powerbi-report-builder",
   "license": "MIT",
   "keywords": ["power-bi", "pbip", "tmdl", "pbir", "dax", "power-query", "dashboard", "bi", "fabric", "modelo-estrella"]
 }

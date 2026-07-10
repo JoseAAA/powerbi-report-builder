@@ -1,6 +1,6 @@
 {
   "name": "powerbi-report-builder-marketplace",
-  "owner": { "name": "Power BI Report Builder maintainers" },
+  "owner": { "name": "JoseAAA", "url": "https://github.com/JoseAAA" },
   "plugins": [
     {
       "name": "powerbi-report-builder",

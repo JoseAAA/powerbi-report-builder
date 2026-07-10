@@ -46,9 +46,14 @@ para no volver a preguntarla. La carpeta `assets/marca/ejemplos/` trae marcas de
 Es un **plugin de Claude Code** que empaqueta varios skills especializados (uno por
 fase) más scripts y assets compartidos.
 
-**Claude Code:** instálalo como plugin desde el repo (`/plugin`), o para desarrollo
-local apunta Claude Code a esta carpeta. El skill de entrada es `powerbi-builder`
-(orquestador); los demás se activan solos según la fase.
+**Claude Code (desde GitHub):**
+```
+/plugin marketplace add JoseAAA/powerbi-report-builder
+/plugin install powerbi-report-builder@powerbi-report-builder-marketplace
+```
+Para desarrollo local, en vez de la primera línea apunta al repo clonado:
+`/plugin marketplace add /ruta/a/powerbi-report-builder`. El skill de entrada es
+`powerbi-builder` (orquestador); los demás se activan solos según la fase.
 
 **Claude.ai / Desktop:** cada carpeta de `skills/<nombre>/` puede subirse como skill
 individual; `powerbi-builder` es el punto de entrada.

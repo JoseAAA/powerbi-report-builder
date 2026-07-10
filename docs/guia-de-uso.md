@@ -7,9 +7,11 @@ entregado como proyecto PBIP** (versionable y editable por IA).
 
 **Claude Code (plugin completo):**
 ```
-/plugin marketplace add <ruta local o URL de GitHub del repo>
+/plugin marketplace add JoseAAA/powerbi-report-builder
 /plugin install powerbi-report-builder@powerbi-report-builder-marketplace
 ```
+*(Para desarrollo local usa la ruta clonada en vez del `owner/repo`:
+`/plugin marketplace add /ruta/a/powerbi-report-builder`.)*
 
 **Otros agentes (Codex, Gemini CLI, OpenCode, Cursor…):** clona el repo y abre tu
 agente en esta carpeta — leerán `AGENTS.md` y sabrán usar los scripts y las

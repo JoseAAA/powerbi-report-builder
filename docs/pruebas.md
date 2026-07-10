@@ -77,7 +77,7 @@ python scripts/scaffold_pbip.py --nombre "../fuera" --dominio ventas --salida C:
 ## Nivel 3 — El asistente (skills)
 
 1. Instala el plugin:
-   `/plugin marketplace add <ruta-o-URL-del-repo>` →
+   `/plugin marketplace add JoseAAA/powerbi-report-builder` →
    `/plugin install powerbi-report-builder@powerbi-report-builder-marketplace`
 2. Prueba: *"Quiero un dashboard de ventas"* · *"Audita este PBIP"* ·
    `/powerbi-report-builder:powerbi-mvp`.
