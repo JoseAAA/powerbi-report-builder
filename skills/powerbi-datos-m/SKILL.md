@@ -1,11 +1,11 @@
 ---
 name: powerbi-datos-m
 description: >
-  Fase Datos — Conexion a fuentes y Power Query M. USAR cuando el usuario pregunta
-  "¿de donde saco los datos?", va a conectar Excel, SharePoint, SQL Server,
-  Azure SQL, Synapse, Databricks o Fabric Lakehouse, decide Import vs DirectQuery
-  vs Direct Lake, o necesita codigo M (query folding, parametros, refresco
-  incremental).
+  USAR cuando la pregunta es de donde salen los datos y como traerlos: "¿de donde
+  saco los datos?", conectar Excel, CSV, SharePoint, SQL Server, Azure SQL,
+  Synapse, Databricks o Fabric Lakehouse, decidir Import vs DirectQuery vs Direct
+  Lake, o hace falta codigo M (query folding, parametros, refresco incremental).
+  NO usar para medidas, relaciones ni DAX (eso es powerbi-modelado-dax).
 ---
 
 # Fase Datos — Conexion a fuentes y Power Query M
@@ -26,5 +26,14 @@ Genera el M base con el script (no a mano):
 
 Detalle (conectores, modos y antipatrones por fuente):
 `${CLAUDE_PLUGIN_ROOT}/references/datos-fuentes-y-m.md`.
+
+
+## Boundaries
+
+Alcance: origen de los datos y su transformacion — conexion, credenciales, modo
+de almacenamiento, codigo M, folding, parametros, refresco incremental.
+Termina cuando cada tabla del modelo tiene una consulta que devuelve su forma.
+Fuera de alcance: relaciones, medidas y DAX → **powerbi-modelado-dax**.
+Rendimiento del modelo ya cargado → **powerbi-rendimiento**.
 
 Fundamento: query folding de Chris Webb + guia oficial de Power Query (Microsoft).

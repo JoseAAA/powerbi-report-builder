@@ -46,7 +46,7 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/validar_modelo.py <ruta .SemanticModel>` | BPA-lite del modelo, reglas **R1–R12** (exit 1 si hay ALTA) |
 | `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P7** (exit 1 si hay ALTA) |
 | `python scripts/verificar_cableado.py <carpeta del proyecto>` | **datos ↔ modelo**, reglas **E1–E6**: que el `.pbip` lea los CSV, que ninguna clave quede huérfana y que las medidas no mezclen indicadores |
-| `python scripts/check_consistencia.py` | guarda de invariantes del repo (skills, rangos de reglas, TMDL, references) |
+| `python scripts/check_consistencia.py` | guarda de invariantes del repo, reglas **C1–C10** (frontmatter, forma de las `description`, `## Boundaries`, skills huérfanos, TMDL, rangos, references, portabilidad) |
 
 `scripts/dominios.py` es el **catálogo único** de dominios de ejemplo (dimensiones,
 indicadores, esquema de cada CSV). Lo importan `generar_datos_ejemplo.py` y
@@ -110,6 +110,30 @@ deterministas (temas, M, TMDL, PBIR) sin gastar tokens ni inventar formatos.
 | Modelo listo para IA / Copilot | `references/preparar-datos-ia.md` |
 | Publicar / Git / Service / MCP | `references/entrega-git-y-mcp.md` |
 | Cómo mantener las plantillas vigentes | `references/mantenimiento-de-plantillas.md` |
+
+## Cómo se escribe un skill de este repo
+
+Tres reglas, todas verificadas por `check_consistencia.py` (C8–C10) para que no se
+erosionen:
+
+1. **La `description` dice solo CUÁNDO, nunca QUÉ.** Arranca con `USAR cuando` y
+   sigue con síntomas y frases literales del usuario entre comillas. Si la
+   description resume el tema o el flujo, el agente **actúa desde ella y se salta
+   el cuerpo del skill** — es un hallazgo empírico documentado en
+   `obra/superpowers` (`skills/writing-skills/SKILL.md`), no una preferencia de
+   estilo. Once de nuestras doce descriptions arrancaban con "Fase N — …".
+2. **Disparador negativo obligatorio.** `NO usar para X (eso es <skill-hermano>)`.
+   Con doce fases que se solapan (modelado vs rendimiento vs auditoría), sin esto
+   el enrutamiento es una moneda al aire. Patrón de `DietrichGebert/ponytail`.
+3. **`## Boundaries` en el cuerpo**: alcance dentro, alcance fuera, y a qué skill
+   hermano enrutar lo que queda fuera. En las fases opinadas añade *cuándo NO
+   aplicar el criterio al pie de la letra* — una regla que no sabe cuándo callarse
+   se aplica donde estorba.
+
+El cuerpo del skill es un **router**, no un manual: carga las references por
+demanda con una tabla `Tema | Reference | Cuándo cargar` y la instrucción
+explícita de no cargarlas todas de una vez (patrón de
+`microsoft/skills-for-fabric`).
 
 ## Convenciones del proyecto
 

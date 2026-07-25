@@ -1,10 +1,11 @@
 ---
 name: powerbi-rendimiento
 description: >
-  Fase 7 — Rendimiento y mantenimiento de un modelo de Power BI. USAR cuando el
-  reporte "va lento", el modelo pesa mucho, hay que optimizar memoria/refresco,
-  bajar cardinalidad, o preparar el modelo para mantenerlo facilmente (VertiPaq,
-  refresco incremental, agregaciones).
+  USAR cuando algo YA construido va mal: "el reporte va lento", "el archivo pesa
+  muchisimo", "tarda en abrir", el refresco tarda o falla, hay que bajar
+  cardinalidad o memoria, o preparar el modelo para mantenerlo con poco esfuerzo.
+  NO usar para diseñar el modelo desde cero (eso es powerbi-modelado-dax) ni si el
+  problema es que un numero sale mal (eso es un error de DAX, no de rendimiento).
 ---
 
 # Fase 7 — Rendimiento y mantenimiento
@@ -22,5 +23,17 @@ Reglas de oro (mayor impacto primero):
 Valida (reglas R8+): `python "${CLAUDE_PLUGIN_ROOT}/scripts/validar_modelo.py" <ruta .SemanticModel>`.
 
 Detalle: `${CLAUDE_PLUGIN_ROOT}/references/rendimiento-y-mantenimiento.md`.
+
+
+## Boundaries
+
+Alcance: tamaño del modelo, memoria, cardinalidad, tiempo de refresco y de
+consulta, agregaciones, refresco incremental.
+Fuera de alcance: diseñar el modelo desde cero → **powerbi-modelado-dax**.
+Un numero que sale mal es un error de logica, no de rendimiento.
+
+**No optimices sin medir.** Sin una medicion (tamaño por columna, tiempo de
+consulta) cualquier cambio es una corazonada. Y no sacrifiques correccion ni
+legibilidad del DAX por una mejora que nadie ha medido.
 
 Fundamento: SQLBI / VertiPaq Analyzer, DAX Studio, Microsoft (optimization guide), Tabular Editor BPA.

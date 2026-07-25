@@ -1,10 +1,11 @@
 ---
 name: powerbi-kpis
 description: >
-  Fase 3 — Definicion y validacion de KPIs / OKRs para un reporte de Power BI.
-  USAR cuando el usuario trae una lista de indicadores, pregunta "¿tenemos datos
-  para esto?", define metas/dueños, o quiere convertir objetivos de negocio en
-  indicadores medibles antes de modelar.
+  USAR cuando hay indicadores que definir o validar: "estos son los KPIs", "¿tenemos
+  datos para esto?", "¿como se calcula esto?", falta acordar formula, grain, meta o
+  dueño, o hay que convertir objetivos de negocio en algo medible. NO usar si aun
+  no se sabe que le duele al area (eso es powerbi-descubrimiento) ni para escribir
+  el DAX de la medida (powerbi-modelado-dax).
 ---
 
 # Fase 3 — KPIs / OKRs validados
@@ -17,5 +18,15 @@ Objetivo: una **ficha de indicador** por KPI, validada contra datos:
 - Entregable: fichas KPI que alimentan el modelado (Fase 4) y la visualizacion.
 
 Detalle: `${CLAUDE_PLUGIN_ROOT}/references/fase3-kpis.md`.
+
+
+## Boundaries
+
+Alcance: convertir objetivos en indicadores medibles — nombre, formula, grain,
+meta, dueño, frecuencia — y verificar que los datos existan.
+Fuera de alcance: escribir el DAX (→ **powerbi-modelado-dax**) y conseguir la
+fuente (→ **powerbi-datos-m**).
+No apruebes un KPI sin dueño ni grain: sin eso, la medida no se puede escribir
+sin adivinar.
 
 Fundamento: OKR (Doerr/Google), Balanced Scorecard (Kaplan & Norton).

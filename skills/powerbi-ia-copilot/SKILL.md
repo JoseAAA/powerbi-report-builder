@@ -1,11 +1,11 @@
 ---
 name: powerbi-ia-copilot
 description: >
-  Preparar un modelo semantico de Power BI para IA y Copilot. USAR cuando el
-  usuario quiere que Copilot/Q&A respondan bien sobre su modelo, menciona "preparar
-  datos para IA", "Prep data for AI", "Approved for Copilot", sinonimos,
-  descripciones de medidas, AI instructions o verified answers, o cuando el modelo
-  lo va a consumir un agente LLM/MCP.
+  USAR cuando el modelo lo va a consumir una IA: "quiero que Copilot responda bien
+  sobre esto", "preparar datos para IA", "Prep data for AI", "Approved for
+  Copilot", faltan sinonimos, descripciones de medidas, AI instructions o verified
+  answers, o el modelo lo va a leer un agente LLM/MCP. NO usar para escribir las
+  medidas en si (eso es powerbi-modelado-dax).
 ---
 
 # Preparar el modelo para IA / Copilot
@@ -31,6 +31,17 @@ Reglas de oro (impacto de mayor a menor):
 Detalle, tabla de las 3 funciones, cómo probar (skill picker/HCAAT) y checklist:
 `${CLAUDE_PLUGIN_ROOT}/references/preparar-datos-ia.md`.
 Antes de tocar un PBIP: `${CLAUDE_PLUGIN_ROOT}/references/formatos-pbip.md`.
+
+
+## Boundaries
+
+Alcance: hacer el modelo legible para una IA — descripciones `///`, sinonimos,
+nombres de negocio, AI instructions, verified answers, que se expone y que se
+oculta.
+Fuera de alcance: escribir o corregir las medidas → **powerbi-modelado-dax**.
+Rendimiento de las consultas que genera la IA → **powerbi-rendimiento**.
+Preparar para IA no arregla un modelo mal construido: si la estrella esta mal,
+Copilot respondera mal con sinonimos perfectos.
 
 Fundamento: Microsoft Learn ("Prepare your data for AI", "Copilot semantic models"),
 SQLBI (descripciones/nombres).

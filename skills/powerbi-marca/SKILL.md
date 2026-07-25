@@ -1,10 +1,11 @@
 ---
 name: powerbi-marca
 description: >
-  Fase 1 — Marca y tema visual de Power BI. USAR cuando el usuario habla de
-  colores, logo, identidad o paleta de su empresa, pide "crea/cambia el theme",
-  modo oscuro, o sube un manual de marca / logo / presentacion (.thmx) / .pbip /
-  theme.json para extraer o aplicar colores.
+  USAR cuando aparecen colores, logo, identidad o paleta de una empresa: "usa los
+  colores de mi empresa", "crea el theme", "cambiale los colores", "ponlo en modo
+  oscuro", o el usuario sube un manual de marca, un logo, una presentacion .thmx,
+  un theme.json o un .pbip del que hay que extraer colores. NO usar para elegir
+  que visual usar ni para el layout de la pagina (eso es powerbi-visualizacion).
 ---
 
 # Fase 1 — Marca y tema (theme.json)
@@ -33,5 +34,16 @@ Flujo:
 Detalle (estructura del theme, $schema, style presets, WCAG, errores comunes):
 `${CLAUDE_PLUGIN_ROOT}/references/fase1-branding.md`. Marca y plantilla:
 `${CLAUDE_PLUGIN_ROOT}/assets/marca/README.md`.
+
+
+## Boundaries
+
+Alcance: identidad visual — colores, logo, tipografia, modo claro/oscuro, y el
+`theme.json` que los aplica. Termina cuando existe un theme accesible.
+Fuera de alcance: que visual usar, layout, jerarquia de la pagina y titulos →
+**powerbi-visualizacion**. Este skill no decide como se cuenta la historia, solo
+con que colores se cuenta.
+Nunca inventes los hex de una marca: confirmalos con el usuario, incluso si los
+extrajiste de una imagen.
 
 Fundamento: WCAG (W3C), ColorBrewer (daltonismo), theme schema (Microsoft).

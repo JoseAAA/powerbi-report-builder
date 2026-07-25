@@ -1,14 +1,12 @@
 ---
 name: powerbi-builder
 description: >
-  Orquestador y punto de entrada para crear, mejorar o auditar un reporte/dashboard
-  de Power BI como proyecto PBIP. USAR cuando el usuario quiere "crear un dashboard",
-  "armar/mejorar un reporte de Power BI", no sabe por donde empezar, sube archivos
-  .pbip/.tmdl/.pbir/theme.json sin una fase clara, o su pedido abarca varias fases.
-  Enruta a la fase: powerbi-marca, powerbi-descubrimiento, powerbi-kpis,
-  powerbi-datos-m, powerbi-modelado-dax, powerbi-visualizacion, powerbi-mvp,
-  powerbi-rendimiento, powerbi-ia-copilot, powerbi-auditoria, powerbi-entrega. NO usar
-  para Excel/Power Query puro ni SQL de fuentes fuera de Power BI.
+  USAR cuando el usuario quiere un dashboard o reporte de Power BI y no esta claro
+  por donde empezar: "quiero un dashboard", "ayudame con un reporte", "no se como
+  arrancar", sube archivos .pbip/.tmdl/.pbir/theme.json sin decir que hacer con
+  ellos, o su pedido abarca varias fases a la vez. NO usar cuando el pedido ya cae
+  claramente en una sola fase (ve directo a ese skill), ni para Excel/Power Query
+  fuera de Power BI, ni para SQL de fuentes ajenas a Power BI.
 ---
 
 # Power BI Report Builder — Orquestador
@@ -89,3 +87,11 @@ Para una empresa/trabajo nuevo, genera la base en un comando:
 → crea `proyecto-<nombre>/` con paletas, estructura de fases y un `.pbip` base.
 El tema es una eleccion EXPLICITA (regla: los colores del usuario nunca se
 ignoran en silencio). La marca del usuario vive en SU proyecto, no en el plugin.
+
+## Boundaries
+
+Alcance: detectar perfil, nivel y fase, y enrutar. **Este skill no construye
+nada** — no escribe TMDL, ni theme.json, ni PBIR. Si ya sabes la fase, invocar
+este skill primero es un paso perdido: ve directo.
+Fuera de alcance: Excel o Power Query que no acaban en Power BI; SQL de fuentes
+ajenas; Power Apps y Power Automate.

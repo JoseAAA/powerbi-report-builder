@@ -1,9 +1,11 @@
 ---
 name: powerbi-mvp
 description: >
-  Fase 6 — MVP rapido: datos de ejemplo + .pbip base. USAR cuando el usuario
-  quiere "datos de ejemplo", "un .pbip base", "arrancar ya sin la fuente real",
-  un proyecto Power BI minimo para abrir y modificar, un MVP o una demo.
+  USAR cuando hace falta algo que abrir YA, sin esperar la fuente real: "datos de
+  ejemplo", "un .pbip base", "quiero ver algo rapido", "arranquemos sin esperar a
+  TI", un MVP, un mockup o una demo. NO usar si la fuente real ya esta accesible
+  (eso es powerbi-datos-m: un MVP sintetico seria un desvio) ni cuando el usuario
+  necesita cifras reales para mostrar a un directivo.
 ---
 
 # Fase 6 — MVP rapido (datos de ejemplo + .pbip que los lee)
@@ -61,14 +63,20 @@ Caracteristicas en vista previa > «Almacenar informes con el formato de metadat
 mejorado (PBIR)»* y reinicie. Sin eso, al guardar se pierde el detalle por
 visual. Va tambien en el `LEEME.md` del proyecto.
 
-## Cuando NO usar datos de ejemplo
-
-- El usuario **ya tiene** la fuente accesible (Excel, SQL, SharePoint): ve
-  directo a **powerbi-datos-m**. Un MVP sintetico seria un desvio.
-- El usuario necesita cifras que pueda mostrar a un directivo: los datos de
-  ejemplo son aleatorios. Dilo explicitamente, no dejes que se confundan con
-  datos reales.
-
 Detalle y como adaptar a un negocio: `${CLAUDE_PLUGIN_ROOT}/references/datos-ejemplo-y-m.md`.
+
+
+## Boundaries
+
+Alcance: datos de ejemplo + un `.pbip` que los LEE, para iterar la forma del
+reporte en minutos. Termina cuando el usuario ya validó la forma y quiere la
+fuente real.
+Fuera de alcance: conectar la fuente real → **powerbi-datos-m**. Publicar →
+**powerbi-entrega**.
+
+**Cuando NO usar datos de ejemplo:** si la fuente real ya esta accesible, un MVP
+sintetico es un desvio. Y si el usuario va a mostrar el resultado a un directivo,
+avisale explicitamente de que las cifras son aleatorias — que nadie las confunda
+con datos de su negocio.
 
 Fundamento: Kimball (estrella), Power Query y PBIP/PBIR (Microsoft Learn).
