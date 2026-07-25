@@ -1,0 +1,47 @@
+table Servicio
+	lineageTag: 9f5b6b48-f1d6-4fcd-8efb-d924f5ea4055
+
+	column 'ID Servicio'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 03b7339e-0ec0-41c0-8bb3-f9a1c8c2caaf
+		summarizeBy: none
+		sourceColumn: ID Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column Servicio
+		dataType: string
+		lineageTag: 3e5f33b2-61c6-4060-bdc1-a7d12b5e7f86
+		summarizeBy: none
+		sourceColumn: Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Servicio Agrupado'
+		dataType: string
+		lineageTag: e370534a-ac85-446e-bffd-d1f2df751102
+		summarizeBy: none
+		sourceColumn: Servicio Agrupado
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Servicio = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Servicio.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Servicio", Int64.Type},
+				        {"Servicio", type text},
+				        {"Servicio Agrupado", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

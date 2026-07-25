@@ -1,0 +1,47 @@
+table Producto
+	lineageTag: 6af4dfa4-b15d-4446-991c-80907a9b2f74
+
+	column 'ID Producto'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 93315c1d-cef1-472f-b4f6-3ee215ba462d
+		summarizeBy: none
+		sourceColumn: ID Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	column Producto
+		dataType: string
+		lineageTag: ed4d7170-d80b-488a-8f40-02f29c28d4a3
+		summarizeBy: none
+		sourceColumn: Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Categoria Producto'
+		dataType: string
+		lineageTag: 283b0d05-6961-4082-8e25-8190e8a8883c
+		summarizeBy: none
+		sourceColumn: Categoria Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Producto = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Producto.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Producto", Int64.Type},
+				        {"Producto", type text},
+				        {"Categoria Producto", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

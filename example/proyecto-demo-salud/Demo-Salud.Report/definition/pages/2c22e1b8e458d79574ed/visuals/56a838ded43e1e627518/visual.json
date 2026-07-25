@@ -1,0 +1,75 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "56a838ded43e1e627518",
+  "position": {
+    "x": 40,
+    "y": 240,
+    "z": 1,
+    "height": 320,
+    "width": 600,
+    "tabOrder": 1
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Servicio"
+                    }
+                  },
+                  "Property": "Servicio"
+                }
+              },
+              "queryRef": "Servicio.Servicio",
+              "nativeQueryRef": "Servicio",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_ Medidas"
+                    }
+                  },
+                  "Property": "% Ocupacion"
+                }
+              },
+              "queryRef": "_ Medidas.% Ocupacion",
+              "nativeQueryRef": "% Ocupacion"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_ Medidas"
+                  }
+                },
+                "Property": "% Ocupacion"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

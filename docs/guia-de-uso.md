@@ -51,7 +51,7 @@ pasos de clic.
 ## 3. Tu marca (los colores de tu empresa)
 
 1. Copia `assets/marca/_plantilla-marca.json` → `mi-empresa.json` **en tu
-   proyecto** (p. ej. `proyecto-x/01-marca/`), llénalo (o pide al agente que lo
+   proyecto** (p. ej. `mi-reporte/docs/`), llénalo (o pide al agente que lo
    llene desde tu logo/manual/hex) y pon `"activa": true`.
 2. Genera el tema: `python scripts/generar_theme.py --marca mi-empresa.json --salida theme.json`
 3. Ese `theme.json` va en todo lo demás (`init_proyecto --tema`, `scaffold --tema`).

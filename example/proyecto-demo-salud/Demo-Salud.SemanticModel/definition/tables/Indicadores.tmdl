@@ -1,0 +1,87 @@
+table Indicadores
+	lineageTag: 899a38a2-90f8-4e2e-942c-369ea0d4c5ea
+
+	column Fecha
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 10cf2ab6-07c4-49d9-818a-a31455b21003
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'ID Sede'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0d390dd7-f2a7-4f1e-a852-fc371c7c73bc
+		summarizeBy: none
+		sourceColumn: ID Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Servicio'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f78ec213-bb77-4964-8c50-c4cf4f88b5b0
+		summarizeBy: none
+		sourceColumn: ID Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Indicador'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 24f36c1b-dd93-4001-abff-824efb605d11
+		summarizeBy: none
+		sourceColumn: ID Indicador
+
+		annotation SummarizationSetBy = Automatic
+
+	column Num
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 76484906-d600-40ac-b64b-11f51f69c7a9
+		summarizeBy: sum
+		sourceColumn: Num
+
+		annotation SummarizationSetBy = Automatic
+
+	column Den
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 9c3e9666-f050-4cec-93d4-2d839ca4dc0e
+		summarizeBy: sum
+		sourceColumn: Den
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Indicadores = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Indicadores.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"Fecha", type date},
+				        {"ID Sede", Int64.Type},
+				        {"ID Servicio", Int64.Type},
+				        {"ID Indicador", Int64.Type},
+				        {"Num", Int64.Type},
+				        {"Den", Int64.Type}
+				    }),
+				    // descarta registros sin denominador (evita dividir por 0).
+				    #"Filas filtradas" = Table.SelectRows(#"Tipo cambiado", each [Den] <> null and [Den] > 0)
+				in
+				    #"Filas filtradas"
+
+	annotation PBI_ResultType = Table

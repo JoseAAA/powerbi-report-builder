@@ -1,0 +1,38 @@
+table Sede
+	lineageTag: daf818ed-2b65-4647-9856-1080463b19ea
+
+	column 'ID Sede'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 8b09e9f3-c3b3-4882-857c-986cee843da4
+		summarizeBy: none
+		sourceColumn: ID Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sede
+		dataType: string
+		lineageTag: 9d500de7-764a-4184-a094-e88be1d96492
+		summarizeBy: none
+		sourceColumn: Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sede = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Sede.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Sede", Int64.Type},
+				        {"Sede", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

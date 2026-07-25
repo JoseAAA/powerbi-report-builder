@@ -3,6 +3,80 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-25 — el MVP dejó de mentir (corrección de raíz)
+
+Auditoría del flujo real (`init_proyecto.py` de punta a punta) contra la
+documentación oficial de Microsoft. Los tres validadores daban **verde** mientras
+el producto entregaba cifras falsas: validaban las reglas del propio framework,
+no si el proyecto describía algo coherente.
+
+### Corregido
+
+- **El `.pbip` ahora LEE los datos generados.** Un comando producía tres
+  artefactos desconectados: 2 232 filas en CSV, un `modelo-ejemplo.m` para pegar
+  a mano, y un `.pbip` con **6 filas inventadas inline**. El usuario abría su
+  mockup y veía datos falsos. Nuevo `scaffold_pbip.py --datos <carpeta>`: las
+  particiones leen los CSV vía el parámetro `RutaBase`.
+- **`expressions.tmdl` (nuevo).** El modelo no tenía este archivo, así que era
+  *imposible* parametrizar la ruta de los datos. Sintaxis oficial:
+  `expression RutaBase = "..." meta [IsParameterQuery=true, ...]`.
+  _Fuente: Microsoft Learn — Tabular Model Definition Language._
+- **Dimensión `Indicador` (nueva).** El hecho es "alto" (una fila por indicador)
+  y la clave `ID Indicador` **no apuntaba a ninguna tabla**, ni en los CSV ni en
+  el TMDL. Al cablear los datos, `DIVIDE(SUM(Num), SUM(Den))` mezclaba
+  `% Margen` con `Ticket Promedio` y daba **5226 %**. Con la dimensión y las
+  medidas defendidas: `% Margen = 32.4 %`.
+- **Medidas conscientes del indicador.** `Indicador %` exige un solo indicador
+  en contexto (`HASONEVALUE`) y devuelve BLANK si hay ambigüedad — mejor una
+  celda vacía que un número falso. Se añade una medida del indicador principal
+  filtrada con `CALCULATE` para que las tarjetas muestren siempre un valor
+  correcto sin depender de que el usuario segmente.
+- **Catálogo de dominios unificado en `scripts/dominios.py`.** Estaba duplicado
+  en los dos generadores y había divergido en **todos** los dominios (ventas: 6
+  productos en los CSV vs 4 en el TMDL; salud: 8 servicios vs 4). Los CSV y el
+  `.pbip` describían modelos distintos.
+- **Columna `Año` alineada.** El CSV emitía `Anio` y el TMDL declaraba `Año`; al
+  leer el CSV la partición no habría encontrado la columna. Se añade también
+  `EsDiaHabil`, que el CSV traía y el modelo ignoraba.
+- **`es-PE` / `es-ES` incrustados** en `scaffold_pbip.py` (modelo y `report.json`)
+  → nuevo `--cultura`, default `es-ES`. Un país concreto dentro de un framework
+  genérico que nadie había elegido.
+- **Escapado de rutas en M.** `json.dumps` duplicaba las barras invertidas;
+  Power Query **no** usa `\` como carácter de escape, así que el modelo habría
+  buscado una ruta con separadores dobles. Nuevo helper `m_texto()`.
+
+### Cambiado (ruptura de estructura, sin compatibilidad)
+
+- **El `.pbip` va en la RAÍZ del proyecto.** Antes quedaba enterrado en
+  `06-mvp/<Nombre>/` detrás de seis carpetas numeradas, **dos de ellas vacías**
+  (`04-modelo/`, `05-diseno/`). Las fases numeradas eran la metodología del
+  framework filtrándose al entregable del cliente. Estructura nueva:
+  `.pbip` + `.SemanticModel/` + `.Report/` + `datos/` + `docs/`.
+  Es lo que espera **Fabric Git Integration**, y sirve igual a quien publica
+  directo desde Desktop sin ningún sistema de versiones.
+- `example/` regenerado con la estructura nueva y `RutaBase` como placeholder
+  (una ruta con el usuario dentro de un archivo versionado es fuga de datos).
+
+### Añadido
+
+- **`scripts/verificar_cableado.py`** (reglas **E1–E6**): guarda de regresión de
+  este bug. Comprueba que el `.pbip` esté en la raíz, que exista `RutaBase`, que
+  toda tabla con CSV disponible lo **lea**, que las columnas declaradas existan
+  en la cabecera del CSV, que ninguna clave del hecho quede huérfana y que
+  ninguna medida haga `DIVIDE` sin defensa por indicador. Verificado en los dos
+  sentidos: pasa en los proyectos nuevos y **detecta el bug viejo**.
+- **Instrucción PBIR que faltaba.** El repo no mencionaba en ningún sitio que
+  hay que activar *Archivo > Opciones > Características en vista previa >
+  «Almacenar informes con el formato de metadatos mejorado (PBIR)»*. Sin esa
+  casilla, al guardar se pierde la carpeta `definition/` y el reporte vuelve a un
+  `report.json` monolítico, sin diff por visual. Ahora va en el `LEEME.md` de
+  cada proyecto generado y en la salida del bootstrap.
+  _Fuente: Microsoft Learn — Power BI Desktop project report folder._
+- `LEEME.md` por proyecto: activar PBIR, el bucle de mockup rápido (corregir un
+  CSV → Actualizar) y las dos rutas de publicación (con Git → `main` → Fabric
+  Git Integration; sin Git → Publicar desde Desktop).
+- CI: chequeo de fugas extendido a `*.tmdl` y prueba de regresión de cableado.
+
 ## 2026-07-10 — portabilidad multi-agente (sin release)
 
 - **README reposicionado**: ya no es "Skill para Claude"; es un **framework

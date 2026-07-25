@@ -1,0 +1,15 @@
+relationship 486524e8-00b0-4e26-9c3f-36d661a6c92f
+	fromColumn: Ventas.Fecha
+	toColumn: Calendario.Fecha
+
+relationship 8fb81d43-a802-4fc7-8282-c3c28951e45d
+	fromColumn: Ventas.'ID Region'
+	toColumn: Region.'ID Region'
+
+relationship 94375eba-4544-4b0c-b2a0-1d3c5c6132e5
+	fromColumn: Ventas.'ID Producto'
+	toColumn: Producto.'ID Producto'
+
+relationship 86ff0653-c81c-4158-b551-222797ae7096
+	fromColumn: Ventas.'ID Indicador'
+	toColumn: Indicador.'ID Indicador'

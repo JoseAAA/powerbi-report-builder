@@ -1,0 +1,15 @@
+relationship a7ab1f40-a2bf-4ba7-870f-88aed9eb903a
+	fromColumn: Indicadores.Fecha
+	toColumn: Calendario.Fecha
+
+relationship b8b6f9f7-77bc-4094-9e9b-99d440592083
+	fromColumn: Indicadores.'ID Sede'
+	toColumn: Sede.'ID Sede'
+
+relationship 957b0e18-ee9c-4c6f-9455-c4c1b20451c3
+	fromColumn: Indicadores.'ID Servicio'
+	toColumn: Servicio.'ID Servicio'
+
+relationship 6a5a5faf-2fd0-4329-a61b-ceb4d862e7f2
+	fromColumn: Indicadores.'ID Indicador'
+	toColumn: Indicador.'ID Indicador'

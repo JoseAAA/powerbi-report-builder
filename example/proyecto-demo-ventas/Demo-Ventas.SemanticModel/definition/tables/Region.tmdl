@@ -1,0 +1,38 @@
+table Region
+	lineageTag: 266ab320-26a9-4390-9a4d-c71fc3df7453
+
+	column 'ID Region'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 19992329-7efa-4dbc-89d4-216cccfab4f5
+		summarizeBy: none
+		sourceColumn: ID Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: f04b9464-10a7-40a9-93d7-f1f6d5297f8f
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Region = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Region.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Region", Int64.Type},
+				        {"Region", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

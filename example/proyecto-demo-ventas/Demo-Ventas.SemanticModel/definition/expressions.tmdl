@@ -1,0 +1,5 @@
+/// Carpeta que contiene los CSV de datos. Cambiala desde Inicio >
+/// Transformar datos > Administrar parametros; todas las consultas la usan.
+expression RutaBase = "C:\CAMBIA-ESTA-RUTA\datos" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text

@@ -1,0 +1,57 @@
+table Indicador
+	lineageTag: c1998434-5430-4e9c-9e95-3165a9fa2f51
+
+	column 'ID Indicador'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 92f4bb7d-b9f5-44ca-a94b-106e49157217
+		summarizeBy: none
+		sourceColumn: ID Indicador
+
+		annotation SummarizationSetBy = Automatic
+
+	column Indicador
+		dataType: string
+		lineageTag: 45a5193b-8492-4464-979e-0d5498ca500e
+		summarizeBy: none
+		sourceColumn: Indicador
+
+		annotation SummarizationSetBy = Automatic
+
+	column Tipo
+		dataType: string
+		lineageTag: dc67497d-7169-4762-a59e-c1d59b609c1c
+		summarizeBy: none
+		sourceColumn: Tipo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Formato
+		dataType: string
+		isHidden
+		lineageTag: 0168b079-aca3-4ae2-8f7a-e14ac921f749
+		summarizeBy: none
+		sourceColumn: Formato
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Indicador = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Indicador.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Indicador", Int64.Type},
+				        {"Indicador", type text},
+				        {"Tipo", type text},
+				        {"Formato", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

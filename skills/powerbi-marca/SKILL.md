@@ -15,7 +15,7 @@ defecto**: la captura una vez y la reutiliza.
 
 Flujo:
 1. **Busca marca activa EN EL PROYECTO DEL USUARIO** (directorio de trabajo:
-   `./marca-*.json`, `./01-marca/`, o donde el usuario indique) — un archivo con
+   `./docs/marca.json`, `./marca-*.json`, o donde el usuario indique) — un archivo con
    `"activa": true`. Si existe, confirma sus colores reales antes de usarla.
 2. **Si no hay**: NO inventes; captura la marca del usuario — logo / presentacion
    (.thmx) / manual / hex / .pbip existente (analiza imagenes visualmente y
@@ -23,7 +23,7 @@ Flujo:
 3. **Guarda la marca EN SU PROYECTO** (nunca dentro del plugin: los plugins se
    actualizan y borran lo guardado ahi): copia
    `${CLAUDE_PLUGIN_ROOT}/assets/marca/_plantilla-marca.json` →
-   `<su-proyecto>/01-marca/<empresa>.json`, llenala y pon `"activa": true`.
+   `<su-proyecto>/docs/marca.json`, llenala y pon `"activa": true`.
 4. **Genera el tema**:
    `python "${CLAUDE_PLUGIN_ROOT}/scripts/generar_theme.py" --marca <ruta a <empresa>.json> --salida theme.json`
    - Cambios puntuales sobre un theme existente: `scripts/editar_theme.py`.
