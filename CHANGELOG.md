@@ -3,6 +3,70 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-26 — fase5-visualizacion.md: de 0 URLs a 20, y cuatro reglas retiradas
+
+La reference que definia el criterio visual **invocaba IBCS con 0 URLs** y
+afirmaba como reglas cosas sin fuente. Es decir: el archivo que dice como se hace
+un reporte profesional incumplia la regla dura #7 del propio repo.
+
+### Retirado por no tener fuente oficial
+
+- **"Maximo 6-8 visuales por pagina"** — estaba en 4 sitios, uno como item de
+  checklist. Microsoft dice literalmente *"limit the number of visuals... to only
+  what is necessary"*, **sin numero**. El unico numero oficial es el limite duro
+  del servicio: 1 000 visuales por pagina.
+- **"Grilla de 8 px"** — Microsoft documenta gridlines y snap-to-grid, pero **no
+  publica el paso de la rejilla**.
+- **"Patron Z de lectura"** — sin fuente. Lo citable es "lo mas importante
+  arriba-izquierda" (Microsoft Learn Training) y el patron F de NN/g.
+- **"Pie con maximo 5 categorias"** — la cifra oficial es **3-6 slices**.
+
+### Degradado, no borrado
+
+- **Notacion de escenarios IBCS** (real solido / plan delineado / forecast
+  achurado) pasa a `[NO VERIFICADO]`: la regla `UN 3.2 Unify scenarios` existe,
+  pero no se leyo su tabla normativa. Se puede proponer como convencion del
+  proyecto; no como estandar citado.
+
+### Añadido, con URL
+
+- **Accesibilidad primero**: alt text (limite duro **250 caracteres**), contraste
+  de texto **≥4.5:1** (≥3:1 solo si ≥18 pt o ≥14 pt bold), contraste no textual
+  **≥3:1**, forma distinta por serie, `tabOrder` explicito. Con enlace al criterio
+  WCAG 2.2 concreto, no a la home.
+- **Trampa de WCAG 2.5.8**: exige 24×24 **CSS px**, pero el canvas de Power BI
+  escala con *Fit to page* — un boton de 24 px de canvas en 1920×1080 sobre un
+  viewport de 1280 mide ~16 CSS px y **no cumple**.
+- **Limites duros de PBIR**: 1 000 paginas, 1 000 visuales/pagina, 300 MB, y
+  **>500 archivos degrada la AUTORIA** (no la lectura).
+- **Cookbook pregunta -> visual** con la regla clave de cada uno.
+- **Arquetipos separados en dos categorias**, y la distincion importa: los
+  **canonicos** (Microsoft los parametriza: tooltip **320×240**, drillthrough,
+  movil **323 pt** con tamaños minimos XL/L/M/S) y los **de negocio**, marcados
+  `[HEURISTICO]` porque **Microsoft no define arquetipos con nombre** — se
+  comprobo recorriendo `guidance/`, las 11 unidades del Training y
+  `service-dashboards-design-tips`.
+- **IBCS con honestidad**: `/standards/page/N/` si expone el texto gratis (19
+  codigos verificados: SA 1-SA 5, ST 1.1-ST 3, EX 1-EX 1.2); el PDF es de socios y
+  la licencia se declara "Creative Commons" **sin variante**.
+- **Seccion "Sin fuente oficial"** con 13 afirmaciones rechazadas, para que nadie
+  las reintroduzca creyendo que se perdieron. Incluye dos correcciones de hecho:
+  **no existe Accessibility Checker en Power BI Desktop** (es checklist manual) y
+  **la familia `guidance/report-design-*` no existe** (el contenido normativo de
+  layout esta en Microsoft Learn **Training**).
+- **Rutas PBIR** exactas para automatizar la auditoria del reporte.
+- **Deuda de investigacion declarada** (6 puntos), para no confundir "no
+  comprobado" con "no aplicable".
+
+### Guarda
+
+- `check_consistencia.py` **C11**: toda reference normativa debe citar al menos una
+  fuente con URL. La deuda esta **DECLARADA** en `SIN_CITAS_PENDIENTES` (5
+  references) y **solo puede encoger**: si una de ellas empieza a citar, el check
+  exige quitarla de la lista. Verificada en los dos sentidos.
+- El skill `powerbi-visualizacion` repetia las mismas afirmaciones sin fuente:
+  reescrito, y ahora nombra explicitamente las cuatro que no debe usar como regla.
+
 ## 2026-07-26 — el catalogo del modelo son las reglas OFICIALES de Microsoft
 
 En vez de escribir nuestras propias "mejores practicas", el validador del modelo

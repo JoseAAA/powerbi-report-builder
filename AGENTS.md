@@ -48,7 +48,7 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P8** (exit 1 si hay ALTA) |
 | `python scripts/verificar_cableado.py <carpeta del proyecto>` | **datos ↔ modelo**, reglas **E1–E6**: que el `.pbip` lea los CSV, que ninguna clave quede huérfana y que las medidas no mezclen indicadores |
 | `python scripts/actualizar_catalogo.py [--forzar\|--json\|--marcar-revisado]` | vigila las **15 fuentes oficiales** (`scripts/fuentes.py`) y reporta páginas agregadas/eliminadas/**modificadas**. 1 llamada HTTP por fuente, sin token, con TTL por fuente (7/30/90 días) |
-| `python scripts/check_consistencia.py` | guarda de invariantes del repo, reglas **C1–C10** (frontmatter, forma de las `description`, `## Boundaries`, skills huérfanos, TMDL, rangos, references, portabilidad) |
+| `python scripts/check_consistencia.py` | guarda de invariantes del repo, reglas **C1–C11** (frontmatter, forma de las `description`, `## Boundaries`, skills huérfanos, TMDL, rangos, references, portabilidad) |
 
 `scripts/tmdl.py` es un **parser de TMDL** (objetos y propiedades, no regex): las
 reglas se escriben sobre datos. `scripts/catalogo_reglas.py` **consume el
@@ -93,6 +93,9 @@ deterministas (temas, M, TMDL, PBIR) sin gastar tokens ni inventar formatos.
    (W3C/IBCS) · 4 experto reconocido · 5 otro. **Una regla de severidad ALTA no
    puede sustentarse solo en un nivel 5.** Si no hay fuente oficial, «no está
    documentado oficialmente» es una respuesta válida; inventar no lo es.
+   `check_consistencia.py` (C11) exige que cada reference cite al menos una
+   fuente con URL; la deuda pendiente está **declarada** en
+   `SIN_CITAS_PENDIENTES` y solo puede encoger.
 8. **Nada privado al repo**: ni marcas/datos reales de empresas, ni rutas locales
    absolutas, ni `.pbi/` (caché). La marca del usuario vive en SU proyecto.
    Ojo con `expressions.tmdl`: el parámetro `RutaBase` lleva una ruta absoluta

@@ -25,6 +25,8 @@ Verifica, sin dependencias (solo stdlib):
       enrutamiento entre skills hermanos es ambiguo.
   C10 Cada SKILL.md tiene '## Boundaries': alcance dentro/fuera y a que skill
       hermano enrutar lo que queda fuera.
+  C11 Toda reference normativa cita al menos una fuente con URL (regla dura #7).
+      La deuda esta DECLARADA en SIN_CITAS_PENDIENTES y solo debe encoger.
 
 Uso:  python scripts/check_consistencia.py
 Salida: lista de fallas y exit 1 si hay alguna; exit 0 si todo consistente.
@@ -107,7 +109,7 @@ for t in (RAIZ / "example").rglob("*.tmdl"):
                           "en TMDL la description va con '///' encima del objeto")
 
 # C5: rangos de reglas desactualizados (excluye CHANGELOG historico)
-PROHIBIDOS = ("R1-R11", "R1–R11", "P1-P6", "P1–P6", "P1-P7", "P1–P7", "C1-C7", "C1–C7")
+PROHIBIDOS = ("R1-R11", "R1–R11", "P1-P6", "P1–P6", "P1-P7", "P1–P7", "C1-C7", "C1–C7", "C1-C10", "C1–C10")
 docs = []
 for patron in ("README.md", "AGENTS.md", "CONTRIBUTING.md", "example/README.md"):
     p = RAIZ / patron
@@ -121,7 +123,7 @@ for f in docs:
         if bad in texto:
             rel = f.relative_to(RAIZ).as_posix()
             fallas.append(f"C5 {rel}: contiene rango desactualizado '{bad}' "
-                          "(deberia ser R1-R12 / P1-P8 / C1-C10)")
+                          "(deberia ser R1-R12 / P1-P8 / C1-C11)")
 
 # C6: references citadas en AGENTS.md que no existen
 agents = RAIZ / "AGENTS.md"
@@ -129,6 +131,47 @@ if agents.exists():
     for ref in sorted(set(re.findall(r"references/[A-Za-z0-9_\-]+\.md", _leer(agents)))):
         if not (RAIZ / ref).exists():
             fallas.append(f"C6 AGENTS.md cita '{ref}' pero el archivo no existe")
+
+# C11: toda reference normativa debe citar al menos una fuente con URL.
+#
+# La regla dura #7 dice que cada recomendacion traza a Microsoft o a un experto
+# reconocido. Sin esta guarda, "sustentado" se degrada solo: fase5-visualizacion.md
+# llego a afirmar "maximo 6-8 visuales por pagina" —que no tiene fuente oficial—
+# con 0 URLs en todo el archivo.
+#
+# SIN_CITAS_PENDIENTES es DEUDA DECLARADA, no una exencion permanente. Este
+# conjunto solo debe ENCOGER: si añades una reference nueva, cítala. Meterla aqui
+# para silenciar el check queda visible en el diff.
+EXENTAS_POR_NATURALEZA = {
+    # Meta-documento sobre como mantener las plantillas; su "fuente" es el propio
+    # proceso del repo, no una pagina externa.
+    "mantenimiento-de-plantillas.md",
+}
+SIN_CITAS_PENDIENTES = {
+    "datos-ejemplo-y-m.md",
+    "datos-fuentes-y-m.md",
+    "fase2-descubrimiento.md",
+    "fase3-kpis.md",
+    "rendimiento-y-mantenimiento.md",
+}
+refs_dir = RAIZ / "references"
+if refs_dir.is_dir():
+    for f in sorted(refs_dir.glob("*.md")):
+        if f.name in EXENTAS_POR_NATURALEZA:
+            continue
+        tiene_url = "http://" in _leer(f) or "https://" in _leer(f)
+        if f.name in SIN_CITAS_PENDIENTES:
+            if tiene_url:
+                fallas.append(
+                    f"C11 references/{f.name}: ya cita fuentes — quitalo de "
+                    "SIN_CITAS_PENDIENTES en check_consistencia.py (la deuda "
+                    "declarada solo debe encoger)")
+            continue
+        if not tiene_url:
+            fallas.append(
+                f"C11 references/{f.name}: no cita ninguna fuente con URL. "
+                "Cada recomendacion normativa traza a Microsoft o a un experto "
+                "reconocido (regla dura #7)")
 
 # C7: portabilidad multi-agente (AGENTS.md + punteros por proveedor)
 if not agents.exists():
@@ -141,7 +184,7 @@ for puntero in ("CLAUDE.md", "GEMINI.md"):
         fallas.append(f"C7 {puntero} no referencia AGENTS.md (evita duplicar la guia)")
 
 # --- salida ---
-print(f"Skills: {len(skills)} | Chequeos: C1-C10")
+print(f"Skills: {len(skills)} | Chequeos: C1-C11")
 if not fallas:
     print("OK  Consistencia del repo: sin fallas.")
     sys.exit(0)
