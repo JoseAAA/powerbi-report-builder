@@ -81,11 +81,6 @@
               }
             }
           }
-        ],
-        "visualHeaderTooltip": [
-          {
-            "show": true
-          }
         ]
       }
     },

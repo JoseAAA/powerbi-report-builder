@@ -107,7 +107,7 @@ for t in (RAIZ / "example").rglob("*.tmdl"):
                           "en TMDL la description va con '///' encima del objeto")
 
 # C5: rangos de reglas desactualizados (excluye CHANGELOG historico)
-PROHIBIDOS = ("R1-R11", "R1–R11", "P1-P6", "P1–P6", "C1-C7", "C1–C7")
+PROHIBIDOS = ("R1-R11", "R1–R11", "P1-P6", "P1–P6", "P1-P7", "P1–P7", "C1-C7", "C1–C7")
 docs = []
 for patron in ("README.md", "AGENTS.md", "CONTRIBUTING.md", "example/README.md"):
     p = RAIZ / patron
@@ -121,7 +121,7 @@ for f in docs:
         if bad in texto:
             rel = f.relative_to(RAIZ).as_posix()
             fallas.append(f"C5 {rel}: contiene rango desactualizado '{bad}' "
-                          "(deberia ser R1-R12 / P1-P7 / C1-C10)")
+                          "(deberia ser R1-R12 / P1-P8 / C1-C10)")
 
 # C6: references citadas en AGENTS.md que no existen
 agents = RAIZ / "AGENTS.md"

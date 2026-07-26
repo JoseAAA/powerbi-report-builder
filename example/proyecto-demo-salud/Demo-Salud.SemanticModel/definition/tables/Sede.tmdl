@@ -1,11 +1,11 @@
 table Sede
-	lineageTag: daf818ed-2b65-4647-9856-1080463b19ea
+	lineageTag: 237bace9-7726-4e67-944c-50be378d83c8
 
 	column 'ID Sede'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 8b09e9f3-c3b3-4882-857c-986cee843da4
+		lineageTag: 969fabf4-f825-44c9-aa35-b5ecaae6ca48
 		summarizeBy: none
 		sourceColumn: ID Sede
 
@@ -13,7 +13,7 @@ table Sede
 
 	column Sede
 		dataType: string
-		lineageTag: 9d500de7-764a-4184-a094-e88be1d96492
+		lineageTag: d61f8a74-e11d-4604-ac73-fee6645cca66
 		summarizeBy: none
 		sourceColumn: Sede
 

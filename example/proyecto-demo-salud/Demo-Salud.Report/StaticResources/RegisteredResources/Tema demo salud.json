@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/reportThemeSchema-2.143.json",
-  "name": "Tema demo salud",
+  "name": "Tema demo salud.json",
   "dataColors": [
     "#2C3E50",
     "#E25822",
@@ -80,11 +80,6 @@
                 "color": "#252423"
               }
             }
-          }
-        ],
-        "visualHeaderTooltip": [
-          {
-            "show": true
           }
         ]
       }

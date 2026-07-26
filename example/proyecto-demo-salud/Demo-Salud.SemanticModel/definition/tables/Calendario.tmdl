@@ -1,12 +1,12 @@
 table Calendario
 	dataCategory: Time
-	lineageTag: e1a221be-ae58-471e-bde1-be66888fb15a
+	lineageTag: 23a018fb-82bc-4c2d-8d8e-16199759503e
 
 	column Fecha
 		dataType: dateTime
 		isKey
 		formatString: Short Date
-		lineageTag: 5fcfce86-b6ba-4596-a7dd-e99727c95aa7
+		lineageTag: 18041f1c-ca38-4908-b6fb-9a00bfbc3a42
 		summarizeBy: none
 		sourceColumn: Fecha
 
@@ -17,7 +17,7 @@ table Calendario
 	column Año
 		dataType: int64
 		formatString: 0
-		lineageTag: efc324b3-8efb-462c-be7f-19d914e5e6ad
+		lineageTag: 4d8a58c0-b71b-4b1c-9daa-cc62771ee76c
 		summarizeBy: none
 		sourceColumn: Año
 
@@ -25,7 +25,7 @@ table Calendario
 
 	column Mes
 		dataType: string
-		lineageTag: b7f214f6-577e-4db2-960d-734812fa36b6
+		lineageTag: 2e508a8c-cb7d-41ee-b82c-fc4be71dc7ae
 		summarizeBy: none
 		sourceColumn: Mes
 		sortByColumn: NumMes
@@ -35,7 +35,7 @@ table Calendario
 	column NumMes
 		dataType: int64
 		formatString: 0
-		lineageTag: 0292fe2a-7674-4c07-a032-75dc1f1bae76
+		lineageTag: 0547811f-6226-47da-9a38-8bfd3b1b23e0
 		summarizeBy: none
 		sourceColumn: NumMes
 
@@ -43,7 +43,7 @@ table Calendario
 
 	column Trimestre
 		dataType: string
-		lineageTag: 05cbaf26-105e-47c6-8a90-1f1afcc5935c
+		lineageTag: 8e2758e9-068e-46b3-8d7e-aff6236d1eb6
 		summarizeBy: none
 		sourceColumn: Trimestre
 
@@ -51,7 +51,7 @@ table Calendario
 
 	column EsDiaHabil
 		dataType: string
-		lineageTag: 22357fe0-ba7e-429a-aef9-804062785cfa
+		lineageTag: c6768b9f-1827-4596-a06c-d843c578a83a
 		summarizeBy: none
 		sourceColumn: EsDiaHabil
 

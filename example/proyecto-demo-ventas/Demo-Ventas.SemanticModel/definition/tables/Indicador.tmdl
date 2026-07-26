@@ -1,11 +1,11 @@
 table Indicador
-	lineageTag: c1998434-5430-4e9c-9e95-3165a9fa2f51
+	lineageTag: 9e23e9b7-6ae7-4ae5-8900-2aec2ee445c5
 
 	column 'ID Indicador'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 92f4bb7d-b9f5-44ca-a94b-106e49157217
+		lineageTag: 690b5ce9-665e-4289-be9f-d8d1f4ff3bff
 		summarizeBy: none
 		sourceColumn: ID Indicador
 
@@ -13,7 +13,7 @@ table Indicador
 
 	column Indicador
 		dataType: string
-		lineageTag: 45a5193b-8492-4464-979e-0d5498ca500e
+		lineageTag: ce342ab1-d187-44c7-a8a9-2b4f7cb89cb6
 		summarizeBy: none
 		sourceColumn: Indicador
 
@@ -21,7 +21,7 @@ table Indicador
 
 	column Tipo
 		dataType: string
-		lineageTag: dc67497d-7169-4762-a59e-c1d59b609c1c
+		lineageTag: 605c97df-48b3-43bc-b26a-c611869fd8cb
 		summarizeBy: none
 		sourceColumn: Tipo
 
@@ -30,7 +30,7 @@ table Indicador
 	column Formato
 		dataType: string
 		isHidden
-		lineageTag: 0168b079-aca3-4ae2-8f7a-e14ac921f749
+		lineageTag: 4ec35c5b-12aa-4340-a626-47b79cf2e22d
 		summarizeBy: none
 		sourceColumn: Formato
 

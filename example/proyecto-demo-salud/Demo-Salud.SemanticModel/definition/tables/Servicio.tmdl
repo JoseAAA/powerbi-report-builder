@@ -1,11 +1,11 @@
 table Servicio
-	lineageTag: 9f5b6b48-f1d6-4fcd-8efb-d924f5ea4055
+	lineageTag: 1a4f434d-2fa0-4687-896d-99e75311fe96
 
 	column 'ID Servicio'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 03b7339e-0ec0-41c0-8bb3-f9a1c8c2caaf
+		lineageTag: 25a435da-5519-4b39-b496-6b89c62dff0e
 		summarizeBy: none
 		sourceColumn: ID Servicio
 
@@ -13,7 +13,7 @@ table Servicio
 
 	column Servicio
 		dataType: string
-		lineageTag: 3e5f33b2-61c6-4060-bdc1-a7d12b5e7f86
+		lineageTag: b0da1dcd-5654-4e20-b43a-31034160837b
 		summarizeBy: none
 		sourceColumn: Servicio
 
@@ -21,7 +21,7 @@ table Servicio
 
 	column 'Servicio Agrupado'
 		dataType: string
-		lineageTag: e370534a-ac85-446e-bffd-d1f2df751102
+		lineageTag: a17a76fe-5ebc-43ee-b0ff-d57be0f235b9
 		summarizeBy: none
 		sourceColumn: Servicio Agrupado
 

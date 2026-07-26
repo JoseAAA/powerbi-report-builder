@@ -123,6 +123,26 @@ BASE_THEME_NAME      = "CY26SU02"
 M_IND = "\t\t\t\t"  # indentacion de una expresion M dentro de una particion TMDL
 
 
+def _nombre_archivo_tema(nombre_tema):
+    """
+    Nombre de archivo para el tema incrustado, derivado del nombre del tema.
+
+    Microsoft exige que el `name` interno del tema, `customTheme.name`, y el
+    `name`/`path` del item de resourcePackages sean IDENTICOS y terminen en
+    ".json". Como ese valor es a la vez nombre de archivo en disco, hay que
+    sanearlo: se quitan los caracteres invalidos en Windows y los separadores de
+    ruta (evita escribir fuera de RegisteredResources).
+    """
+    base = (nombre_tema or "theme_custom").strip()
+    if base.lower().endswith(".json"):
+        base = base[:-5]
+    base = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", base).strip(" .")
+    base = re.sub(r"\s+", " ", base)
+    if not base:
+        base = "theme_custom"
+    return base[:80] + ".json"
+
+
 def m_texto(valor):
     """
     Literal de texto para Power Query M.
@@ -1086,17 +1106,35 @@ def generar(nombre, salida, tema, dominio, datos=None, cultura="es-ES",
     if tema:
         with open(tema, "r", encoding="utf-8") as f:
             tema_obj = json.load(f)
-        tema_name = tema_obj.get("name") or "TemaCustom"
-        tema_filename = "theme_custom.json"
+        # CUATRO valores tienen que ser IDENTICOS y terminar en ".json":
+        #   1. el `name` interno del theme.json incrustado
+        #   2. `themeCollection.customTheme.name` de report.json
+        #   3. `resourcePackages[].items[].name`
+        #   4. `resourcePackages[].items[].path`  (= nombre del archivo en disco)
+        #
+        # Si el `name` no lleva .json, Power BI Desktop abre bien pero **el reporte
+        # publicado en el Service aplica el tema incorrectamente**: los colores del
+        # usuario se pierden en silencio justo al llegar a produccion. Si el `name`
+        # interno del tema no coincide con la referencia, el tema no carga.
+        #
+        # Ambas reglas las verifica el validador oficial de Microsoft
+        # (@microsoft/powerbi-report-authoring-cli): diagnosticos
+        # PBIR_THEME_NAME_MISSING_JSON_EXT y PBIR_THEME_FILE_NAME_MISMATCH.
+        # Comprobado empiricamente: name interno sin extension => falla.
+        #
+        # El theme.json SUELTO conserva su nombre legible ("Tema corporativo");
+        # solo la COPIA incrustada se reescribe para cumplir la regla.
+        tema_ref = _nombre_archivo_tema(tema_obj.get("name"))
+        tema_obj = dict(tema_obj, name=tema_ref)
         rr_dir = os.path.join(report_dir, "StaticResources", "RegisteredResources")
-        ruta_tema = os.path.join(rr_dir, tema_filename)
+        ruta_tema = os.path.join(rr_dir, tema_ref)
         escribir_json(ruta_tema, tema_obj)
         archivos.append(ruta_tema)
         # ThemeMetadata REQUIERE name + reportVersionAtImport + type (schema oficial
         # report/3.x). Omitir reportVersionAtImport corrompe el report.json al abrir.
         report_json["themeCollection"] = {
             "customTheme": {
-                "name": tema_name,
+                "name": tema_ref,
                 "reportVersionAtImport": THEME_REPORT_VERSIONS,
                 "type": "RegisteredResources",
             }
@@ -1106,7 +1144,7 @@ def generar(nombre, salida, tema, dominio, datos=None, cultura="es-ES",
                 "name": "RegisteredResources",
                 "type": "RegisteredResources",
                 "items": [
-                    {"name": tema_name, "path": tema_filename, "type": "CustomTheme"}
+                    {"name": tema_ref, "path": tema_ref, "type": "CustomTheme"}
                 ],
             }
         ]

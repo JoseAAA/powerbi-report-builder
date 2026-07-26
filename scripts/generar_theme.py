@@ -231,7 +231,11 @@ def construir_tema(cfg, no_auto_contraste=False):
                     "dropShadow": [{"show": False}],
                     "title": [{"show": True, "alignment": "left",
                                "fontColor": {"solid": {"color": texto}}}],
-                    "visualHeaderTooltip": [{"show": True}],
+                    # NO agregar "visualHeaderTooltip": no es una propiedad de tema
+                    # valida. El validador oficial de Microsoft la rechaza
+                    # (PBIR_THEME_VISUAL_PROP_UNKNOWN). El catalogo de propiedades
+                    # validas esta en el schema de temas de
+                    # microsoft/powerbi-desktop-samples; no inventes claves aqui.
                 }
             },
             "page": {

@@ -51,3 +51,19 @@ jobs:
           python scripts/verificar_cableado.py "/tmp/ci/ci-demo"
           python scripts/verificar_cableado.py "example/proyecto-demo-ventas"
           python scripts/verificar_cableado.py "example/proyecto-demo-salud"
+
+      # Segunda capa: el validador OFICIAL de Microsoft. Nuestros validadores son
+      # stdlib-only y siempre corren; este es una comprobacion independiente contra
+      # la herramienta del fabricante, que detecta cosas semanticas que un schema no
+      # ve (p. ej. que el nombre del tema rompa el reporte al publicarlo en el
+      # Service). No forma parte del contrato stdlib-only del repo: si el paquete no
+      # esta disponible, el paso avisa y no bloquea.
+      - name: Validador oficial de Microsoft (PBIR) — capa independiente
+        continue-on-error: true
+        run: |
+          for r in "/tmp/ci/ci-demo/CI-Demo.Report" \
+                   "example/proyecto-demo-ventas/Demo-Ventas.Report" \
+                   "example/proyecto-demo-salud/Demo-Salud.Report"; do
+            echo "== $r"
+            npx --yes @microsoft/powerbi-report-authoring-cli@0.1.4 validate "$r" || exit 1
+          done

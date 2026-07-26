@@ -1,15 +1,15 @@
-relationship 486524e8-00b0-4e26-9c3f-36d661a6c92f
+relationship 81c8b770-4277-468d-aa7f-bb5722e249c2
 	fromColumn: Ventas.Fecha
 	toColumn: Calendario.Fecha
 
-relationship 8fb81d43-a802-4fc7-8282-c3c28951e45d
+relationship dbe9ede5-85d9-4384-bed6-01f37214c670
 	fromColumn: Ventas.'ID Region'
 	toColumn: Region.'ID Region'
 
-relationship 94375eba-4544-4b0c-b2a0-1d3c5c6132e5
+relationship 204e21a4-746b-44e2-baee-25da0ee982f9
 	fromColumn: Ventas.'ID Producto'
 	toColumn: Producto.'ID Producto'
 
-relationship 86ff0653-c81c-4158-b551-222797ae7096
+relationship 51441dcd-c1f6-43ab-9e58-df1f2ee46df9
 	fromColumn: Ventas.'ID Indicador'
 	toColumn: Indicador.'ID Indicador'

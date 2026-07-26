@@ -1,10 +1,10 @@
 table Indicadores
-	lineageTag: 899a38a2-90f8-4e2e-942c-369ea0d4c5ea
+	lineageTag: 27bf964f-74ea-4681-ba4a-559e959ed92b
 
 	column Fecha
 		dataType: dateTime
 		formatString: Short Date
-		lineageTag: 10cf2ab6-07c4-49d9-818a-a31455b21003
+		lineageTag: 0ddb17e4-bf2d-457f-9f72-4ca62d8d9360
 		summarizeBy: none
 		sourceColumn: Fecha
 
@@ -16,7 +16,7 @@ table Indicadores
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: 0d390dd7-f2a7-4f1e-a852-fc371c7c73bc
+		lineageTag: b1056279-bbbe-4ff1-991c-3b85892a59da
 		summarizeBy: none
 		sourceColumn: ID Sede
 
@@ -26,7 +26,7 @@ table Indicadores
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: f78ec213-bb77-4964-8c50-c4cf4f88b5b0
+		lineageTag: 11b067f8-0c81-4686-98b5-c6f219739c9d
 		summarizeBy: none
 		sourceColumn: ID Servicio
 
@@ -36,7 +36,7 @@ table Indicadores
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: 24f36c1b-dd93-4001-abff-824efb605d11
+		lineageTag: 6a6a0b22-aebc-410d-aa52-9def24ed0b73
 		summarizeBy: none
 		sourceColumn: ID Indicador
 
@@ -46,7 +46,7 @@ table Indicadores
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: 76484906-d600-40ac-b64b-11f51f69c7a9
+		lineageTag: ae1fa4e4-b44f-4d95-8bfe-b13ead602ba1
 		summarizeBy: sum
 		sourceColumn: Num
 
@@ -56,7 +56,7 @@ table Indicadores
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: 9c3e9666-f050-4cec-93d4-2d839ca4dc0e
+		lineageTag: a48041d8-e404-47a3-91f6-f71a930a1079
 		summarizeBy: sum
 		sourceColumn: Den
 

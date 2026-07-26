@@ -44,7 +44,7 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/scaffold_pbip.py --nombre "X" --dominio <d> --tema theme.json [--datos <carpeta>] [--en-raiz]` | proyecto `.pbip` válido (estrella + PBIR). **`--datos` cablea las particiones a los CSV**; `--en-raiz` deja el `.pbip` en la raíz |
 | `python scripts/init_proyecto.py --nombre "X" --dominio <d> --marca <m>\|--tema <t>\|--sin-marca` | bootstrap completo: `.pbip` en la raíz + `datos/` cableados + `docs/` |
 | `python scripts/validar_modelo.py <ruta .SemanticModel>` | BPA-lite del modelo, reglas **R1–R12** (exit 1 si hay ALTA) |
-| `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P7** (exit 1 si hay ALTA) |
+| `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P8** (exit 1 si hay ALTA) |
 | `python scripts/verificar_cableado.py <carpeta del proyecto>` | **datos ↔ modelo**, reglas **E1–E6**: que el `.pbip` lea los CSV, que ninguna clave quede huérfana y que las medidas no mezclen indicadores |
 | `python scripts/check_consistencia.py` | guarda de invariantes del repo, reglas **C1–C10** (frontmatter, forma de las `description`, `## Boundaries`, skills huérfanos, TMDL, rangos, references, portabilidad) |
 
@@ -66,12 +66,12 @@ deterministas (temas, M, TMDL, PBIR) sin gastar tokens ni inventar formatos.
    visuales o bookmarks. `displayName` sí es editable.
 3. **El tema del usuario nunca se ignora en silencio**: `init_proyecto.py` exige
    `--marca`/`--tema`/`--sin-marca`; al scaffoldear pasa SIEMPRE `--tema`.
-   `validar_pbip.py` (P7) detecta temas sin cablear.
+   `validar_pbip.py` detecta temas sin cablear (P7) y nombres de tema inconsistentes que rompen el tema **al publicar en el Service** (P8).
 4. **Valida antes de entregar**: `validar_modelo.py`, `validar_pbip.py` y
    `verificar_cableado.py` en verde. Los dos primeros comprueban las reglas del
    framework; el tercero comprueba que el proyecto **describa algo coherente**
    (que el reporte lea los datos que hay al lado). Un modelo puede pasar R1–R12
-   y P1–P7 y aun así mostrar cifras falsas: eso ya pasó.
+   y P1–P8 y aun así mostrar cifras falsas: eso ya pasó.
 5. **El MVP no puede mentir**: si generas datos de ejemplo, el `.pbip` los tiene
    que **leer** (`--datos`). Nunca entregues CSVs junto a un reporte que muestra
    otros números; el usuario corrige un CSV, refresca y espera ver el cambio.

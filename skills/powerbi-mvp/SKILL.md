@@ -50,13 +50,13 @@ acepta explicitamente los colores por defecto de Power BI.
 
 ```
 python "${CLAUDE_PLUGIN_ROOT}/scripts/validar_modelo.py"     <ruta .SemanticModel>   # R1-R12
-python "${CLAUDE_PLUGIN_ROOT}/scripts/validar_pbip.py"       <ruta .Report>          # P1-P7
+python "${CLAUDE_PLUGIN_ROOT}/scripts/validar_pbip.py"       <ruta .Report>          # P1-P8
 python "${CLAUDE_PLUGIN_ROOT}/scripts/verificar_cableado.py" <carpeta del proyecto>  # E1-E6
 ```
 
 Los dos primeros validan las reglas del framework; **el tercero valida que el
 proyecto describa algo coherente** (que el reporte lea los datos que hay al
-lado). Un modelo puede pasar R1–R12 y P1–P7 y aun asi mostrar cifras falsas.
+lado). Un modelo puede pasar R1–R12 y P1–P8 y aun asi mostrar cifras falsas.
 
 Avisa al usuario de que active **PBIR** una vez: *Archivo > Opciones >
 Caracteristicas en vista previa > «Almacenar informes con el formato de metadatos

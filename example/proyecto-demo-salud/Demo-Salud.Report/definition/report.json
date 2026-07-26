@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.3.0/schema.json",
   "themeCollection": {
     "customTheme": {
-      "name": "Tema demo salud",
+      "name": "Tema demo salud.json",
       "reportVersionAtImport": {
         "visual": "2.6.0",
         "report": "3.1.0",
@@ -17,8 +17,8 @@
       "type": "RegisteredResources",
       "items": [
         {
-          "name": "Tema demo salud",
-          "path": "theme_custom.json",
+          "name": "Tema demo salud.json",
+          "path": "Tema demo salud.json",
           "type": "CustomTheme"
         }
       ]

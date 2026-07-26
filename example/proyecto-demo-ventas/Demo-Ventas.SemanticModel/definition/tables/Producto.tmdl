@@ -1,11 +1,11 @@
 table Producto
-	lineageTag: 6af4dfa4-b15d-4446-991c-80907a9b2f74
+	lineageTag: f89407e0-ca37-467e-9292-13d5c862d496
 
 	column 'ID Producto'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 93315c1d-cef1-472f-b4f6-3ee215ba462d
+		lineageTag: 8d4f0ccf-dc26-4fb5-9b7f-e728b716487e
 		summarizeBy: none
 		sourceColumn: ID Producto
 
@@ -13,7 +13,7 @@ table Producto
 
 	column Producto
 		dataType: string
-		lineageTag: ed4d7170-d80b-488a-8f40-02f29c28d4a3
+		lineageTag: 6e94b55e-1c33-48bf-900d-3378d14177dc
 		summarizeBy: none
 		sourceColumn: Producto
 
@@ -21,7 +21,7 @@ table Producto
 
 	column 'Categoria Producto'
 		dataType: string
-		lineageTag: 283b0d05-6961-4082-8e25-8190e8a8883c
+		lineageTag: 9d04204d-df06-4552-abec-6821299277aa
 		summarizeBy: none
 		sourceColumn: Categoria Producto
 

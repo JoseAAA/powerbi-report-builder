@@ -3,6 +3,51 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-25 — el tema se rompia al publicar (validador oficial de Microsoft)
+
+Existe un validador **oficial y publico** de Microsoft para PBIR:
+`npx @microsoft/powerbi-report-authoring-cli validate <ruta .Report>`. Lo corri
+contra los `example/` del repo y encontro **2 errores que nuestros validadores no
+veian**. Ambos corregidos, y ahora los detecta `validar_pbip.py` sin depender de npm.
+
+### Corregido
+
+- **El tema se aplicaba mal AL PUBLICAR EN EL SERVICE.** `customTheme.name` llevaba
+  el nombre "bonito" del tema (p. ej. `"Tema corporativo"`). Power BI Desktop abre
+  bien, asi que el bug era invisible en local, pero el reporte publicado aplica el
+  tema incorrectamente. Cita literal del validador: *"Using the bare theme name
+  causes the published report on the Power BI service to incorrectly apply the
+  theme"*. Golpeaba justo la regla dura #3 — los colores del usuario se perdian en
+  silencio, y en el peor momento: al llegar a produccion.
+  (Diagnostico `PBIR_THEME_NAME_MISSING_JSON_EXT`.)
+- **`visualHeaderTooltip.show` no es una propiedad de tema valida** y
+  `generar_theme.py` la escribia en todos los temas
+  (`PBIR_THEME_VISUAL_PROP_UNKNOWN`). Eliminada.
+
+La regla exacta se determino **empiricamente**, probando tres variantes contra el
+validador oficial: el `name` interno del theme.json, `customTheme.name`,
+`resourcePackages[].items[].name` y `.path` deben ser los **cuatro identicos** y
+terminar en `.json`. Con el `name` interno sin extension, falla. El `theme.json`
+suelto conserva su nombre legible; solo la copia incrustada se reescribe.
+
+### Añadido
+
+- **`validar_pbip.py` regla P8**: los cuatro valores del nombre del tema deben
+  coincidir y llevar `.json`. Equivale a `PBIR_THEME_NAME_MISSING_JSON_EXT` +
+  `PBIR_THEME_FILE_NAME_MISMATCH`, en stdlib. Verificada en los dos sentidos.
+- **CI: el validador oficial como segunda capa independiente** (`continue-on-error`,
+  para no romper el contrato stdlib-only del repo si el paquete no esta disponible).
+  Nuestros validadores comprueban nuestras reglas; este comprueba las de Microsoft.
+- `check_consistencia.py`: "P1-P7" pasa a rango obsoleto en C5. La propia guarda
+  cazo las 8 referencias desactualizadas en la documentacion.
+
+### Nota de metodo
+
+Este hallazgo confirma el patron del bug anterior: **nuestros validadores en verde
+no significan producto correcto**. Ahi fue el MVP mostrando datos falsos; aqui, el
+tema rompiendose solo en el Service. Cuando existe una herramienta del fabricante,
+se corre — no se sustituye por reglas propias.
+
 ## 2026-07-25 — el MVP dejó de mentir (corrección de raíz)
 
 Auditoría del flujo real (`init_proyecto.py` de punta a punta) contra la

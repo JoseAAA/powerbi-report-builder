@@ -1,11 +1,11 @@
 table Region
-	lineageTag: 266ab320-26a9-4390-9a4d-c71fc3df7453
+	lineageTag: f7dee4c6-dc42-45af-8815-4c2fb831315c
 
 	column 'ID Region'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 19992329-7efa-4dbc-89d4-216cccfab4f5
+		lineageTag: 310e2adb-3a83-4df6-9b27-4f8b3140146b
 		summarizeBy: none
 		sourceColumn: ID Region
 
@@ -13,7 +13,7 @@ table Region
 
 	column Region
 		dataType: string
-		lineageTag: f04b9464-10a7-40a9-93d7-f1f6d5297f8f
+		lineageTag: 9756a801-9cfa-4219-ade3-a31c7c7e6055
 		summarizeBy: none
 		sourceColumn: Region
 

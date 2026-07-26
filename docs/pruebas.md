@@ -35,7 +35,7 @@ python scripts/init_proyecto.py --nombre "Demo" --dominio ventas --marca assets/
 #    Variantes: --tema theme.json | --sin-marca (neutro EXPLÍCITO)
 #    Sin elección → error con instrucciones (así nunca se ignoran tus colores).
 
-# 6) Validar modelo (R1–R12) y reporte (P1–P7)
+# 6) Validar modelo (R1–R12) y reporte (P1–P8)
 python scripts/validar_modelo.py "C:/demo/mi-reporte/Demo.SemanticModel"
 python scripts/validar_pbip.py   "C:/demo/mi-reporte/Demo.Report"
 #    Esperado: "OK  Sin hallazgos ..." (exit 0)

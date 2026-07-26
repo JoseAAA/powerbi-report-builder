@@ -27,7 +27,7 @@ references. No hay dependencias que instalar (Python estándar).
 O directo en terminal:
 ```bash
 python scripts/validar_modelo.py "MiReporte.SemanticModel"   # modelo/DAX: R1–R12
-python scripts/validar_pbip.py   "MiReporte.Report"          # reporte:    P1–P7
+python scripts/validar_pbip.py   "MiReporte.Report"          # reporte:    P1–P8
 ```
 Salen hallazgos por severidad (ALTA/MEDIA/BAJA) con el fix concreto.
 
@@ -70,7 +70,7 @@ pasos de clic.
 | `scaffold_pbip.py` | proyecto `.pbip` mínimo y válido (estrella + PBIR + tema) |
 | `init_proyecto.py` | bootstrap completo `proyecto-<nombre>/` (estructura + tema + datos + `.pbip`) |
 | `validar_modelo.py` | BPA-lite del modelo (R1–R12, incl. description para IA) |
-| `validar_pbip.py` | validación del reporte (P1–P7, incl. tema cableado) |
+| `validar_pbip.py` | validación del reporte (P1–P8, incl. tema cableado) |
 
 ## 5. Publicar (producción)
 
