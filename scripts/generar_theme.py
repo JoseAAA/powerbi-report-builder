@@ -312,6 +312,33 @@ def main():
           f"({'AA OK' if cf >= 4.5 else 'REVISAR'})")
     for r in reporte:
         print(f"    - {r}")
+
+    # Contraste de los COLORES DE DATOS contra el fondo. Es el que se olvida:
+    # WCAG 1.4.11 pide >= 3:1 para las partes del grafico necesarias para
+    # entenderlo, no solo para el texto. Reportar unicamente texto/fondo daba un
+    # "AA OK" enganoso mientras una serie quedaba a 1.97:1 e invisible.
+    # Los colores son del usuario, asi que se AVISA, no se cambian en silencio.
+    fondo = tema.get("background") or "#FFFFFF"
+    bajos = []
+    for i, c in enumerate(tema.get("dataColors") or []):
+        try:
+            r = contrast(c, fondo)
+        except Exception:  # noqa: BLE001 — color no parseable: no romper la salida
+            continue
+        if r < 3.0:
+            bajos.append((i, c, r))
+    if bajos:
+        print("")
+        print(f"    AVISO — colores de datos con contraste bajo sobre {fondo} "
+              "(WCAG 1.4.11 pide >= 3:1):")
+        for i, c, r in bajos:
+            print(f"      dataColors[{i}] {c}: {r:.2f}:1")
+        print("      Son los colores de TU marca, asi que no se modifican solos.")
+        print("      Aclaralos (mismo tono, mas luminosidad), o reordena la paleta")
+        print("      para que los que fallan no sean los primeros: Power BI asigna")
+        print("      las series por orden. Una serie por debajo de 3:1 deja fuera a")
+        print("      quien tiene baja vision.")
+
     print("\nImportar en Power BI: Vista -> Temas -> Buscar temas -> "
           f"elegir {args.salida}")
 

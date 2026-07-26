@@ -3,6 +3,45 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-26 — v0.5.0 · revision previa a pruebas reales
+
+Repaso de extremo a extremo antes de ponerlo en manos de gente. Se ejecutaron
+**todos** los comandos que aparecen en la documentacion, literalmente como estan
+escritos, y los **5 dominios** (no solo ventas).
+
+### Corregido
+
+- **Contraste de los COLORES DE DATOS, no solo del texto.** `generar_theme.py` y
+  `editar_theme.py` reportaban "AA OK" mirando unicamente texto sobre fondo. Pero
+  WCAG 1.4.11 pide **>= 3:1** para las partes del grafico necesarias para
+  entenderlo. En modo oscuro, el color primario de la marca de ejemplo quedaba a
+  **1.97:1** sobre el fondo: una serie practicamente invisible, con el script
+  diciendo OK. En modo claro tambien habia dos por debajo del umbral (2.13:1 y
+  1.66:1). Ahora ambos scripts lo reportan al generar y al editar.
+  Los colores son del usuario, asi que **se avisa, no se cambian en silencio** — y
+  el aviso explica las tres salidas por orden de preferencia (aclarar el hex,
+  reordenar la paleta, o usar el tema claro). No bloquea el bootstrap.
+- **`evals/evals.json` apuntaba a la estructura vieja**: decia que la marca del
+  usuario vive en `assets/marca/` del plugin, cuando desde el cambio de estructura
+  vive en `<su-proyecto>/docs/marca.json`. Reescrito y ampliado de 2 a **10
+  escenarios**, la mitad nacidos de fallos REALES de este ciclo: el MVP huerfano,
+  el KPI en 5226%, la regla de visualizacion sin fuente, y la notacion IBCS no
+  verificada. Añadidos escenarios de presion (publicar sin validar), de
+  enrutamiento entre fases que se solapan, de usuario no tecnico, y de publicar
+  sin Git.
+
+### Verificado
+
+- Los **13 comandos** documentados corren sin error tal como estan escritos.
+- Los **5 dominios** (generico, ventas, rrhh, finanzas, salud) generan proyectos
+  que pasan R1-R12 + 26 reglas oficiales / P1-P8 / E1-E6.
+- Bootstrap, los 2 ejemplos versionados y el validador **oficial de Microsoft**:
+  0 errores. El unico aviso es `PBIR_THEME_SCHEMA_UNREACHABLE`, ya documentado:
+  el CLI v0.1.4 es anterior al schema 2.156.
+- Sin fugas de rutas personales en `*.m`, `*.json` ni `*.tmdl`.
+- `plugin.json` a **0.5.0** (venia de 0.4.0 con 6 commits y un cambio de
+  estructura sin compatibilidad encima).
+
 ## 2026-07-26 — fase5-visualizacion.md: de 0 URLs a 20, y cuatro reglas retiradas
 
 La reference que definia el criterio visual **invocaba IBCS con 0 URLs** y

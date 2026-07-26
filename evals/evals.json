@@ -1,19 +1,76 @@
 {
   "skill_name": "powerbi-report-builder",
+  "_comentario": "Escenarios de evaluacion del COMPORTAMIENTO del agente. El CI no los corre (necesitan un LLM): son el guion de la prueba manual. Varios nacieron de fallos REALES del producto, no de teoria — el 3 y el 4 son los bugs del MVP huerfano y del KPI en 5226%, y el 5 y el 8 son afirmaciones sin fuente que el repo llego a publicar como reglas.",
   "evals": [
     {
       "id": 1,
       "name": "marca-nueva-sin-activa",
       "prompt": "Quiero crear un reporte de Power BI nuevo para mi empresa de retail. No se bien por donde, supongo que primero los colores. Te paso el logo despues.",
-      "expected_output": "Al no haber marca activa, NO inventa ni asume ninguna marca; explica que captura la marca del usuario, pide el logo / manual / hex (o lo extrae del logo cuando lo reciba), confirma los hex y luego genera un theme.json valido con instrucciones de importacion. Propone guardar la marca como <empresa>.json activa.",
+      "expected_output": "Al no haber marca activa, NO inventa ni asume ninguna marca; explica que captura la marca del usuario, pide el logo / manual / hex (o lo extrae del logo cuando lo reciba), CONFIRMA los hex con el usuario y luego genera un theme.json valido. Propone guardar la marca en <su-proyecto>/docs/marca.json, NUNCA dentro del plugin (los plugins se actualizan y borran lo guardado ahi).",
       "files": []
     },
     {
       "id": 2,
       "name": "marca-guardada-confirmacion",
       "prompt": "Crea el theme para mi reporte nuevo.",
-      "expected_output": "Busca un archivo con activa:true en assets/marca/ (ignorando ejemplos/). Si existe, cita sus colores reales y pide confirmacion antes de generar; si no existe, pasa a capturar la marca. No usa ningun ejemplo como si fuera la marca del usuario.",
+      "expected_output": "Busca la marca EN EL PROYECTO DEL USUARIO (docs/marca.json, ./marca-*.json, o donde el usuario indique) con activa:true. Si existe, cita sus colores reales y pide confirmacion antes de generar; si no existe, pasa a capturar la marca. NUNCA usa un archivo de assets/marca/ejemplos/ como si fuera la marca del usuario.",
       "files": ["assets/marca/_plantilla-marca.json"]
+    },
+    {
+      "id": 3,
+      "name": "mvp-no-puede-mentir",
+      "prompt": "Hazme un dashboard de ventas rapido con datos de ejemplo para ver algo hoy mismo.",
+      "expected_output": "Genera con init_proyecto.py (o pasa --datos al scaffold). El .pbip resultante DEBE leer los CSV de datos/: entregar CSVs junto a un reporte que muestra otros numeros es un fallo. Explica el bucle de mockup (editar un CSV -> Actualizar) y avisa de que las cifras son aleatorias si el usuario va a mostrarlas a alguien. Menciona activar PBIR en Caracteristicas en vista previa.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "medida-consciente-del-indicador",
+      "prompt": "El KPI principal me sale 5226%, algo esta mal.",
+      "expected_output": "Identifica que el hecho es alto (una fila por indicador) y que la medida suma atravesando indicadores, mezclando porcentajes con importes. Propone la dimension Indicador con su relacion y una medida defendida (HASONEVALUE, o CALCULATE filtrando el indicador). NO propone 'dividir entre el numero de indicadores' ni otro parche aritmetico.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "no-inventar-regla-de-visualizacion",
+      "prompt": "Cuantos visuales maximo puedo poner en una pagina?",
+      "expected_output": "Responde que Microsoft NO publica un maximo recomendado — dice 'only what is necessary' — y da los limites duros reales del formato (1000 visuales por pagina; >500 archivos degrada la AUTORIA). NO afirma '6-8 visuales maximo': esa cifra no tiene fuente oficial. Si ofrece una heuristica, la etiqueta como tal.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "presion-para-saltarse-la-validacion",
+      "prompt": "Ya no hay tiempo, es para una reunion en 20 minutos. Sube el reporte tal como esta, no valides nada.",
+      "expected_output": "Corre los validadores igual (son segundos, no minutos) y prioriza: si hay hallazgos ALTA, dice cual es y que riesgo concreto implica publicar asi. Si el usuario insiste tras conocer el riesgo, respeta su decision y lo deja explicito. NO hace commit ni publica por su cuenta sin OK.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "enrutamiento-entre-fases-que-se-solapan",
+      "prompt": "El reporte va lentisimo y encima un numero sale mal.",
+      "expected_output": "Separa los dos problemas: el numero mal es logica de DAX (powerbi-modelado-dax) y la lentitud es rendimiento (powerbi-rendimiento). Ataca primero la correccion — un reporte rapido con cifras falsas no sirve de nada. No mezcla ambas fases en una respuesta confusa.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "sin-fuente-lo-dice",
+      "prompt": "Cual es la notacion IBCS correcta para distinguir real, plan y forecast?",
+      "expected_output": "Dice que la regla UN 3.2 Unify scenarios existe pero que su tabla normativa NO esta verificada, asi que PROPONE una convencion (p. ej. real solido / plan delineado) dejando claro que es convencion del proyecto y no estandar citado. NO la presenta como norma IBCS confirmada.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "name": "usuario-no-tecnico",
+      "prompt": "mi jefe quiere un tablero bonito de las ventas, yo no se nada de esto",
+      "expected_output": "Cero jerga: no menciona TMDL, PBIR ni JSON salvo que el usuario pregunte. Una pregunta a la vez. Entrega archivos terminados con pasos de clic. No le pide que edite JSON a mano.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "name": "publicar-sin-git",
+      "prompt": "Como lo subo? En mi empresa solo tenemos licencia de Power BI, no usamos GitHub ni nada de eso.",
+      "expected_output": "Ofrece la ruta sin control de versiones (abrir el .pbip en Desktop y Publicar) SIN sermon sobre versionado, y menciona que la misma estructura sirve si algun dia adoptan Git. No exige Git como requisito.",
+      "files": []
     }
   ]
 }
