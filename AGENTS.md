@@ -46,6 +46,7 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/validar_modelo.py <ruta .SemanticModel>` | BPA-lite del modelo, reglas **R1–R12** (exit 1 si hay ALTA) |
 | `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P8** (exit 1 si hay ALTA) |
 | `python scripts/verificar_cableado.py <carpeta del proyecto>` | **datos ↔ modelo**, reglas **E1–E6**: que el `.pbip` lea los CSV, que ninguna clave quede huérfana y que las medidas no mezclen indicadores |
+| `python scripts/actualizar_catalogo.py [--forzar\|--json\|--marcar-revisado]` | vigila las **15 fuentes oficiales** (`scripts/fuentes.py`) y reporta páginas agregadas/eliminadas/**modificadas**. 1 llamada HTTP por fuente, sin token, con TTL por fuente (7/30/90 días) |
 | `python scripts/check_consistencia.py` | guarda de invariantes del repo, reglas **C1–C10** (frontmatter, forma de las `description`, `## Boundaries`, skills huérfanos, TMDL, rangos, references, portabilidad) |
 
 `scripts/dominios.py` es el **catálogo único** de dominios de ejemplo (dimensiones,
@@ -79,6 +80,11 @@ deterministas (temas, M, TMDL, PBIR) sin gastar tokens ni inventar formatos.
 7. **No inventes "mejores prácticas"**: cada recomendación traza a Microsoft o a
    un experto reconocido (Kimball, SQLBI/BPA, Chris Webb, IBCS, WCAG). El
    conocimiento citado vive en `references/` — cárgalo por fase, no todo junto.
+   Respeta la **jerarquía de autoridad** (`NIVELES_AUTORIDAD` en `scripts/fuentes.py`):
+   1 Microsoft Learn · 2 repos oficiales de Microsoft · 3 estándar de un organismo
+   (W3C/IBCS) · 4 experto reconocido · 5 otro. **Una regla de severidad ALTA no
+   puede sustentarse solo en un nivel 5.** Si no hay fuente oficial, «no está
+   documentado oficialmente» es una respuesta válida; inventar no lo es.
 8. **Nada privado al repo**: ni marcas/datos reales de empresas, ni rutas locales
    absolutas, ni `.pbi/` (caché). La marca del usuario vive en SU proyecto.
    Ojo con `expressions.tmdl`: el parámetro `RutaBase` lleva una ruta absoluta

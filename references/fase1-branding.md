@@ -49,7 +49,7 @@ Power BI ignora silenciosamente lo que no reconoce; el unico campo requerido es
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/reportThemeSchema-2.143.json",
+  "$schema": "https://raw.githubusercontent.com/microsoft/powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/reportThemeSchema-2.156.json",
   "name": "Tema de ejemplo",
   "dataColors": ["#1B4D77","#E25822","#50C878","#1987EC","#E1C955","#6B7A8F","#1076AA","#9C5BA8"],
   "good": "#2E8B57", "neutral": "#E1A30B", "bad": "#C0392B",

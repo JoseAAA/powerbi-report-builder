@@ -52,6 +52,7 @@ independientes (un usuario de negocio puede pedir un dashboard complejo).
 | "Prepara el modelo para Copilot/IA", sinonimos, descripciones, Q&A, "Approved for Copilot" | **powerbi-ia-copilot** |
 | Una carpeta PBIP completa ("audita mi proyecto") | **powerbi-auditoria** |
 | "Publicar", "subir a producción", versionar/GitHub, conectar al Service | **powerbi-entrega** |
+| "¿Hay novedades?", "¿el criterio sigue vigente?", algo que el catálogo no contempla | **powerbi-actualizar** |
 
 Si llega sin contexto, pregunta en que punto esta y arranca ahi. No fuerces todas
 las fases si solo necesita una.

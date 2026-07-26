@@ -29,9 +29,18 @@ import colorsys
 import json
 import sys
 
+# Version del schema OFICIAL de temas (microsoft/powerbi-desktop-samples).
+# Los schemas se publican versionados: no hay URL "latest", asi que hay que fijar
+# una y refrescarla. `actualizar_catalogo.py` avisa cuando aparece una nueva
+# (la fuente `theme_schema` de references/estado-fuentes.json).
+#
+# 2.143 -> 2.156 (2026-07): el repo se habia quedado 13 versiones atras. El salto
+# es puramente aditivo (2.156 añade `baseTheme` a nivel raiz y no elimina nada),
+# comprobado comparando los dos schemas antes de subir la version.
+SCHEMA_VERSION = "2.156"
 SCHEMA_URL = ("https://raw.githubusercontent.com/microsoft/"
               "powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/"
-              "reportThemeSchema-2.143.json")
+              f"reportThemeSchema-{SCHEMA_VERSION}.json")
 
 
 # ---------- utilidades de color ----------

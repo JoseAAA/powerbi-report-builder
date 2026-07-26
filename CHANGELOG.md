@@ -3,6 +3,55 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-26 — vigilante de fuentes oficiales + theme schema al dia
+
+"Todo sustentado en documentacion oficial y actualizada" pasa de intencion a
+mecanismo: 15 fuentes declaradas, con TTL, y un script que detecta cuando
+Microsoft las cambia.
+
+### Añadido
+
+- **`scripts/fuentes.py`**: registro de las 15 fuentes oficiales que sustentan el
+  catalogo (repo, rama, ruta, TTL, y que reglas sustenta cada una). Todas
+  confirmadas con peticion real a la API de GitHub. Tres cosas no eran lo que
+  parecian: **DAX vive en `MicrosoftDocs/query-docs`** (no en `sql-docs` ni
+  `bi-shared-docs`; `MicrosoftDocs/dax-docs` no existe), **`microsoft/Analysis-Services`
+  usa rama `master`**, y los repos `*-pr` de MicrosoftDocs son privados.
+- **Jerarquia de autoridad en 5 niveles** (`NIVELES_AUTORIDAD`): 1 Microsoft Learn ·
+  2 repos oficiales de Microsoft · 3 estandar de organismo (W3C/IBCS) · 4 experto
+  reconocido · 5 otro. **Una regla de severidad ALTA no puede sustentarse solo en
+  un nivel 5.** Añadido a la regla dura #7.
+- **`scripts/actualizar_catalogo.py`**: vigilante con **1 sola llamada HTTP por
+  fuente** y sin token. `/contents` devuelve el **blob SHA de cada archivo**, asi
+  que un inventario `{nombre: sha}` detecta agregados, eliminados **y
+  modificados** sin tocar `/commits`. Para las fuentes cuyo contenido son
+  carpetas (`pbir_schemas`, `skills_for_fabric`) se inventaria tambien el **tree
+  SHA de cada subcarpeta**, que da deteccion recursiva con la misma llamada.
+  Revision completa = 15 de las 60 llamadas/hora que permite GitHub sin token.
+- **TTL por niveles, no global**: 7 dias las fuentes que se mueven mucho
+  (`create-reports`, `guidance`), 30 las normales, 90 las casi inmoviles (spec de
+  TMDL, `ms.date` 2023-12-27). Hay ~100x de diferencia de cadencia entre unas y
+  otras; un TTL unico o revisa de mas o revisa de menos.
+- **`references/estado-fuentes.json`**: lockfile con `ultima_revision` ISO y el
+  inventario de cada fuente. Verificado en los dos sentidos: detecta modificados
+  y eliminados, y respeta el TTL.
+- Contrato para agentes: `--json` devuelve `pbi-builder/actualizar-catalogo@1`
+  con exit codes estables (0 al dia · 1 hay cambios · 2 error de red/cuota).
+- **Skill `powerbi-actualizar`**: TTL, interpretacion de cambios por tipo (pagina
+  nueva / modificada / eliminada), **gate humano explicito** (no toca el catalogo
+  sin OK), y una seccion honesta de lo que el mecanismo NO cubre (release plans,
+  cambios de comportamiento sin cambio de doc, y que detectar que un archivo
+  cambio no es lo mismo que verificar que la afirmacion citada sigue ahi).
+
+### Corregido
+
+- **Theme schema 13 versiones desactualizado**: el repo fijaba
+  `reportThemeSchema-2.143.json` y upstream va por **2.156**. Comprobado antes de
+  subirlo: el salto es puramente aditivo (2.156 añade `baseTheme` a nivel raiz, no
+  elimina nada) y las 18 claves raiz de nuestros temas siguen reconocidas. Ahora
+  la version esta en una constante (`SCHEMA_VERSION`) y la fuente `theme_schema`
+  del vigilante avisa cuando aparezca otra.
+
 ## 2026-07-25 — el tema se rompia al publicar (validador oficial de Microsoft)
 
 Existe un validador **oficial y publico** de Microsoft para PBIR:
