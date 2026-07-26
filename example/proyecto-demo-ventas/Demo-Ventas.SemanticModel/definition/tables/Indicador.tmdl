@@ -1,11 +1,13 @@
+/// Que mide cada fila del hecho. Segmenta por esta tabla para leer un indicador a
+/// la vez: sumar varios mezclaria porcentajes con importes absolutos.
 table Indicador
-	lineageTag: 9e23e9b7-6ae7-4ae5-8900-2aec2ee445c5
+	lineageTag: 2cee061d-6718-4192-b850-94cc0a3cbed7
 
 	column 'ID Indicador'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 690b5ce9-665e-4289-be9f-d8d1f4ff3bff
+		lineageTag: 45472bf7-1ee3-48bf-9369-4996d69aed1b
 		summarizeBy: none
 		sourceColumn: ID Indicador
 
@@ -13,7 +15,7 @@ table Indicador
 
 	column Indicador
 		dataType: string
-		lineageTag: ce342ab1-d187-44c7-a8a9-2b4f7cb89cb6
+		lineageTag: a2579838-d7a3-4ff2-a441-c7ac7e61f05d
 		summarizeBy: none
 		sourceColumn: Indicador
 
@@ -21,7 +23,7 @@ table Indicador
 
 	column Tipo
 		dataType: string
-		lineageTag: 605c97df-48b3-43bc-b26a-c611869fd8cb
+		lineageTag: c5eb64ed-9fa7-46a8-9763-a44f5ab34cc5
 		summarizeBy: none
 		sourceColumn: Tipo
 
@@ -30,7 +32,7 @@ table Indicador
 	column Formato
 		dataType: string
 		isHidden
-		lineageTag: 4ec35c5b-12aa-4340-a626-47b79cf2e22d
+		lineageTag: 4c6eebc7-007f-410f-afbe-2298733c4eda
 		summarizeBy: none
 		sourceColumn: Formato
 

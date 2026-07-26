@@ -217,12 +217,45 @@ def main():
         if not m.get("tiene_desc"):
             hallazgos.append(("BAJA", "R12", f"Medida '{m['nombre']}' sin description (/// encima del measure): agrega una frase de negocio (Copilot/IA la usa; ver preparar-datos-ia.md)"))
 
-    print(f"Modelo: {mostrar}  |  Archivos .tmdl: {len(archivos)}  |  Medidas: {len(todas)}")
+    # --- Catalogo OFICIAL de Microsoft (BPARules.json) ---------------------
+    # Nuestras reglas R1-R12 cubren las convenciones del framework. Estas son las
+    # de Microsoft, evaluadas sobre el modelo parseado con scripts/tmdl.py y
+    # citando el ID oficial y su fuente. Si el catalogo no se puede cargar (copia
+    # ausente o corrupta) se avisa y se sigue: R1-R12 no dependen de el.
+    # Reglas propias que una regla OFICIAL cubre igual o mejor. Cuando el catalogo
+    # de Microsoft esta disponible se suprimen: reportar el mismo problema dos
+    # veces con codigos distintos es ruido, y la version oficial ademas trae cita.
+    # Si el catalogo no carga, se evaluan como respaldo.
+    SUPERSEDIDAS = {
+        "R1": "PROVIDE_FORMAT_STRING_FOR_MEASURES",
+        "R3": "USE_THE_DIVIDE_FUNCTION_FOR_DIVISION",
+        "R6": "REMOVE_AUTO-DATE_TABLE",
+        "R12": "OBJECTS_WITH_NO_DESCRIPTION",
+    }
+    n_oficiales = 0
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import catalogo_reglas
+        import tmdl as _tmdl
+        n_oficiales = len(catalogo_reglas.construir())
+        modelo_obj = _tmdl.cargar(str(raiz))
+        for h in catalogo_reglas.evaluar(modelo_obj):
+            hallazgos.append((h["severidad"], h["codigo"],
+                              f"{h['donde']}: {h['detalle']}  [fuente: {h['fuente']}]"))
+        hallazgos = [h for h in hallazgos if h[1] not in SUPERSEDIDAS]
+    except Exception as e:  # noqa: BLE001 — el validador propio no debe caerse
+        print(f"AVISO: no se pudo evaluar el catalogo oficial de Microsoft ({e}).")
+        print("       Las reglas R1-R12 del framework si se evaluaron, incluidas las")
+        print("       que normalmente cede a su equivalente oficial.")
+
+    etiqueta = f"R1-R12 + {n_oficiales} reglas oficiales" if n_oficiales else "R1-R12"
+    print(f"Modelo: {mostrar}  |  Archivos .tmdl: {len(archivos)}  |  "
+          f"Medidas: {len(todas)}  |  Reglas: {etiqueta}")
     if not hallazgos:
-        print("OK  Sin hallazgos en las reglas automatizadas (R1-R12).")
+        print(f"OK  Sin hallazgos ({etiqueta}).")
         return 0
     orden = {"ALTA": 0, "MEDIA": 1, "BAJA": 2}
-    for sev, regla, msg in sorted(hallazgos, key=lambda h: orden[h[0]]):
+    for sev, regla, msg in sorted(hallazgos, key=lambda h: (orden[h[0]], h[1])):
         print(f"[{sev}] {regla}: {msg}")
     altas = sum(1 for h in hallazgos if h[0] == "ALTA")
     print(f"\nTotal: {len(hallazgos)} hallazgos ({altas} de severidad ALTA)")

@@ -1,10 +1,12 @@
+/// Hecho Indicadores. Grano: una fila por fecha, Sede, Servicio e indicador, con el patron
+/// Num/Den. Las claves y las metricas base van ocultas: consulta el modelo con las medidas.
 table Indicadores
-	lineageTag: 27bf964f-74ea-4681-ba4a-559e959ed92b
+	lineageTag: ef417db8-a451-408d-af50-b9980e7d8cbe
 
 	column Fecha
 		dataType: dateTime
 		formatString: Short Date
-		lineageTag: 0ddb17e4-bf2d-457f-9f72-4ca62d8d9360
+		lineageTag: 5cc56065-0ded-49ca-b3e6-a2fae8a3ace7
 		summarizeBy: none
 		sourceColumn: Fecha
 
@@ -16,7 +18,7 @@ table Indicadores
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: b1056279-bbbe-4ff1-991c-3b85892a59da
+		lineageTag: 07eead99-9bb5-4b03-9c1f-a673e3a6f579
 		summarizeBy: none
 		sourceColumn: ID Sede
 
@@ -26,7 +28,7 @@ table Indicadores
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: 11b067f8-0c81-4686-98b5-c6f219739c9d
+		lineageTag: 34456d68-c97f-4cc6-8d88-1da6f0dddc80
 		summarizeBy: none
 		sourceColumn: ID Servicio
 
@@ -36,7 +38,7 @@ table Indicadores
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: 6a6a0b22-aebc-410d-aa52-9def24ed0b73
+		lineageTag: 89ea6588-bc89-4584-99e6-da189f253425
 		summarizeBy: none
 		sourceColumn: ID Indicador
 
@@ -46,7 +48,7 @@ table Indicadores
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: ae1fa4e4-b44f-4d95-8bfe-b13ead602ba1
+		lineageTag: 39df1bdc-d93c-4a39-bcf5-2247e1adfe2c
 		summarizeBy: sum
 		sourceColumn: Num
 
@@ -56,7 +58,7 @@ table Indicadores
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: a48041d8-e404-47a3-91f6-f71a930a1079
+		lineageTag: 94aa7069-f127-44b9-95b1-7dec0f96f862
 		summarizeBy: sum
 		sourceColumn: Den
 

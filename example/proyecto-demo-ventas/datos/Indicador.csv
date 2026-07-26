@@ -1,4 +1,4 @@
 ﻿ID Indicador,Indicador,Tipo,Formato
-1,% Margen,Porcentaje,0.0%;-0.0%;0.0%
-2,% Cumplimiento Meta,Porcentaje,0.0%;-0.0%;0.0%
+1,% Margen,Porcentaje,"#,0.0%;-#,0.0%;#,0.0%"
+2,% Cumplimiento Meta,Porcentaje,"#,0.0%;-#,0.0%;#,0.0%"
 3,Ticket Promedio,Absoluto,"#,0"

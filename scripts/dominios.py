@@ -176,7 +176,9 @@ def filas_indicador(dom):
             ind_id,
             nombre,
             "Porcentaje" if es_pct else "Absoluto",
-            "0.0%;-0.0%;0.0%" if es_pct else "#,0",
+            # Formato canonico que exige la regla oficial
+            # PERCENTAGE_FORMATTING de Microsoft, literal.
+            "#,0.0%;-#,0.0%;#,0.0%" if es_pct else "#,0",
         ])
     return filas
 

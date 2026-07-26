@@ -1,6 +1,6 @@
 table '_ Medidas'
 	isHidden
-	lineageTag: 4cfa2213-70b9-408f-b677-263b410c9105
+	lineageTag: e254b379-1c1b-483b-a357-95561a6216a4
 
 	/// Suma del numerador del indicador (columna Num del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Numerador = ```
@@ -11,7 +11,7 @@ table '_ Medidas'
 		formatString: #,0
 		displayFolder: Base
 		isHidden
-		lineageTag: 5b751c98-7894-49c3-bba2-2216f75a8879
+		lineageTag: bc5e9556-832b-43cc-ab2e-6b87895b7a62
 
 	/// Suma del denominador del indicador (columna Den del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Denominador = ```
@@ -22,7 +22,7 @@ table '_ Medidas'
 		formatString: #,0
 		displayFolder: Base
 		isHidden
-		lineageTag: 170099ae-2dcc-450a-85ae-9f0a24208aef
+		lineageTag: 397953ea-45ce-4303-a317-314fbd098ef6
 
 	/// Valor del indicador seleccionado (Numerador / Denominador). Devuelve BLANK si hay mas de un indicador en contexto, porque sumar indicadores distintos (un porcentaje y un importe) daria un numero sin significado. Segmenta por Indicador para verlo.
 	measure 'Indicador %' = ```
@@ -31,9 +31,9 @@ table '_ Medidas'
 			RETURN
 			    IF ( UnSoloIndicador, Resultado )
 			```
-		formatString: 0.0%;-0.0%;0.0%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		displayFolder: Indicadores
-		lineageTag: e7f029ef-d2e0-4de7-97e0-5c45a5672741
+		lineageTag: 74d14094-64ea-4ed3-aa21-703074f34a31
 
 	/// % Margen: indicador principal del reporte, filtrado explicitamente con CALCULATE. Muestra siempre un valor correcto aunque no haya segmentacion por Indicador.
 	measure '% Margen' = ```
@@ -45,14 +45,14 @@ table '_ Medidas'
 			RETURN
 			    Resultado
 			```
-		formatString: 0.0%;-0.0%;0.0%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		displayFolder: Indicadores
-		lineageTag: a1498a96-0ebd-4ae0-a0fd-0ec9f8c0d6a1
+		lineageTag: a8dcabbe-9104-4a3a-95ad-e86bad33b793
 
 	column Valor
 		isHidden
 		formatString: 0
-		lineageTag: b3fd82dc-965e-44e2-9da4-a4ea9bbab87e
+		lineageTag: e4226733-18df-4c23-af67-affaea3fe1cd
 		summarizeBy: none
 		sourceColumn: [Valor]
 

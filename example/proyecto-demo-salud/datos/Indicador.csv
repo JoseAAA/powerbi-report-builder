@@ -1,6 +1,6 @@
 ﻿ID Indicador,Indicador,Tipo,Formato
-1,% Ocupacion,Porcentaje,0.0%;-0.0%;0.0%
-2,% Entregas a tiempo,Porcentaje,0.0%;-0.0%;0.0%
+1,% Ocupacion,Porcentaje,"#,0.0%;-#,0.0%;#,0.0%"
+2,% Entregas a tiempo,Porcentaje,"#,0.0%;-#,0.0%;#,0.0%"
 3,Tiempo de Estancia,Absoluto,"#,0"
-4,% Cumplimiento Citas,Porcentaje,0.0%;-0.0%;0.0%
+4,% Cumplimiento Citas,Porcentaje,"#,0.0%;-#,0.0%;#,0.0%"
 5,Reingresos 30 dias,Absoluto,"#,0"

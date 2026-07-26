@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
-  "name": "e34731c4ce1f43e82949",
+  "name": "a703efad0194dbe847f8",
   "position": {
     "x": 40,
     "y": 40,
@@ -23,11 +23,11 @@
                       "Entity": "_ Medidas"
                     }
                   },
-                  "Property": "% Ocupacion"
+                  "Property": "% Margen"
                 }
               },
-              "queryRef": "_ Medidas.% Ocupacion",
-              "nativeQueryRef": "% Ocupacion"
+              "queryRef": "_ Medidas.% Margen",
+              "nativeQueryRef": "% Margen"
             }
           ]
         }

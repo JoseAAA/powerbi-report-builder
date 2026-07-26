@@ -1,6 +1,6 @@
 table '_ Medidas'
 	isHidden
-	lineageTag: 3372c1b0-bdaa-4b6f-9665-3bab55770e49
+	lineageTag: 15b7d176-ae0b-412b-b378-28e3b2e98b6f
 
 	/// Suma del numerador del indicador (columna Num del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Numerador = ```
@@ -11,7 +11,7 @@ table '_ Medidas'
 		formatString: #,0
 		displayFolder: Base
 		isHidden
-		lineageTag: b752b62b-34e0-48b8-a056-0cb674b032e4
+		lineageTag: 45b770db-2f9e-48c8-8ba0-4384da83f8bf
 
 	/// Suma del denominador del indicador (columna Den del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Denominador = ```
@@ -22,7 +22,7 @@ table '_ Medidas'
 		formatString: #,0
 		displayFolder: Base
 		isHidden
-		lineageTag: d5d84e84-5f3a-409f-942b-94f3d632a3ce
+		lineageTag: e6a059d1-d28a-4d27-85b5-bd080dc18182
 
 	/// Valor del indicador seleccionado (Numerador / Denominador). Devuelve BLANK si hay mas de un indicador en contexto, porque sumar indicadores distintos (un porcentaje y un importe) daria un numero sin significado. Segmenta por Indicador para verlo.
 	measure 'Indicador %' = ```
@@ -31,9 +31,9 @@ table '_ Medidas'
 			RETURN
 			    IF ( UnSoloIndicador, Resultado )
 			```
-		formatString: 0.0%;-0.0%;0.0%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		displayFolder: Indicadores
-		lineageTag: ba7c1da0-2c9d-4c40-a852-b6d27d2f1185
+		lineageTag: d590ddf8-21de-4f9d-81ee-87af82ba87d3
 
 	/// % Ocupacion: indicador principal del reporte, filtrado explicitamente con CALCULATE. Muestra siempre un valor correcto aunque no haya segmentacion por Indicador.
 	measure '% Ocupacion' = ```
@@ -45,14 +45,14 @@ table '_ Medidas'
 			RETURN
 			    Resultado
 			```
-		formatString: 0.0%;-0.0%;0.0%
+		formatString: #,0.0%;-#,0.0%;#,0.0%
 		displayFolder: Indicadores
-		lineageTag: 01642350-66c9-45bd-95d4-107624cb0c35
+		lineageTag: 0c0b52f3-ad29-4654-8c5a-51de338c2252
 
 	column Valor
 		isHidden
 		formatString: 0
-		lineageTag: 1306d702-fa33-41ca-9f26-49878a355ade
+		lineageTag: f9624ff8-ff92-4816-a792-c794adc9b24c
 		summarizeBy: none
 		sourceColumn: [Valor]
 

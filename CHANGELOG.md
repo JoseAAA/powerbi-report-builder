@@ -3,6 +3,66 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-26 — el catalogo del modelo son las reglas OFICIALES de Microsoft
+
+En vez de escribir nuestras propias "mejores practicas", el validador del modelo
+consume el **`BPARules.json` oficial** de `microsoft/Analysis-Services`: 71 reglas
+con `ID` estable, `Severity`, `Scope`, `Expression` y, en 30 de ellas, la URL de
+referencia dentro de la propia regla.
+
+### Añadido
+
+- **`scripts/tmdl.py`**: parser de TMDL (objetos, propiedades, expresiones,
+  descripciones `///`, indentacion con tabs o espacios). Las reglas se evaluan
+  sobre datos, no sobre cadenas. Motivo concreto: con regex ya me colé una vez
+  (`[\w ]+` capturaba un espacio y reportaba medidas "cualificadas" que no lo
+  estaban).
+- **`scripts/catalogo_reglas.py`**: 26 reglas implementadas — **25 oficiales de
+  Microsoft + 1 propia** — cada una con `fuente` como **campo obligatorio**.
+  `verificar_catalogo()` falla si a una regla le falta la fuente, si una de
+  severidad ALTA se apoya solo en un nivel 5 de la jerarquia de autoridad, o si la
+  copia local de `BPARules.json` no coincide con su SHA-256 fijado.
+- **`references/bpa/BPARules.json`** + `.sha256`: copia fijada del catalogo oficial.
+- **6 reglas oficiales EXCLUIDAS a proposito, con el motivo escrito** en
+  `EXCLUIDAS` (que esten declaradas y no simplemente ausentes hace la decision
+  auditable). La mas importante: **`DATECOLUMN_FORMATSTRING` exige literalmente
+  `mm/dd/yyyy`**, el formato de EE. UU. En un reporte es-ES eso es incorrecto —
+  mostraria 03/07 como 7 de marzo. Aplicarla a ciegas empeoraria el producto.
+- **`PBI-NAME-01`**, regla propia: las reglas oficiales basadas en nombres
+  INGLESES no disparan en español. `MONTH_(AS_A_STRING)_MUST_BE_SORTED` busca
+  "MONTH", asi que nunca ve una columna `Mes` sin `sortByColumn` — y un slicer de
+  meses sin ordenar sale alfabetico (Abril, Agosto, Diciembre...) y el reporte
+  parece roto.
+- **CI**: guarda del catalogo, y comparacion de la copia local con upstream
+  reportando reglas nuevas / retiradas / modificadas por ID.
+
+### Corregido (hallazgos del catalogo sobre nuestro propio generador)
+
+- **`PERCENTAGE_FORMATTING`**: nuestras medidas usaban `0.0%;-0.0%;0.0%` y la
+  regla oficial exige literalmente `#,0.0%;-#,0.0%;#,0.0%`. Es una convencion, no
+  una correccion, pero es de Microsoft y cumplirla es gratis: generadores alineados.
+- **`OBJECTS_WITH_NO_DESCRIPTION`**: las 5 tablas generadas no tenian descripcion
+  `///`. Se añadieron, y explican el modelo (grano del hecho, para que sirve la
+  dimension Indicador, por que filtrar por el calendario). Las leen Copilot y los
+  agentes: es la misma razon por la que R12 ya las exigia en las medidas.
+- **Bug en mi propia regla nueva**: `PBI-NAME-01` reportaba
+  `Calendario[Trimestre]` porque "MES" es subcadena de "TRI-MES-TRE". Se exige
+  limite de palabra. La regla oficial no tiene el problema porque en ingles
+  "MONTH" casi no aparece dentro de otra palabra.
+- **Duplicados suprimidos**: R1, R3, R6 y R12 ceden a su equivalente oficial
+  cuando el catalogo esta disponible (y se evaluan como respaldo si no lo esta).
+  Reportar el mismo problema dos veces con codigos distintos es ruido, y la
+  version oficial ademas trae cita.
+
+### Nota sobre el theme schema 2.156
+
+Al subir de 2.143 a 2.156 aparece el aviso `PBIR_THEME_SCHEMA_UNREACHABLE` del
+validador oficial: el CLI v0.1.4 conoce 2.143 pero no 2.156, asi que **se salta**
+la validacion del tema (aviso, no error). Comprobado aislando la variable. Se
+mantiene 2.156: fijar un schema viejo para complacer a una version de una
+herramienta es al reves. Pendiente validar las claves del tema con stdlib para no
+depender de que el CLI conozca la version.
+
 ## 2026-07-26 — vigilante de fuentes oficiales + theme schema al dia
 
 "Todo sustentado en documentacion oficial y actualizada" pasa de intencion a

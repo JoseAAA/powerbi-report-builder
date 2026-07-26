@@ -40,6 +40,45 @@ jobs:
           python scripts/validar_modelo.py "example/proyecto-demo-salud/Demo-Salud.SemanticModel"
           python scripts/validar_pbip.py   "example/proyecto-demo-salud/Demo-Salud.Report"
 
+      - name: Catalogo de reglas — toda regla con fuente, y SHA de BPARules fijado
+        run: |
+          python scripts/catalogo_reglas.py
+
+      - name: BPARules.json local vs upstream de Microsoft
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import json, sys, urllib.request
+          U=("https://raw.githubusercontent.com/microsoft/Analysis-Services/"
+             "master/BestPracticeRules/BPARules.json")
+          def norm(b):
+              # Se compara el CONTENIDO parseado, no los bytes: la copia local se
+              # guarda sin BOM, asi que un diff de bytes daria falsa alarma
+              # permanente aunque las 71 reglas fueran identicas.
+              return {r["ID"]: (r.get("Severity"), r.get("Category"),
+                                " ".join(r.get("Expression","").split()),
+                                " ".join(r.get("Description","").split()))
+                      for r in json.loads(b.decode("utf-8-sig"))}
+          loc = norm(open("references/bpa/BPARules.json","rb").read())
+          try:
+              up = norm(urllib.request.urlopen(U, timeout=60).read())
+          except Exception as e:
+              print(f"AVISO: no se pudo consultar upstream ({e}); no bloquea.")
+              sys.exit(0)
+          if loc == up:
+              print(f"BPARules.json: las {len(loc)} reglas locales coinciden con upstream.")
+              sys.exit(0)
+          nuevas, retiradas = set(up)-set(loc), set(loc)-set(up)
+          print("BPARules.json CAMBIO en upstream.")
+          if nuevas:   print("  reglas nuevas:", ", ".join(sorted(nuevas)))
+          if retiradas: print("  reglas retiradas:", ", ".join(sorted(retiradas)))
+          for k in sorted(set(loc) & set(up)):
+              if loc[k] != up[k]:
+                  print(f"  modificada: {k}")
+          print("  Revisa con: python scripts/actualizar_catalogo.py --forzar")
+          sys.exit(1)
+          PY
+
       - name: Sin fugas de datos personales en el repo
         run: |
           # .tmdl incluido: expressions.tmdl guarda el parametro RutaBase, que en

@@ -43,11 +43,19 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/generar_datos_ejemplo.py --dominio ventas\|rrhh\|finanzas\|salud\|generico` | CSVs de ejemplo (5 tablas) + `modelo-ejemplo.m` |
 | `python scripts/scaffold_pbip.py --nombre "X" --dominio <d> --tema theme.json [--datos <carpeta>] [--en-raiz]` | proyecto `.pbip` válido (estrella + PBIR). **`--datos` cablea las particiones a los CSV**; `--en-raiz` deja el `.pbip` en la raíz |
 | `python scripts/init_proyecto.py --nombre "X" --dominio <d> --marca <m>\|--tema <t>\|--sin-marca` | bootstrap completo: `.pbip` en la raíz + `datos/` cableados + `docs/` |
-| `python scripts/validar_modelo.py <ruta .SemanticModel>` | BPA-lite del modelo, reglas **R1–R12** (exit 1 si hay ALTA) |
+| `python scripts/validar_modelo.py <ruta .SemanticModel>` | modelo: **R1–R12** propias **+ 26 reglas OFICIALES de Microsoft** (`BPARules.json`), cada hallazgo con su ID oficial y su fuente (exit 1 si hay ALTA) |
+| `python scripts/catalogo_reglas.py` | guarda del catálogo: toda regla con fuente, ninguna ALTA apoyada solo en nivel 5, y el SHA-256 de `BPARules.json` sin tocar |
 | `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P8** (exit 1 si hay ALTA) |
 | `python scripts/verificar_cableado.py <carpeta del proyecto>` | **datos ↔ modelo**, reglas **E1–E6**: que el `.pbip` lea los CSV, que ninguna clave quede huérfana y que las medidas no mezclen indicadores |
 | `python scripts/actualizar_catalogo.py [--forzar\|--json\|--marcar-revisado]` | vigila las **15 fuentes oficiales** (`scripts/fuentes.py`) y reporta páginas agregadas/eliminadas/**modificadas**. 1 llamada HTTP por fuente, sin token, con TTL por fuente (7/30/90 días) |
 | `python scripts/check_consistencia.py` | guarda de invariantes del repo, reglas **C1–C10** (frontmatter, forma de las `description`, `## Boundaries`, skills huérfanos, TMDL, rangos, references, portabilidad) |
+
+`scripts/tmdl.py` es un **parser de TMDL** (objetos y propiedades, no regex): las
+reglas se escriben sobre datos. `scripts/catalogo_reglas.py` **consume el
+`BPARules.json` OFICIAL de Microsoft** (copia fijada en `references/bpa/` con su
+SHA-256) en vez de reinventar buenas prácticas: 71 reglas disponibles, 25
+implementadas + 1 propia, 6 **excluidas a propósito y con motivo escrito** (p. ej.
+`DATECOLUMN_FORMATSTRING` exige `mm/dd/yyyy`, que es incorrecto en es-ES).
 
 `scripts/dominios.py` es el **catálogo único** de dominios de ejemplo (dimensiones,
 indicadores, esquema de cada CSV). Lo importan `generar_datos_ejemplo.py` y

@@ -122,6 +122,10 @@ BASE_THEME_NAME      = "CY26SU02"
 # ---------------------------------------------------------------------------
 M_IND = "\t\t\t\t"  # indentacion de una expresion M dentro de una particion TMDL
 
+# Formato canonico de porcentaje que exige la regla oficial PERCENTAGE_FORMATTING
+# de Microsoft (BPARules.json), literal: no vale "0.0%;-0.0%;0.0%".
+FMT_PORCENTAJE = "#,0.0%;-#,0.0%;#,0.0%"
+
 
 def _nombre_archivo_tema(nombre_tema):
     """
@@ -349,7 +353,9 @@ def tmdl_calendario(dom, usar_csv):
             + f"{M_IND}in\n"
             + f"{M_IND}    Habil\n"
         )
-    return f"""table Calendario
+    return f"""/// Calendario de fechas continuo, marcado como tabla de fecha. Filtra por esta
+/// tabla y no por la fecha del hecho: es lo que hace funcionar la inteligencia de tiempo.
+table Calendario
 \tdataCategory: Time
 \tlineageTag: {lt_tabla}
 
@@ -425,7 +431,8 @@ def tmdl_dim1(dom, usar_csv):
             '%s            {%d, "%s"}' % (M_IND, i, n) for i, n in filas_dom)
         tipo = "{} = Int64.Type, {} = text".format(mq(id1), mq(dim1))
         particion = particion_inline(dim1, tipo, filas)
-    return f"""table {tq(dim1)}
+    return f"""/// Dimension {dim1}: atributo por el que se corta el negocio. Una fila por miembro.
+table {tq(dim1)}
 \tlineageTag: {lt_tabla}
 
 \tcolumn '{id1}'
@@ -466,7 +473,8 @@ def tmdl_dim2(dom, usar_csv):
         tipo = "{} = Int64.Type, {} = text, {} = text".format(
             mq(id2), mq(dim2), mq(col_grupo))
         particion = particion_inline(dim2, tipo, filas)
-    return f"""table {tq(dim2)}
+    return f"""/// Dimension {dim2}, con la columna {col_grupo} para agrupar y jerarquizar.
+table {tq(dim2)}
 \tlineageTag: {lt_tabla}
 
 \tcolumn '{id2}'
@@ -524,7 +532,9 @@ def tmdl_indicador(dom, usar_csv):
         tipo = "{} = Int64.Type, {} = text, Tipo = text, Formato = text".format(
             mq(id_ind), mq(ind))
         particion = particion_inline(ind, tipo, filas)
-    return f"""table {tq(ind)}
+    return f"""/// Que mide cada fila del hecho. Segmenta por esta tabla para leer un indicador a
+/// la vez: sumar varios mezclaria porcentajes con importes absolutos.
+table {tq(ind)}
 \tlineageTag: {lt_tabla}
 
 \tcolumn '{id_ind}'
@@ -622,7 +632,9 @@ def tmdl_hecho(dom, usar_csv):
                 "{} = Int64.Type, Num = Int64.Type, Den = Int64.Type").format(
             mq(id1), mq(id2), mq(id_ind))
         particion = particion_inline(hecho, tipo, _filas_hecho(dom))
-    return f"""table {tq(hecho)}
+    return f"""/// Hecho {hecho}. Grano: una fila por fecha, {dim1}, {dim2} e indicador, con el patron
+/// Num/Den. Las claves y las metricas base van ocultas: consulta el modelo con las medidas.
+table {tq(hecho)}
 \tlineageTag: {lt_tabla}
 
 \tcolumn Fecha
@@ -756,7 +768,7 @@ def tmdl_medidas(dom):
 \t\t\tRETURN
 \t\t\t    IF ( UnSoloIndicador, Resultado )
 \t\t\t```
-\t\tformatString: 0.0%;-0.0%;0.0%
+\t\tformatString: {FMT_PORCENTAJE}
 \t\tdisplayFolder: Indicadores
 \t\tlineageTag: {lt_ind}
 

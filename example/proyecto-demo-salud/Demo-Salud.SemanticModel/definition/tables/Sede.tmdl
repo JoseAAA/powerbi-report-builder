@@ -1,11 +1,12 @@
+/// Dimension Sede: atributo por el que se corta el negocio. Una fila por miembro.
 table Sede
-	lineageTag: 237bace9-7726-4e67-944c-50be378d83c8
+	lineageTag: aa13f055-3fff-4877-8f2f-2f042577b3f6
 
 	column 'ID Sede'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 969fabf4-f825-44c9-aa35-b5ecaae6ca48
+		lineageTag: f4d23765-b4e2-4fc9-8fbb-13ad5d677091
 		summarizeBy: none
 		sourceColumn: ID Sede
 
@@ -13,7 +14,7 @@ table Sede
 
 	column Sede
 		dataType: string
-		lineageTag: d61f8a74-e11d-4604-ac73-fee6645cca66
+		lineageTag: 69ab5a52-1d51-4287-810b-cb82c14da6b9
 		summarizeBy: none
 		sourceColumn: Sede
 

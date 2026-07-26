@@ -36,7 +36,20 @@ import sys
 #
 # 2.143 -> 2.156 (2026-07): el repo se habia quedado 13 versiones atras. El salto
 # es puramente aditivo (2.156 añade `baseTheme` a nivel raiz y no elimina nada),
-# comprobado comparando los dos schemas antes de subir la version.
+# comprobado comparando los dos schemas antes de subir la version, y las 18 claves
+# raiz que generamos siguen reconocidas.
+#
+# CONTRAPARTIDA CONOCIDA: el validador oficial
+# (@microsoft/powerbi-report-authoring-cli v0.1.4) trae una lista de versiones de
+# schema que conoce, y 2.156 es posterior al CLI. Con 2.143 valida el tema; con
+# 2.156 emite el aviso PBIR_THEME_SCHEMA_UNREACHABLE y **se salta** esa
+# validacion (aviso, no error). Comprobado aislando la variable: misma carpeta,
+# solo cambiando el $schema.
+#
+# Se mantiene 2.156 porque fijar un schema viejo para complacer a una version de
+# una herramienta es al reves: el artefacto tiene que declarar el contrato
+# vigente. Pendiente: validar las claves del tema con stdlib contra el schema
+# fijado, para no depender de que el CLI lo conozca.
 SCHEMA_VERSION = "2.156"
 SCHEMA_URL = ("https://raw.githubusercontent.com/microsoft/"
               "powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/"
