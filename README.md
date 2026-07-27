@@ -1,168 +1,307 @@
-# Power BI Report Builder
+# 📊 Power BI Report Builder
 
-> 🇪🇸 **Framework end-to-end para crear y auditar reportes de Power BI** con las
-> mejores prácticas actuales (2026): del problema de negocio a los archivos PBIP
-> (TMDL + PBIR), con datos de ejemplo y un `.pbip` base. **Funciona con cualquier
-> agente de IA** — Claude Code, Codex, Gemini CLI, OpenCode, Cursor… — y también
-> **sin agente** (scripts Python, solo librería estándar, cero dependencias).
-> 🇬🇧 *End-to-end framework to build and audit Power BI reports with current best
-> practices. Works with any AI coding agent (Claude Code, Codex, Gemini CLI,
-> OpenCode, Cursor) and standalone via Python. Content in Spanish.*
+![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)
+![Funciona con](https://img.shields.io/badge/funciona%20con-Claude%20Code%20·%20Codex%20·%20Gemini%20CLI%20·%20OpenCode-blueviolet)
+![Dependencias](https://img.shields.io/badge/dependencias-0%20(solo%20stdlib)-brightgreen)
+![Reglas](https://img.shields.io/badge/reglas-26%20oficiales%20de%20Microsoft-0078D4)
 
-**Portabilidad:** el conocimiento vive en Markdown citado (`references/`), el trabajo
-determinista en **Python stdlib** (`scripts/`), y la guía para el agente en
-**[AGENTS.md](AGENTS.md)** (estándar que leen Codex, Gemini CLI, OpenCode, Cursor…).
-En **Claude Code** además es un plugin con skills especializados por fase. Ningún
-script depende de un agente concreto.
+**Crea, audita y publica reportes de Power BI hablándole a tu asistente de IA en
+español — de la idea de negocio al `.pbip` versionable, con datos que puedes tocar
+desde el primer minuto.**
 
-## ¿Qué hace?
+Son instrucciones reutilizables (skills) + scripts deterministas que le enseñan a
+Claude Code, Codex, Gemini CLI u OpenCode a construir reportes siguiendo las
+**reglas oficiales de Microsoft** (el `BPARules.json` del Best Practice Analyzer),
+WCAG y los frameworks del sector (Kimball, SQLBI, IBCS). Para analistas y equipos
+que quieren un reporte profesional sin memorizar 71 reglas.
 
-Guía (y ejecuta) el **flujo completo por fases**. Se adapta a quién lo usa: modo
-guiado (no técnico, cero jerga, pasos de clic) o modo experto (edita archivos,
-listo para Git).
+---
 
-1. **Marca** — lee un **archivo de marca guardado y reutilizable**
-   (`assets/marca/`), te dice qué colores tiene tu empresa y, si no son los
-   correctos, los captura (logo, manual, `.pbip` o hex) y los **guarda una sola
-   vez** para no volver a preguntar. Genera el `theme.json` (con `$schema`,
-   semáforos, style presets 2026) y verifica contraste WCAG. Funciona para
-   cualquier empresa: el archivo de marca es intercambiable.
-2. **Descubrimiento** — design workshop con plantilla de agenda y dinámicas.
-3. **KPIs/OKRs** — ficha por indicador, validada contra datos (✅/⚠️/❌).
-4. **Modelado y DAX** — estrella, **nomenclatura de negocio** (sin `DIM_/FACT_`,
-   con citas), VAR/RETURN, calculation groups, DAX UDF (GA 2026), field parameters,
-   patrón Num/Den, `description` en cada medida, **RLS/OLS**, y un validador BPA-lite.
-5. **Visualización** — storytelling IBCS + patrón Z, style presets y visual
-   calculations (2026); edita PBIR directamente.
-6. **MVP rápido** — genera **datos de ejemplo + código M para pegar** y un
-   **proyecto `.pbip` base** listo para abrir y modificar.
-7. **IA / Copilot** — deja el modelo **AI-ready** (descripciones, sinónimos, "Prep
-   data for AI", Approved for Copilot) para que Copilot y los agentes LLM/MCP
-   respondan bien.
+## 👀 Míralo en acción
 
-Trabaja sobre el formato **PBIP** (TMDL + PBIR), estándar de Power BI 2026.
+```text
+Tú ▸ hazme un dashboard de ventas para arrancar hoy, sin esperar a que TI me dé la base
 
-## Sistema de marca (genérico, para cualquier empresa)
+Agente ▸ Proyecto listo: mi-reporte/
+         dominio: ventas | tema: marca | cultura: es-ES
+         tema docs/theme.json : OK
+         datos de ejemplo     : OK   (2.232 filas en 5 tablas)
+         .pbip (en la raiz)   : OK   [lee los CSV de datos/]
 
-El framework **no trae ninguna marca activa por defecto**. En la Fase 1 captura la
-identidad de *tu* empresa (logo, presentación/`.thmx`, manual, `.pbip` o hex) y
-la guarda una sola vez como `assets/marca/<empresa>.json` con `"activa": true`,
-para no volver a preguntarla. La carpeta `assets/marca/ejemplos/` trae marcas de
-**ejemplo** (`activa: false`) solo como referencia de cómo se llena el archivo.
+         ANTES DE ABRIRLO — una vez por equipo, en Power BI Desktop:
+         Archivo > Opciones > Caracteristicas en vista previa >
+         marca «Almacenar informes con el formato de metadatos mejorado (PBIR)»
 
-## Instalación (elige tu agente)
+Tú ▸ ¿y qué tal quedó?
 
-Requisito único: **Python 3.8+** (para los scripts). No hay que instalar nada más.
+Agente ▸ 2 páginas (Resumen + Detalle), 14 visuales, 4 segmentadores.
+         Validación:
+           OK  Sin hallazgos (R1-R12 + 26 reglas oficiales de Microsoft)
+           OK  Sin hallazgos en el reporte (P1-P9)
+           OK  El .pbip lee los CSV, las claves tienen dimension
+               y las medidas no mezclan indicadores
 
-**Con Claude Code** — plugin con skills especializados por fase:
+Tú ▸ los rangos no se parecen a mi negocio
+
+Agente ▸ Edita datos/Ventas.csv y pulsa Actualizar en Power BI.
+         El reporte cambia sin tocar el modelo. Cuando la forma te sirva,
+         cambiamos el origen por tu SQL y las medidas siguen funcionando.
 ```
+
+Abres el `.pbip`, pulsas **Actualizar** y ves **tus** datos — no seis filas de
+relleno. Corriges un CSV, refrescas, y el reporte cambia. Ese bucle es el punto.
+
+---
+
+## 🚀 Instalación
+
+**Prerrequisito único:** [Python 3.8+](https://www.python.org/downloads/). Cero
+dependencias que instalar. Elige tu herramienta:
+[Claude Code](#claude-code) · [Codex](#openai-codex) · [Gemini CLI](#gemini-cli) ·
+[OpenCode](#opencode) · [sin agente](#sin-agente)
+
+### Claude Code
+
+```text
 /plugin marketplace add JoseAAA/powerbi-report-builder
 /plugin install powerbi-report-builder@powerbi-report-builder-marketplace
 ```
-Para desarrollo local, en vez de la primera línea: `/plugin marketplace add
-/ruta/a/powerbi-report-builder`. Entrada: `powerbi-builder` (orquestador); el resto
-se activa solo según la fase.
+Para actualizarlo más adelante:
+`/plugin marketplace update powerbi-report-builder-marketplace`
+y luego `/plugin update powerbi-report-builder@powerbi-report-builder-marketplace`.
 
-**Con Codex, Gemini CLI, OpenCode, Cursor… (cualquier agente)** — clona el repo y
-abre tu agente en la carpeta; leerá **[AGENTS.md](AGENTS.md)**, la guía canónica
-(reglas, tabla de scripts, mapa de references) y sabrá operar igual:
-```
+Entrada: **`powerbi-builder`** (orquestador). El resto de skills se activa solo
+según la fase; no tienes que recordar nombres.
+
+### OpenAI Codex
+
+```bash
 git clone https://github.com/JoseAAA/powerbi-report-builder.git
 ```
+Abre la carpeta con Codex: lee **[AGENTS.md](AGENTS.md)**, la guía canónica
+(reglas duras, tabla de scripts, mapa de references) y sabe operar igual.
 
-**Sin agente** — usa los scripts directamente (ver `docs/guia-de-uso.md`), p. ej.
-`python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas --sin-marca`.
+### Gemini CLI
 
-**Claude.ai / Desktop:** cada carpeta `skills/<nombre>/` puede subirse como skill
-individual; `powerbi-builder` es el punto de entrada.
+Igual que Codex: clona y abre la carpeta (`GEMINI.md` → `AGENTS.md`).
 
-### Compatibilidad por agente
+### OpenCode
 
-Cada agente lee su archivo de contexto; todos apuntan a la **misma** guía canónica
-(`AGENTS.md`), así que el comportamiento es el mismo en todos:
+Igual que Codex: clona y abre la carpeta (además lee `skills/`).
 
-| Agente | Archivo que lee | Cómo opera |
-|---|---|---|
-| **Claude Code** | `CLAUDE.md` → `AGENTS.md` | plugin con skills por fase + scripts |
-| **Codex** (OpenAI) | `AGENTS.md` (nativo) | guía + scripts |
-| **Gemini CLI / Antigravity** | `GEMINI.md` → `AGENTS.md` | guía + scripts |
-| **OpenCode** | `AGENTS.md` (nativo) | guía + scripts |
-| **Cursor** | `AGENTS.md` | guía + scripts |
-| **Sin agente** | — | `python scripts/*.py` |
+### Sin agente
 
-Los archivos `CLAUDE.md` y `GEMINI.md` son punteros finos a `AGENTS.md` (una sola
-fuente de verdad, sin contenido duplicado). Ningún script depende de un agente.
-
-## Cómo se usa (3 perfiles)
-
-- **Solo validar / auditar (experto):** ¿tu reporte sigue las buenas prácticas?
-  Apunta el skill `powerbi-auditoria` a tu carpeta PBIP, o corre directo:
-  `python scripts/validar_modelo.py <...>.SemanticModel` y
-  `python scripts/validar_pbip.py <...>.Report` → hallazgos por severidad (R1–R12 / P1–P9).
-- **Crear de cero (una idea → reporte):** el orquestador `powerbi-builder` te lleva
-  fase por fase; o arranca la base en un comando:
-  `python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas`.
-- **No técnico (modo guiado):** describe lo que quieres en lenguaje de negocio
-  ("un reporte de ventas para mi jefe"); el agente edita por dentro y te entrega el
-  `.pbip` listo, con pasos de clic.
-
-## Uso (prompts que lo activan)
-
-- "Quiero crear un reporte de Power BI para el área de Compras"
-- "Genera el theme con los colores de mi empresa"
-- "Dame datos de ejemplo y un .pbip base para arrancar"
-- "Aquí está mi carpeta PBIP, audita el modelo y las medidas"
-- "Crea las medidas DAX con buenas prácticas"
-
-## Estructura
-
+Los scripts funcionan solos, sin IA de por medio:
+```bash
+python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas --sin-marca
 ```
-powerbi-report-builder/                 # plugin (la raíz del repo)
-├── .claude-plugin/  (plugin.json · marketplace.json)
-├── .github/workflows/ci.yml            # CI: compila + valida ejemplos + anti-fugas
-├── AGENTS.md                           # guía canónica multi-agente (Codex/Gemini/OpenCode/…)
-├── README.md · CHANGELOG.md · LICENSE · CONTRIBUTING.md · SECURITY.md
-├── docs/  (guia-de-uso.md · pruebas.md)
-├── skills/                             # un skill por fase (autodescubiertos)
-│   ├── powerbi-builder/                # ENTRADA: perfil + nivel + enruta
-│   ├── powerbi-marca/                  # Fase 1
-│   ├── powerbi-descubrimiento/         # Fase 2
-│   ├── powerbi-kpis/                   # Fase 3
-│   ├── powerbi-datos-m/                # Datos + M
-│   ├── powerbi-modelado-dax/           # Fase 4
-│   ├── powerbi-visualizacion/          # Fase 5
-│   ├── powerbi-mvp/                    # Fase 6
-│   ├── powerbi-rendimiento/            # Fase 7
-│   ├── powerbi-ia-copilot/            # preparar el modelo para IA/Copilot
-│   ├── powerbi-auditoria/              # auditar un PBIP existente
-│   └── powerbi-entrega/               # publicar / Git / Service / producción
-├── references/                         # conocimiento citado (plantillas vivas)
-│   ├── formatos-pbip.md · nomenclatura.md · mantenimiento-de-plantillas.md
-│   ├── fase1-branding.md … fase5-visualizacion.md · seguridad-rls.md
-│   ├── datos-fuentes-y-m.md · datos-ejemplo-y-m.md · rendimiento-y-mantenimiento.md
-│   └── preparar-datos-ia.md · entrega-git-y-mcp.md
-├── assets/
-│   ├── marca/ (_plantilla-marca.json · ejemplos/ejemplo-corporativo.json · README.md)
-│   ├── ejemplos/                       # acumulación por uso
-│   └── ficha-kpi.md · plantilla-descubrimiento.md · plantilla-agenda-taller.md
-└── scripts/                            # compartidos (stdlib): ${CLAUDE_PLUGIN_ROOT}/scripts
-    ├── generar_theme.py · editar_theme.py   # marca → theme.json (WCAG)
-    ├── generar_conexion_m.py                # M por fuente (sql/sharepoint/databricks/…)
-    ├── generar_datos_ejemplo.py · scaffold_pbip.py   # datos + .pbip base (multi-dominio)
-    ├── validar_modelo.py · validar_pbip.py  # BPA-lite modelo (R1–R12) + reporte (P1–P9)
-    ├── init_proyecto.py                     # bootstrap proyecto-<nombre>/
-    └── check_consistencia.py                # guarda de invariantes del repo (CI)
+Guía completa en [docs/guia-de-uso.md](docs/guia-de-uso.md).
+
+---
+
+## 🏁 Primeros pasos
+
+Tres formas de usarlo, según lo que necesites hoy:
+
+### A) Ya tengo un reporte y quiero saber si está bien hecho
+
+No necesita nada más. Apunta a tu carpeta PBIP y dile al agente:
+
+> *"audita este proyecto de Power BI: C:\proyectos\ventas"*
+
+Recibes hallazgos por severidad, **cada uno con su fuente oficial**:
+
+```text
+[ALTA]  NUMERIC_COLUMN_SUMMARIZE_BY: Ventas[Num]: summarizeBy=sum (deberia ser none)
+        [fuente: github.com/microsoft/Analysis-Services/.../BPARules.json]
+[MEDIA] USE_THE_DIVIDE_FUNCTION_FOR_DIVISION: usa '/' en vez de DIVIDE()
+        [fuente: learn.microsoft.com/power-bi/guidance/dax-divide-function-operator]
 ```
 
-## Frameworks y fuentes
+O directo en terminal:
+```bash
+python scripts/validar_modelo.py     "MiReporte.SemanticModel"   # R1-R12 + 26 oficiales
+python scripts/validar_pbip.py       "MiReporte.Report"          # P1-P9
+python scripts/verificar_cableado.py "MiReporte"                 # E1-E6
+```
 
-- Formato PBIP/TMDL/PBIR y theme schema (Microsoft Learn + `powerbi-desktop-samples`)
-- Nomenclatura: Tabular Editor (2026), Chris Webb, SQLBI, Microsoft
-- BPA del equipo Power BI CAT; DAX UDF (GA jun 2026); visual calculations (GA 2026)
-- IA/Copilot: Microsoft "Prepare your data for AI" (AI instructions, verified answers, AI data schemas)
-- Seguridad: RLS/OLS (Microsoft Learn RLS guidance)
-- IBCS® / fórmula SUCCESS; esquema estrella (Kimball)
+### B) Quiero un reporte desde cero
 
-## Licencia
+> *"quiero un dashboard de ventas para mi empresa"*
 
-MIT.
+El orquestador detecta si eres técnico o no, y te lleva por las fases que hagan
+falta — sin obligarte a pasar por todas. O arranca la base en un comando:
+
+```bash
+python scripts/init_proyecto.py --nombre "Ventas LATAM" --dominio ventas --marca mi-empresa.json
+```
+
+### C) Necesito enseñar algo hoy, sin tener los datos reales
+
+> *"dame datos de ejemplo y un .pbip que ya los muestre"*
+
+Genera CSVs y un `.pbip` **que los lee**. Editas un CSV, pulsas Actualizar en
+Power BI y el reporte cambia: así iteras la forma del reporte antes de pelear con
+la fuente real.
+
+> **Un paso obligatorio, una sola vez por equipo:** en Power BI Desktop,
+> *Archivo > Opciones > Características en vista previa >* marca **«Almacenar
+> informes con el formato de metadatos mejorado (PBIR)»** y reinicia. Sin esa
+> casilla, al guardar se pierde el detalle por visual y con él el diff en Git.
+> ([fuente](https://learn.microsoft.com/power-bi/developer/projects/projects-report))
+
+---
+
+## 💬 Qué puedes pedirle (prompts de ejemplo)
+
+| Quiero… | Escríbele a tu agente, por ejemplo |
+|---|---|
+| 🔍 **Auditar** mi proyecto | *"Audita este PBIP y dime qué está mal"* |
+| 🎨 **Mi marca** en el reporte | *"Usa los colores de mi empresa, te paso el logo"* |
+| 🧭 **No sé qué medir** | *"Tengo reunión con Comercial y no sé qué pedirles"* |
+| 📐 **Definir KPIs** | *"Estos son los indicadores, ¿tenemos datos para calcularlos?"* |
+| 🔌 **Conectar datos** | *"Los datos están en SharePoint / SQL / Databricks, ¿cómo los traigo?"* |
+| 🧮 **Medidas DAX** | *"Crea las medidas con buenas prácticas y nomenclatura"* |
+| 🖼️ **Diseñar la página** | *"Esto se ve cargado, ordénalo y cuéntame la historia"* |
+| ⚡ **Va lento** | *"El reporte tarda muchísimo en abrir"* |
+| 🤖 **Copilot** | *"Prepara el modelo para que Copilot responda bien"* |
+| 🚀 **Publicar** | *"¿Cómo lo subo al Service?"* · *"Quiero versionarlo en GitHub"* |
+| 🔄 **Criterio al día** | *"¿Hay novedades de Power BI? ¿El catálogo sigue vigente?"* |
+
+Cada fase produce un **entregable editable** (theme JSON, TMDL, PBIR, CSV, M) que
+alimenta la siguiente. Nunca capturas de pantalla.
+
+---
+
+## 📦 Qué obtienes
+
+Un proyecto que Power BI y Git entienden, con el `.pbip` **en la raíz** — que es
+donde lo busca Fabric Git Integration:
+
+```text
+mi-reporte/
+├── Mi Reporte.pbip              ← el punto de entrada
+├── Mi Reporte.SemanticModel/    ← modelo: tablas, relaciones, medidas (TMDL)
+├── Mi Reporte.Report/           ← reporte: 2 páginas, 14 visuales (PBIR)
+├── datos/                       ← los CSV que el modelo LEE de verdad
+├── docs/                        ← tema, marca, descubrimiento, KPIs
+└── LEEME.md  .gitignore
+```
+
+Sirve para **los dos caminos de publicación**, sin bifurcar nada:
+
+- **Con Git:** commit y push a `main` → Fabric Git Integration → Service.
+- **Sin Git:** abres el `.pbip` en Desktop y **Publicar**. No necesitas ningún
+  sistema de versiones para empezar — que es la realidad de muchas empresas.
+
+---
+
+## 🧠 Cómo funciona (y por qué puedes confiar en el criterio)
+
+- **El criterio no lo inventa la IA.** El validador del modelo **consume el
+  `BPARules.json` oficial** de `microsoft/Analysis-Services` — 71 reglas con su ID,
+  severidad y expresión. Implementamos 26, y **6 están excluidas a propósito con el
+  motivo escrito**: p. ej. `DATECOLUMN_FORMATSTRING` exige literalmente
+  `mm/dd/yyyy`, que en un reporte es-ES sería incorrecto.
+- **Cada regla lleva su fuente, y es campo obligatorio.** `catalogo_reglas.py`
+  falla si a una regla le falta la URL, o si una de severidad ALTA se apoya solo en
+  un blog. Hay una **jerarquía de autoridad en 5 niveles** (Microsoft Learn > repos
+  oficiales > estándar de organismo > experto reconocido > otro).
+- **La documentación se vigila, no se supone.** `actualizar_catalogo.py` consulta
+  **15 fuentes oficiales** con una sola llamada HTTP cada una y avisa qué páginas se
+  agregaron, borraron o **modificaron**. TTL por fuente (7/30/90 días) según su
+  cadencia real.
+- **Si no hay fuente, se dice.** `fase5-visualizacion.md` documenta 13 afirmaciones
+  populares **rechazadas por no tener respaldo** — incluida "máximo 6-8 visuales por
+  página", que este mismo repo llegó a publicar como regla y no existe en ninguna
+  doc de Microsoft.
+- **Cuatro capas de validación**, no una: reglas propias (R1-R12, P1-P9), las 26
+  oficiales de Microsoft, el cableado datos↔modelo (E1-E6), y **el validador oficial
+  del fabricante** (`@microsoft/powerbi-report-authoring-cli`) como comprobación
+  independiente en CI.
+- **Accesibilidad por construcción**: el generador **no puede** crear un visual sin
+  texto alternativo — lanza excepción. `altText` en los 14 visuales, `tabOrder`
+  siguiendo el orden de lectura, y contraste verificado (texto **y** colores de
+  datos: WCAG 1.4.3 y 1.4.11).
+- **Cero dependencias y cero telemetría.** Solo librería estándar de Python. La
+  única salida a red es opcional y sin credenciales: el vigilante consulta
+  metadatos públicos en `api.github.com`.
+
+---
+
+## 🩺 Problemas comunes
+
+| Problema | Solución |
+|---|---|
+| **Al guardar en Desktop desaparece la carpeta `definition/`** | Falta activar PBIR: *Archivo > Opciones > Características en vista previa > «Almacenar informes con el formato de metadatos mejorado»*, y reiniciar. |
+| **Abro el `.pbip` y no carga los datos** | Moviste el proyecto. Corrige la ruta en *Inicio > Transformar datos > Administrar parámetros > **RutaBase***. |
+| **Los colores se ven bien en Desktop pero mal al publicar** | Era un bug real, corregido: el nombre del tema debe llevar `.json` y coincidir en cuatro sitios. `validar_pbip.py` (regla **P8**) lo detecta. Regenera el tema. |
+| **Un KPI da un número absurdo (miles por ciento)** | Estás sumando indicadores distintos. Necesitas la dimensión `Indicador` y una medida defendida con `HASONEVALUE` o `CALCULATE`. Pídele *"el KPI da 5226%, revísalo"*. |
+| **La tarjeta sale en blanco** | La medida exige **un solo** indicador en contexto (a propósito: mejor vacío que falso). Usa el segmentador de `Indicador`, o la medida del indicador principal. |
+| **El agente no toma la última versión** | Actualiza el plugin: `/plugin marketplace update …` → `/plugin update …`. |
+| **`validar_modelo.py` avisa de que no pudo cargar el catálogo oficial** | Falta `references/bpa/BPARules.json`. Las reglas R1-R12 se evalúan igual; recupera el archivo con `git checkout`. |
+| **GitHub devuelve 403 al actualizar el catálogo** | Se agotaron las 60 llamadas/hora que da sin token. Espera y reintenta: el TTL evita que pase en uso normal. |
+| **Los datos de ejemplo no se parecen a mi negocio** | Están **para** eso: edita los CSV de `datos/` y pulsa Actualizar. Si necesitas otra forma, pide *"cambia el modelo de ejemplo a …"*. |
+| **¿Puedo mostrar esto a un directivo?** | Los datos de ejemplo son **aleatorios**. Dilo antes de proyectarlos, o conecta la fuente real primero. |
+
+---
+
+## 📚 Documentación
+
+- **Guía canónica para agentes:** [AGENTS.md](AGENTS.md) — reglas duras, scripts,
+  mapa de references, y cómo se escribe un skill de este repo.
+- **Fases (skills):** [Orquestador](skills/powerbi-builder/SKILL.md) ·
+  [Marca](skills/powerbi-marca/SKILL.md) ·
+  [Descubrimiento](skills/powerbi-descubrimiento/SKILL.md) ·
+  [KPIs](skills/powerbi-kpis/SKILL.md) ·
+  [Datos+M](skills/powerbi-datos-m/SKILL.md) ·
+  [Modelado+DAX](skills/powerbi-modelado-dax/SKILL.md) ·
+  [Visualización](skills/powerbi-visualizacion/SKILL.md) ·
+  [MVP](skills/powerbi-mvp/SKILL.md) ·
+  [Rendimiento](skills/powerbi-rendimiento/SKILL.md) ·
+  [IA/Copilot](skills/powerbi-ia-copilot/SKILL.md) ·
+  [Auditoría](skills/powerbi-auditoria/SKILL.md) ·
+  [Entrega](skills/powerbi-entrega/SKILL.md) ·
+  [Actualizador](skills/powerbi-actualizar/SKILL.md)
+- **Formato PBIP/TMDL/PBIR (reglas anti-corrupción):** [formatos-pbip.md](references/formatos-pbip.md)
+- **Criterio visual y accesibilidad:** [fase5-visualizacion.md](references/fase5-visualizacion.md)
+  — incluye las 13 afirmaciones rechazadas por no tener fuente.
+- **Nomenclatura citada:** [nomenclatura.md](references/nomenclatura.md) ·
+  **RLS/OLS:** [seguridad-rls.md](references/seguridad-rls.md)
+- **Publicar / Git / Service:** [entrega-git-y-mcp.md](references/entrega-git-y-mcp.md)
+- **Uso paso a paso:** [docs/guia-de-uso.md](docs/guia-de-uso.md) ·
+  **Pruebas:** [docs/pruebas.md](docs/pruebas.md)
+- **Seguridad:** [SECURITY.md](SECURITY.md) · **Cambios:** [CHANGELOG.md](CHANGELOG.md)
+- **Ejemplos ejecutables:** [example/](example/) — dos proyectos completos que
+  pasan todos los validadores.
+
+---
+
+## 📐 Frameworks y fuentes
+
+| Área | Fuente |
+|---|---|
+| Reglas del modelo | **`BPARules.json` oficial** (microsoft/Analysis-Services) — 71 reglas |
+| Formato PBIP/TMDL/PBIR | Microsoft Learn + `microsoft/json-schemas` |
+| Tema visual | theme schema oficial (`powerbi-desktop-samples`, v2.156) |
+| Accesibilidad | WCAG 2.2 (W3C) + checklist de accesibilidad de Microsoft |
+| Modelo dimensional | Kimball (esquema estrella) |
+| DAX | Microsoft Learn DAX best practices · SQLBI (Russo/Ferrari) |
+| Power Query / M | Microsoft Learn · Chris Webb |
+| Visualización | Microsoft Learn (docs + Training) · IBCS (parte pública) · ColorBrewer |
+| IA / Copilot | Microsoft "Prepare your data for AI" |
+
+---
+
+## 🤝 Contribuir y licencia
+
+Issues y PRs bienvenidos — convenciones en [AGENTS.md](AGENTS.md) y
+[CONTRIBUTING.md](CONTRIBUTING.md). Antes de abrir un PR:
+
+```bash
+python scripts/check_consistencia.py   # C1-C11: invariantes del repo
+python scripts/catalogo_reglas.py      # toda regla con fuente
+```
+
+**JoseAAA** · [github.com/JoseAAA](https://github.com/JoseAAA) · MIT — ver [LICENSE](LICENSE)

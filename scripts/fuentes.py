@@ -38,7 +38,7 @@ FUENTES = {
     "powerbi_projects": (
         "MicrosoftDocs/powerbi-docs", "main", "powerbi-docs/developer/projects", 7,
         "Formato PBIP/PBIR, limites, casilla de vista previa. Sustenta "
-        "references/formatos-pbip.md y las reglas P1-P8."),
+        "references/formatos-pbip.md y las reglas P1-P9."),
     "powerbi_create_reports": (
         "MicrosoftDocs/powerbi-docs", "main", "powerbi-docs/create-reports", 7,
         "Accesibilidad, temas, visuales, Copilot. Sustenta PBI-A11Y-*, "
