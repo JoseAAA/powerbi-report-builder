@@ -66,6 +66,7 @@ import uuid
 # Catalogo de dominios compartido con generar_datos_ejemplo.py (fuente unica).
 # Antes estaba duplicado en los dos scripts y divergio en TODOS los dominios.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import arquetipos  # noqa: E402
 from dominios import (  # noqa: E402
     DOMINIOS, TABLA_INDICADOR, esquema_csv, filas_indicador, orden_tablas,
 )
@@ -861,6 +862,116 @@ annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode"]
 # ---------------------------------------------------------------------------
 # Reporte PBIR
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Constructor generico de visuales, con altText OBLIGATORIO.
+#
+# `PBI-A11Y-01` (alt text en todo visual que transmita informacion) es la regla de
+# mayor severidad del catalogo de visualizacion, y este generador la incumplia en
+# el 100% de los visuales que producia. Ahora el alt es un parametro requerido:
+# no se puede construir un visual sin el.
+#
+# El alt describe el INSIGHT, no el aspecto — el lector de pantalla ya anuncia
+# titulo y tipo de visual. Limite duro de 250 caracteres.
+# learn.microsoft.com/power-bi/create-reports/desktop-accessibility-creating-reports
+# ---------------------------------------------------------------------------
+
+def _lit(valor):
+    """Propiedad literal de PBIR: el valor de texto va entre comillas simples."""
+    return {"expr": {"Literal": {"Value": f"'{valor}'"}}}
+
+
+def campo_medida(entidad, propiedad):
+    return {
+        "field": {"Measure": {"Expression": {"SourceRef": {"Entity": entidad}},
+                              "Property": propiedad}},
+        "queryRef": f"{entidad}.{propiedad}",
+        "nativeQueryRef": propiedad,
+    }
+
+
+def campo_columna(entidad, propiedad, activo=False):
+    c = {
+        "field": {"Column": {"Expression": {"SourceRef": {"Entity": entidad}},
+                             "Property": propiedad}},
+        "queryRef": f"{entidad}.{propiedad}",
+        "nativeQueryRef": propiedad,
+    }
+    if activo:
+        c["active"] = True
+    return c
+
+
+def visual(tipo, pos, alt, roles=None, titulo=None, orden_desc=None):
+    """
+    Un visual PBIR completo.
+
+    tipo   : visualType (del cookbook de arquetipos.py, no inventado aqui)
+    pos    : (x, y, w, h, tabOrder) — el tabOrder debe seguir el orden de lectura
+             (WCAG 2.4.3)
+    alt    : texto alternativo. OBLIGATORIO.
+    roles  : {"Category": [campo...], "Y": [campo...]} segun el tipo de visual
+    titulo : texto del titulo del visual (usa el mensaje, no el tema)
+    """
+    if not alt or not alt.strip():
+        raise ValueError(
+            f"visual '{tipo}' sin altText. Es la regla de accesibilidad de mayor "
+            "severidad (PBI-A11Y-01): sin alt, un lector de pantalla solo anuncia "
+            "el tipo de visual y el insight se pierde.")
+    x, y, w, h, tab = pos
+    name = nombre_hex()
+    v = {"visualType": tipo, "drillFilterOtherVisuals": True}
+    if roles:
+        v["query"] = {"queryState": {
+            rol: {"projections": campos} for rol, campos in roles.items() if campos}}
+    if orden_desc:
+        entidad, prop = orden_desc
+        v["query"]["sortDefinition"] = {
+            "sort": [{"field": {"Measure": {
+                "Expression": {"SourceRef": {"Entity": entidad}},
+                "Property": prop}}, "direction": "Descending"}],
+            "isDefaultSort": True,
+        }
+    # altText vive en visualContainerObjects.general[].properties.altText
+    objetos = {"general": [{"properties": {"altText": _lit(alt[:250])}}]}
+    if titulo:
+        objetos["title"] = [{"properties": {
+            "show": {"expr": {"Literal": {"Value": "true"}}},
+            "text": _lit(titulo),
+        }}]
+    v["visualContainerObjects"] = objetos
+    return name, {
+        "$schema": SCHEMA_VISUAL,
+        "name": name,
+        "position": {"x": x, "y": y, "z": tab, "height": h, "width": w,
+                     "tabOrder": tab},
+        "visual": v,
+    }
+
+
+def visual_texto(pos, alt, texto, tamano=18):
+    """Cuadro de texto: el titulo/mensaje de la pagina."""
+    x, y, w, h, tab = pos
+    name = nombre_hex()
+    return name, {
+        "$schema": SCHEMA_VISUAL,
+        "name": name,
+        "position": {"x": x, "y": y, "z": tab, "height": h, "width": w,
+                     "tabOrder": tab},
+        "visual": {
+            "visualType": "textbox",
+            "visualContainerObjects": {
+                "general": [{"properties": {"altText": _lit(alt[:250])}}],
+                "title": [{"properties": {
+                    "show": {"expr": {"Literal": {"Value": "true"}}},
+                    "text": _lit(texto),
+                    "fontSize": {"expr": {"Literal": {"Value": f"{tamano}D"}}},
+                }}],
+            },
+            "drillFilterOtherVisuals": True,
+        },
+    }
+
+
 def visual_card(measure_entity, measure_prop):
     """Tarjeta (cardVisual) que muestra una medida."""
     name = nombre_hex()
@@ -1198,43 +1309,103 @@ def generar(nombre, salida, tema, dominio, datos=None, cultura="es-ES",
     escribir_json(r, report_json)
     archivos.append(r)
 
-    # --- página + visuales ---
-    page_name = nombre_hex()
+    # --- páginas y visuales, construidas desde los ARQUETIPOS ---
+    #
+    # Antes esto eran 3 visuales fijos en una pagina, sin altText y sin ningun
+    # slicer. Dos consecuencias: incumplia la regla de accesibilidad de mayor
+    # severidad en el 100% de los visuales, y la medida 'Indicador %' (defendida
+    # con HASONEVALUE) devolvia BLANK porque no habia forma de elegir un
+    # indicador. Ahora las paginas salen de `arquetipos.py`, que declara ranuras
+    # con su alt y su orden de lectura.
     pages_dir = os.path.join(report_dir, "definition", "pages")
+    nombre_ppal, _fmt = medida_principal(dom)
+    otros = [n for _i, n, _a, _b in dom["indicadores"]][1:3]
+    ind = TABLA_INDICADOR
+
+    paginas = []
+    for clave in ("resumen", "detalle"):
+        arq = arquetipos.arquetipo(clave)
+        page_name = nombre_hex()
+        visuales = []
+        for tab, ranura in enumerate(arq["ranuras"]):
+            rol, pregunta, x, y, w, h, alt_tpl = ranura
+            pos = (x, y, w, h, tab)
+            alt = arquetipos.alt_de(alt_tpl, nombre_ppal, dim1, dim2)
+            tipo = arquetipos.visual_para(pregunta)
+
+            if rol == "titulo":
+                titulo = (f"{arq['titulo']} — {nombre_ppal}" if clave == "resumen"
+                          else f"{arq['titulo']} por {dim2} y mes")
+                visuales.append(visual_texto(pos, alt, titulo))
+            elif rol == "slicer_indicador":
+                # La pieza que faltaba: sin este slicer, 'Indicador %' es BLANK.
+                visuales.append(visual(tipo, pos, alt, titulo=ind,
+                                       roles={"Values": [campo_columna(ind, ind, True)]}))
+            elif rol == "slicer_anio":
+                visuales.append(visual(tipo, pos, alt, titulo="Año",
+                                       roles={"Values": [campo_columna("Calendario", "Año", True)]}))
+            elif rol == "slicer_dim1":
+                visuales.append(visual(tipo, pos, alt, titulo=dim1,
+                                       roles={"Values": [campo_columna(dim1, dim1, True)]}))
+            elif rol.startswith("kpi_"):
+                idx = int(rol[-1]) - 1
+                medida = nombre_ppal if idx == 0 else (
+                    otros[idx - 1] if idx - 1 < len(otros) else nombre_ppal)
+                visuales.append(visual(tipo, pos, alt, titulo=medida,
+                                       roles={"Data": [campo_medida("_ Medidas", medida)]}))
+            elif rol == "tendencia":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por mes",
+                    roles={"Category": [campo_columna("Calendario", "Mes", True)],
+                           "Y": [campo_medida("_ Medidas", nombre_ppal)]}))
+            elif rol == "ranking":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por {dim2}",
+                    roles={"Category": [campo_columna(dim2, dim2, True)],
+                           "Y": [campo_medida("_ Medidas", nombre_ppal)]},
+                    orden_desc=("_ Medidas", nombre_ppal)))
+            elif rol == "detalle":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por {dim1}",
+                    roles={"Values": [campo_columna(dim1, dim1, True),
+                                      campo_medida("_ Medidas", nombre_ppal)]}))
+            elif rol == "matriz":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal}: {dim2} por mes",
+                    roles={"Rows": [campo_columna(dim2, dim2, True)],
+                           "Columns": [campo_columna("Calendario", "Mes", True)],
+                           "Values": [campo_medida("_ Medidas", nombre_ppal)]}))
+            elif rol == "comparacion":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por {dim1} y año",
+                    roles={"Category": [campo_columna(dim1, dim1, True)],
+                           "Series": [campo_columna("Calendario", "Año")],
+                           "Y": [campo_medida("_ Medidas", nombre_ppal)]}))
+
+        page = {
+            "$schema": SCHEMA_PAGE,
+            "name": page_name,
+            "displayName": arq["titulo"],
+            "displayOption": "FitToPage",
+            "height": arquetipos.CANVAS["height"],
+            "width": arquetipos.CANVAS["width"],
+        }
+        r = os.path.join(pages_dir, page_name, "page.json")
+        escribir_json(r, page)
+        archivos.append(r)
+        for vname, vobj in visuales:
+            r = os.path.join(pages_dir, page_name, "visuals", vname, "visual.json")
+            escribir_json(r, vobj)
+            archivos.append(r)
+        paginas.append(page_name)
 
     r = os.path.join(pages_dir, "pages.json")
     escribir_json(r, {
         "$schema": SCHEMA_PAGES,
-        "pageOrder": [page_name],
-        "activePageName": page_name,
+        "pageOrder": paginas,
+        "activePageName": paginas[0],
     })
     archivos.append(r)
-
-    page = {
-        "$schema": SCHEMA_PAGE,
-        "name": page_name,
-        "displayName": "Resumen",
-        "displayOption": "FitToPage",
-        "height": 720,
-        "width": 1280,
-    }
-    r = os.path.join(pages_dir, page_name, "page.json")
-    escribir_json(r, page)
-    archivos.append(r)
-
-    # 3 visuales. Usan la medida del indicador principal (filtrada con CALCULATE),
-    # NO 'Indicador %': esa devuelve BLANK sin segmentacion por Indicador, porque
-    # el hecho guarda varios indicadores y sumarlos no significaria nada.
-    nombre_ppal, _fmt = medida_principal(dom)
-    visuales = [
-        visual_titulo(f"Resumen — {nombre_ppal}"),
-        visual_card("_ Medidas", nombre_ppal),
-        visual_barras(dim2, dim2, "_ Medidas", nombre_ppal),
-    ]
-    for vname, vobj in visuales:
-        r = os.path.join(pages_dir, page_name, "visuals", vname, "visual.json")
-        escribir_json(r, vobj)
-        archivos.append(r)
 
     return base, archivos
 

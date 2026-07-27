@@ -3,6 +3,59 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-26 — v0.6.0 · el generador produce un reporte, no un esqueleto
+
+La brecha que quedaba no era de codigo: **no existia el conocimiento de diseño**
+que el generador tenia que materializar. Ahora vive en `scripts/arquetipos.py`
+como datos, y el scaffold construye las paginas desde ahi.
+
+### El salto
+
+| | antes | ahora |
+|---|---|---|
+| Paginas | 1 | **2** (Resumen + Detalle) |
+| Visuales | 3 | **14** |
+| Tipos de visual | 3 | **8** (card, line, bar, column, matriz, tabla, slicer, texto) |
+| Visuales con `altText` | **0** | **14** |
+| Slicers | 0 | **4** |
+
+### Corregido — dos defectos que el conteo hace evidentes
+
+- **`altText` en CERO visuales.** `PBI-A11Y-01` es la regla de MAYOR severidad del
+  catalogo de visualizacion, la que la propia reference documenta como la #1, y el
+  generador la incumplia en el 100% de lo que producia. Sin alt, un lector de
+  pantalla solo anuncia el tipo de visual y el insight se pierde. Ahora el
+  constructor de visuales **exige** el alt: `visual()` lanza excepcion si falta.
+  Cada ranura de arquetipo declara el suyo, describiendo el **insight** y no el
+  aspecto, con el limite duro de 250 caracteres.
+- **No habia ningun slicer de `Indicador`.** La medida `Indicador %` esta defendida
+  con `HASONEVALUE` y devuelve BLANK si hay mas de un indicador en contexto — asi
+  que sin slicer era **una medida que el usuario no podia usar**. Se creo el
+  problema en el commit del catalogo y se cierra aqui.
+
+### Añadido
+
+- **`scripts/arquetipos.py`**: el conocimiento de diseño como DATOS.
+  - **COOKBOOK** *pregunta → visual*, con la regla y la fuente de cada eleccion
+    (por que linea necesita eje continuo, por que barras si los nombres son
+    largos, por que una tarjeta necesita contexto). Es la parte SUSTENTADA.
+  - **ARQUETIPOS** con ranuras: rol, posicion, y plantilla de texto alternativo.
+    El orden de la lista ES el orden de tabulacion, que debe seguir el orden de
+    lectura (WCAG 2.4.3).
+  - Marcados `heuristico=True` los de negocio, porque **Microsoft no define
+    arquetipos de pagina con nombre**; los canonicos (tooltip 320x240,
+    drillthrough, movil) si llevan parametros oficiales.
+- **`validar_pbip.py` regla P9**: visual sin `altText` es hallazgo ALTA; alt de
+  mas de 250 caracteres es MEDIA. Exentos los decorativos (shape, image,
+  actionButton). Verificada en los dos sentidos.
+
+### Verificado
+
+- El reporte de 14 visuales pasa el **validador oficial de Microsoft** con
+  `succeeded`, 0 errores y 0 avisos.
+- Los 5 dominios generan las 2 paginas correctamente.
+- C5 volvio a cazar las 8 referencias a `P1-P8` desactualizadas en la doc.
+
 ## 2026-07-26 — v0.5.0 · revision previa a pruebas reales
 
 Repaso de extremo a extremo antes de ponerlo en manos de gente. Se ejecutaron

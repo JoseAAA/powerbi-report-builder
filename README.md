@@ -98,7 +98,7 @@ fuente de verdad, sin contenido duplicado). Ningún script depende de un agente.
 - **Solo validar / auditar (experto):** ¿tu reporte sigue las buenas prácticas?
   Apunta el skill `powerbi-auditoria` a tu carpeta PBIP, o corre directo:
   `python scripts/validar_modelo.py <...>.SemanticModel` y
-  `python scripts/validar_pbip.py <...>.Report` → hallazgos por severidad (R1–R12 / P1–P8).
+  `python scripts/validar_pbip.py <...>.Report` → hallazgos por severidad (R1–R12 / P1–P9).
 - **Crear de cero (una idea → reporte):** el orquestador `powerbi-builder` te lleva
   fase por fase; o arranca la base en un comando:
   `python scripts/init_proyecto.py --nombre "Mi Reporte" --dominio ventas`.
@@ -149,7 +149,7 @@ powerbi-report-builder/                 # plugin (la raíz del repo)
     ├── generar_theme.py · editar_theme.py   # marca → theme.json (WCAG)
     ├── generar_conexion_m.py                # M por fuente (sql/sharepoint/databricks/…)
     ├── generar_datos_ejemplo.py · scaffold_pbip.py   # datos + .pbip base (multi-dominio)
-    ├── validar_modelo.py · validar_pbip.py  # BPA-lite modelo (R1–R12) + reporte (P1–P8)
+    ├── validar_modelo.py · validar_pbip.py  # BPA-lite modelo (R1–R12) + reporte (P1–P9)
     ├── init_proyecto.py                     # bootstrap proyecto-<nombre>/
     └── check_consistencia.py                # guarda de invariantes del repo (CI)
 ```

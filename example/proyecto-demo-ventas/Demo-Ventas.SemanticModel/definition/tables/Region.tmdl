@@ -1,12 +1,12 @@
 /// Dimension Region: atributo por el que se corta el negocio. Una fila por miembro.
 table Region
-	lineageTag: c4de0979-9105-4422-be7e-76a994716c34
+	lineageTag: e9c69a59-e37b-4503-9ead-9661d5062f66
 
 	column 'ID Region'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 8a13ff2a-7e53-48dc-9ef0-f14e812b6d65
+		lineageTag: 7e5ac2af-2dbc-4368-9f6b-ddfd04472b13
 		summarizeBy: none
 		sourceColumn: ID Region
 
@@ -14,7 +14,7 @@ table Region
 
 	column Region
 		dataType: string
-		lineageTag: dba6f8cd-9f3b-477c-8cec-9707efe50281
+		lineageTag: 4bc49f66-38bb-4153-9234-495582d23378
 		summarizeBy: none
 		sourceColumn: Region
 

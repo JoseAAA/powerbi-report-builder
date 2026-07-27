@@ -19,7 +19,7 @@ Procedimiento:
    (R1–R12, incl. description para IA). Contrasta con `references/fase4-modelado.md`,
    `references/nomenclatura.md` y `references/preparar-datos-ia.md`.
 3. **Reporte (PBIR)**: `python "${CLAUDE_PLUGIN_ROOT}/scripts/validar_pbip.py" <ruta .Report>`
-   (P1–P8: JSON válido, `$schema`, tema completo y cableado, páginas) — evita la
+   (P1–P9: JSON válido, `$schema`, tema completo y cableado, páginas) — evita la
    corrupción al abrir.
 4. **Rendimiento**: aplica `references/rendimiento-y-mantenimiento.md` (cardinalidad,
    columnas sin uso, bidireccionales, fecha/hora).

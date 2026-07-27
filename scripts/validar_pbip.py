@@ -27,6 +27,10 @@ Reglas (severidad [ALTA] bloquea, exit 1):
               abre bien pero el reporte PUBLICADO EN EL SERVICE aplica mal el tema.
               Equivale a PBIR_THEME_NAME_MISSING_JSON_EXT y
               PBIR_THEME_FILE_NAME_MISMATCH del validador oficial de Microsoft.
+  P9  [ALTA]  Visual sin altText (accesibilidad). Es la regla de MAYOR severidad
+              del catalogo de visualizacion: sin alt, un lector de pantalla solo
+              anuncia el tipo de visual y el insight se pierde. Limite 250 chars.
+              Exentos los decorativos (shape, image, actionButton).
 
 Solo librería estándar.
 """
@@ -144,6 +148,36 @@ def main():
             if "name" not in obj:
                 hallazgos.append(("MEDIA", "P5", f"{nombre} sin 'name' ({f.parent.name})"))
 
+        if nombre == "visual.json":
+            # P9 — accesibilidad: alt text en todo visual que transmita informacion.
+            # Es la regla de MAYOR severidad del catalogo de visualizacion
+            # (PBI-A11Y-01): sin alt, un lector de pantalla solo anuncia el tipo de
+            # visual y el insight se pierde. Limite duro de 250 caracteres.
+            # learn.microsoft.com/power-bi/create-reports/desktop-accessibility-creating-reports
+            v = obj.get("visual", {})
+            tipo = v.get("visualType", "?")
+            general = v.get("visualContainerObjects", {}).get("general", [])
+            alt = None
+            for bloque in general:
+                cand = bloque.get("properties", {}).get("altText")
+                if isinstance(cand, dict):
+                    alt = (cand.get("expr", {}).get("Literal", {}).get("Value") or "")
+                    alt = alt.strip("'")
+                    break
+            # Los puramente decorativos (formas e imagenes sin dato) estan exentos.
+            decorativos = {"shape", "image", "actionButton", "basicShape"}
+            if tipo in decorativos:
+                pass
+            elif not alt:
+                hallazgos.append(("ALTA", "P9",
+                    f"visual '{tipo}' sin altText ({f.parent.name}): un lector de "
+                    "pantalla solo anunciara el tipo de visual y el insight se "
+                    "pierde. Describe el hallazgo, no el aspecto"))
+            elif len(alt) > 250:
+                hallazgos.append(("MEDIA", "P9",
+                    f"visual '{tipo}': altText de {len(alt)} caracteres; el limite "
+                    "duro del campo son 250"))
+
         elif f.suffix == ".pbir":
             if "datasetReference" not in obj:
                 hallazgos.append(("MEDIA", "P6", "definition.pbir sin 'datasetReference'"))
@@ -208,7 +242,7 @@ def main():
 
     print(f"Reporte: {report.name}  |  Archivos JSON/PBIR: {n_ok}")
     if not hallazgos:
-        print("OK  Sin hallazgos en el reporte (P1-P8).")
+        print("OK  Sin hallazgos en el reporte (P1-P9).")
         return 0
     orden = {"ALTA": 0, "MEDIA": 1, "BAJA": 2}
     for sev, regla, msg in sorted(hallazgos, key=lambda h: orden[h[0]]):

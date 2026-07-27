@@ -1,12 +1,12 @@
 /// Dimension Producto, con la columna Categoria Producto para agrupar y jerarquizar.
 table Producto
-	lineageTag: 57806c25-2628-42a4-878f-96743ed41f8a
+	lineageTag: 7a5693f5-821a-448f-ae90-c77f05ad5245
 
 	column 'ID Producto'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 760b72e8-2ede-41a2-9a7c-beb4e97affcd
+		lineageTag: 03c6970a-9e8e-4e2b-9364-ff6d33b666a0
 		summarizeBy: none
 		sourceColumn: ID Producto
 
@@ -14,7 +14,7 @@ table Producto
 
 	column Producto
 		dataType: string
-		lineageTag: 73ec8135-c3c2-4d73-b1e6-3a4f325792a9
+		lineageTag: c6758962-a2a4-435d-828d-526d11b889f6
 		summarizeBy: none
 		sourceColumn: Producto
 
@@ -22,7 +22,7 @@ table Producto
 
 	column 'Categoria Producto'
 		dataType: string
-		lineageTag: be4e920a-6697-4a4a-99e6-c112c0ffd38f
+		lineageTag: 6289cd6c-617f-4ace-aba5-b25543e72652
 		summarizeBy: none
 		sourceColumn: Categoria Producto
 
