@@ -29,9 +29,31 @@ import colorsys
 import json
 import sys
 
+# Version del schema OFICIAL de temas (microsoft/powerbi-desktop-samples).
+# Los schemas se publican versionados: no hay URL "latest", asi que hay que fijar
+# una y refrescarla. `actualizar_catalogo.py` avisa cuando aparece una nueva
+# (la fuente `theme_schema` de references/estado-fuentes.json).
+#
+# 2.143 -> 2.156 (2026-07): el repo se habia quedado 13 versiones atras. El salto
+# es puramente aditivo (2.156 añade `baseTheme` a nivel raiz y no elimina nada),
+# comprobado comparando los dos schemas antes de subir la version, y las 18 claves
+# raiz que generamos siguen reconocidas.
+#
+# CONTRAPARTIDA CONOCIDA: el validador oficial
+# (@microsoft/powerbi-report-authoring-cli v0.1.4) trae una lista de versiones de
+# schema que conoce, y 2.156 es posterior al CLI. Con 2.143 valida el tema; con
+# 2.156 emite el aviso PBIR_THEME_SCHEMA_UNREACHABLE y **se salta** esa
+# validacion (aviso, no error). Comprobado aislando la variable: misma carpeta,
+# solo cambiando el $schema.
+#
+# Se mantiene 2.156 porque fijar un schema viejo para complacer a una version de
+# una herramienta es al reves: el artefacto tiene que declarar el contrato
+# vigente. Pendiente: validar las claves del tema con stdlib contra el schema
+# fijado, para no depender de que el CLI lo conozca.
+SCHEMA_VERSION = "2.156"
 SCHEMA_URL = ("https://raw.githubusercontent.com/microsoft/"
               "powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/"
-              "reportThemeSchema-2.143.json")
+              f"reportThemeSchema-{SCHEMA_VERSION}.json")
 
 
 # ---------- utilidades de color ----------
@@ -231,7 +253,11 @@ def construir_tema(cfg, no_auto_contraste=False):
                     "dropShadow": [{"show": False}],
                     "title": [{"show": True, "alignment": "left",
                                "fontColor": {"solid": {"color": texto}}}],
-                    "visualHeaderTooltip": [{"show": True}],
+                    # NO agregar "visualHeaderTooltip": no es una propiedad de tema
+                    # valida. El validador oficial de Microsoft la rechaza
+                    # (PBIR_THEME_VISUAL_PROP_UNKNOWN). El catalogo de propiedades
+                    # validas esta en el schema de temas de
+                    # microsoft/powerbi-desktop-samples; no inventes claves aqui.
                 }
             },
             "page": {
@@ -286,6 +312,33 @@ def main():
           f"({'AA OK' if cf >= 4.5 else 'REVISAR'})")
     for r in reporte:
         print(f"    - {r}")
+
+    # Contraste de los COLORES DE DATOS contra el fondo. Es el que se olvida:
+    # WCAG 1.4.11 pide >= 3:1 para las partes del grafico necesarias para
+    # entenderlo, no solo para el texto. Reportar unicamente texto/fondo daba un
+    # "AA OK" enganoso mientras una serie quedaba a 1.97:1 e invisible.
+    # Los colores son del usuario, asi que se AVISA, no se cambian en silencio.
+    fondo = tema.get("background") or "#FFFFFF"
+    bajos = []
+    for i, c in enumerate(tema.get("dataColors") or []):
+        try:
+            r = contrast(c, fondo)
+        except Exception:  # noqa: BLE001 — color no parseable: no romper la salida
+            continue
+        if r < 3.0:
+            bajos.append((i, c, r))
+    if bajos:
+        print("")
+        print(f"    AVISO — colores de datos con contraste bajo sobre {fondo} "
+              "(WCAG 1.4.11 pide >= 3:1):")
+        for i, c, r in bajos:
+            print(f"      dataColors[{i}] {c}: {r:.2f}:1")
+        print("      Son los colores de TU marca, asi que no se modifican solos.")
+        print("      Aclaralos (mismo tono, mas luminosidad), o reordena la paleta")
+        print("      para que los que fallan no sean los primeros: Power BI asigna")
+        print("      las series por orden. Una serie por debajo de 3:1 deja fuera a")
+        print("      quien tiene baja vision.")
+
     print("\nImportar en Power BI: Vista -> Temas -> Buscar temas -> "
           f"elegir {args.salida}")
 

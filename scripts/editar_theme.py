@@ -293,6 +293,42 @@ def _aplicar(theme, antes, cambios, args, reg):
                 estado = "OK" if r >= 4.5 else ("OK texto grande" if r >= 3 else "FALLA")
                 print(f"  {etiqueta} {theme[etiqueta]} / {bg}: {r:.2f}:1 [{estado}]")
 
+        # Los COLORES DE DATOS tambien tienen minimo de contraste, y es el que se
+        # olvida: WCAG 1.4.11 pide >= 3:1 para las partes del grafico necesarias
+        # para entenderlo. Al cambiar a modo oscuro la paleta de marca se conserva
+        # a proposito (son los colores del usuario), pero un color pensado para
+        # fondo claro puede quedar casi invisible sobre fondo oscuro. Reportar solo
+        # el contraste del TEXTO daba un "[OK]" enganoso mientras la serie
+        # principal quedaba en 1.97:1.
+        datos = theme.get("dataColors") or []
+        if datos:
+            bajos = []
+            for i, c in enumerate(datos):
+                try:
+                    r = contrast(c, bg)
+                except Exception:  # noqa: BLE001 — color no parseable: no romper
+                    continue
+                if r < 3.0:
+                    bajos.append((i, c, r))
+            print("Contraste de los colores de datos sobre el fondo "
+                  "(WCAG 1.4.11 pide >= 3:1):")
+            if not bajos:
+                print(f"  los {len(datos)} colores de la paleta cumplen [OK]")
+            else:
+                for i, c, r in bajos:
+                    print(f"  dataColors[{i}] {c} / {bg}: {r:.2f}:1 [FALLA]")
+                print("")
+                print("  QUE HACER: son los colores de TU marca, asi que el script no")
+                print("  los cambia solo. Opciones, de mejor a peor:")
+                print("   1. Aclara esos hex para el tema oscuro (mantienen el tono,")
+                print("      ganan luminosidad) y vuelve a generar el tema.")
+                print("   2. Reordena `dataColors` para que los que fallan no sean")
+                print("      los primeros: Power BI asigna por orden, asi que el")
+                print("      primero es el que mas se ve.")
+                print("   3. Usa el tema claro para este reporte.")
+                print("  Un color de serie por debajo de 3:1 sobre el fondo deja")
+                print("  fuera a quien tiene baja vision: no es un detalle estetico.")
+
     return 0
 
 

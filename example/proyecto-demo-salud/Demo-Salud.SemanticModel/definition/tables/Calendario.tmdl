@@ -1,0 +1,82 @@
+/// Calendario de fechas continuo, marcado como tabla de fecha. Filtra por esta
+/// tabla y no por la fecha del hecho: es lo que hace funcionar la inteligencia de tiempo.
+table Calendario
+	dataCategory: Time
+	lineageTag: 56aafea9-4bc2-467b-84e8-39dfb1947d9d
+
+	column Fecha
+		dataType: dateTime
+		isKey
+		formatString: Short Date
+		lineageTag: 21e7e6e2-2b9b-421d-a5b3-a77a3385f076
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Año
+		dataType: int64
+		formatString: 0
+		lineageTag: 04b0da3a-d296-4cbd-b8ea-908be17eaff5
+		summarizeBy: none
+		sourceColumn: Año
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mes
+		dataType: string
+		lineageTag: db93c75b-097b-4213-b4a6-869137113bf3
+		summarizeBy: none
+		sourceColumn: Mes
+		sortByColumn: NumMes
+
+		annotation SummarizationSetBy = Automatic
+
+	column NumMes
+		dataType: int64
+		formatString: 0
+		lineageTag: 95cc893e-ac19-4239-ad3c-855def16aacb
+		summarizeBy: none
+		sourceColumn: NumMes
+
+		annotation SummarizationSetBy = Automatic
+
+	column Trimestre
+		dataType: string
+		lineageTag: ebac6041-70f2-4082-8ad9-f259046205a0
+		summarizeBy: none
+		sourceColumn: Trimestre
+
+		annotation SummarizationSetBy = Automatic
+
+	column EsDiaHabil
+		dataType: string
+		lineageTag: 70bb9099-9c05-451c-8124-2af3e88fb453
+		summarizeBy: none
+		sourceColumn: EsDiaHabil
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Calendario = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Calendario.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"Fecha", type date},
+				        {"Año", Int64.Type},
+				        {"Mes", type text},
+				        {"NumMes", Int64.Type},
+				        {"Trimestre", type text},
+				        {"EsDiaHabil", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

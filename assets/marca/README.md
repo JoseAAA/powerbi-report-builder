@@ -9,7 +9,7 @@ preguntarlos en cada reporte.
 > en la Fase 1 captura la marca de *tu* empresa. Los archivos en `ejemplos/` son
 > solo muestras (`activa: false`) para ver cómo se llena uno.
 >
-> **Tu marca vive en TU proyecto** (p. ej. `proyecto-x/01-marca/<empresa>.json`),
+> **Tu marca vive en TU proyecto** (p. ej. `mi-reporte/docs/marca.json`),
 > no dentro del plugin: los plugins se actualizan y borran lo guardado dentro.
 > Esta carpeta del plugin solo aporta la **plantilla** y los **ejemplos**.
 

@@ -1,10 +1,11 @@
 ---
 name: powerbi-modelado-dax
 description: >
-  Fase 4 — Modelado estrella y medidas DAX en TMDL. USAR cuando el usuario crea o
-  revisa tablas/relaciones, pide "crea las medidas", escribe o refactoriza DAX,
-  define nomenclatura, configura RLS/OLS, o trabaja archivos .tmdl de un modelo
-  semantico.
+  USAR cuando se crean o revisan tablas y relaciones, "crea las medidas", hay DAX
+  que escribir o refactorizar, falta acordar nomenclatura, hay que configurar
+  RLS/OLS, o se editan archivos .tmdl de un modelo semantico. NO usar si el
+  problema es que el reporte va lento o pesa mucho (eso es powerbi-rendimiento),
+  ni para traer los datos a la tabla (powerbi-datos-m).
 ---
 
 # Fase 4 — Modelado estrella y DAX
@@ -34,5 +35,15 @@ Reglas de oro:
 Detalle (sintaxis TMDL, patrones DAX, patron Num/Den, checklist BPA):
 `${CLAUDE_PLUGIN_ROOT}/references/fase4-modelado.md`. Antes de tocar un PBIP:
 `${CLAUDE_PLUGIN_ROOT}/references/formatos-pbip.md`.
+
+
+## Boundaries
+
+Alcance: estructura del modelo (tablas, relaciones, estrella, calendario),
+medidas DAX, nomenclatura, RLS/OLS. Termina con `validar_modelo.py` en verde.
+Fuera de alcance: traer los datos → **powerbi-datos-m**. Optimizar un modelo que
+va lento → **powerbi-rendimiento**. Como se ven las medidas en pantalla →
+**powerbi-visualizacion**.
+Este skill corrige numeros mal calculados; no persigue milisegundos.
 
 Fundamento: Kimball (estrella), SQLBI (Russo/Ferrari), Tabular Editor BPA, Microsoft Learn.

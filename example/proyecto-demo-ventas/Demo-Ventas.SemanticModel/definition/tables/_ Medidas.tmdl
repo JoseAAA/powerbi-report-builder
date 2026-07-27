@@ -1,0 +1,67 @@
+table '_ Medidas'
+	isHidden
+	lineageTag: 64261e44-a034-425e-9b98-bbba18759ec4
+
+	/// Suma del numerador del indicador (columna Num del hecho). Medida base para construir cocientes; no se muestra sola.
+	measure Numerador = ```
+			VAR Resultado = SUM ( Ventas[Num] )
+			RETURN
+			    Resultado
+			```
+		formatString: #,0
+		displayFolder: Base
+		isHidden
+		lineageTag: 96d11351-350f-42d4-b0b4-420ea3fcf7b8
+
+	/// Suma del denominador del indicador (columna Den del hecho). Medida base para construir cocientes; no se muestra sola.
+	measure Denominador = ```
+			VAR Resultado = SUM ( Ventas[Den] )
+			RETURN
+			    Resultado
+			```
+		formatString: #,0
+		displayFolder: Base
+		isHidden
+		lineageTag: 7c79a7a4-9f4c-4100-acd1-4f01db7611b3
+
+	/// Valor del indicador seleccionado (Numerador / Denominador). Devuelve BLANK si hay mas de un indicador en contexto, porque sumar indicadores distintos (un porcentaje y un importe) daria un numero sin significado. Segmenta por Indicador para verlo.
+	measure 'Indicador %' = ```
+			VAR UnSoloIndicador = HASONEVALUE ( Indicador[Indicador] )
+			VAR Resultado = DIVIDE ( [Numerador], [Denominador] )
+			RETURN
+			    IF ( UnSoloIndicador, Resultado )
+			```
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		displayFolder: Indicadores
+		lineageTag: ff1ca8d1-5012-4e1d-b349-d5cac63466dc
+
+	/// % Margen: indicador principal del reporte, filtrado explicitamente con CALCULATE. Muestra siempre un valor correcto aunque no haya segmentacion por Indicador.
+	measure '% Margen' = ```
+			VAR Resultado =
+			    CALCULATE (
+			        DIVIDE ( [Numerador], [Denominador] ),
+			        Indicador[Indicador] = "% Margen"
+			    )
+			RETURN
+			    Resultado
+			```
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		displayFolder: Indicadores
+		lineageTag: f1f35e5b-6204-468b-9d4f-1c84971f6f11
+
+	column Valor
+		isHidden
+		formatString: 0
+		lineageTag: 75bfe09c-6451-4936-a41b-34c4a062cd93
+		summarizeBy: none
+		sourceColumn: [Valor]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition '_ Medidas' = calculated
+		mode: import
+		source = ```
+				SELECTCOLUMNS ( { BLANK() }, "Valor", BLANK() )
+				```
+
+	annotation PBI_ResultType = Calculated

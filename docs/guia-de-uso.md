@@ -27,7 +27,7 @@ references. No hay dependencias que instalar (Python estándar).
 O directo en terminal:
 ```bash
 python scripts/validar_modelo.py "MiReporte.SemanticModel"   # modelo/DAX: R1–R12
-python scripts/validar_pbip.py   "MiReporte.Report"          # reporte:    P1–P7
+python scripts/validar_pbip.py   "MiReporte.Report"          # reporte:    P1–P9
 ```
 Salen hallazgos por severidad (ALTA/MEDIA/BAJA) con el fix concreto.
 
@@ -51,7 +51,7 @@ pasos de clic.
 ## 3. Tu marca (los colores de tu empresa)
 
 1. Copia `assets/marca/_plantilla-marca.json` → `mi-empresa.json` **en tu
-   proyecto** (p. ej. `proyecto-x/01-marca/`), llénalo (o pide al agente que lo
+   proyecto** (p. ej. `mi-reporte/docs/`), llénalo (o pide al agente que lo
    llene desde tu logo/manual/hex) y pon `"activa": true`.
 2. Genera el tema: `python scripts/generar_theme.py --marca mi-empresa.json --salida theme.json`
 3. Ese `theme.json` va en todo lo demás (`init_proyecto --tema`, `scaffold --tema`).
@@ -70,7 +70,7 @@ pasos de clic.
 | `scaffold_pbip.py` | proyecto `.pbip` mínimo y válido (estrella + PBIR + tema) |
 | `init_proyecto.py` | bootstrap completo `proyecto-<nombre>/` (estructura + tema + datos + `.pbip`) |
 | `validar_modelo.py` | BPA-lite del modelo (R1–R12, incl. description para IA) |
-| `validar_pbip.py` | validación del reporte (P1–P7, incl. tema cableado) |
+| `validar_pbip.py` | validación del reporte (P1–P9, incl. tema cableado) |
 
 ## 5. Publicar (producción)
 

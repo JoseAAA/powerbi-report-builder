@@ -1,0 +1,142 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/reportThemeSchema-2.156.json",
+  "name": "Tema demo ventas.json",
+  "dataColors": [
+    "#2C3E50",
+    "#E25822",
+    "#50C878",
+    "#1987EC",
+    "#E1C955",
+    "#6B7A8F",
+    "#1076AA",
+    "#9C5BA8"
+  ],
+  "good": "#2E8B57",
+  "neutral": "#E1A30B",
+  "bad": "#C0392B",
+  "maximum": "#2C3E50",
+  "center": "#84A9C0",
+  "minimum": "#DCE6EF",
+  "null": "#B3B0AD",
+  "firstLevelElements": "#252423",
+  "secondLevelElements": "#605E5C",
+  "thirdLevelElements": "#DBE3EA",
+  "fourthLevelElements": "#8A8886",
+  "background": "#FFFFFF",
+  "secondaryBackground": "#EAEFF4",
+  "tableAccent": "#2C3E50",
+  "textClasses": {
+    "callout": {
+      "fontFace": "Segoe UI",
+      "fontSize": 34,
+      "color": "#252423"
+    },
+    "title": {
+      "fontFace": "Segoe UI",
+      "fontSize": 14,
+      "color": "#252423"
+    },
+    "header": {
+      "fontFace": "Segoe UI",
+      "fontSize": 12,
+      "color": "#252423"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#252423"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "transparency": 0,
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            }
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "title": [
+          {
+            "show": true,
+            "alignment": "left",
+            "fontColor": {
+              "solid": {
+                "color": "#252423"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "transparency": 0,
+            "color": {
+              "solid": {
+                "color": "#F5F6F8"
+              }
+            }
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F5F6F8"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "card": {
+      "*": {
+        "labels": [
+          {
+            "fontSize": 34,
+            "color": {
+              "solid": {
+                "color": "#2C3E50"
+              }
+            }
+          }
+        ],
+        "categoryLabels": [
+          {
+            "color": {
+              "solid": {
+                "color": "#605E5C"
+              }
+            }
+          }
+        ]
+      },
+      "Callout Destacado": {
+        "labels": [
+          {
+            "fontSize": 40,
+            "bold": true
+          }
+        ]
+      }
+    }
+  }
+}

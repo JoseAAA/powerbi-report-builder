@@ -1,10 +1,11 @@
 ---
 name: powerbi-descubrimiento
 description: >
-  Fase 2 — Descubrimiento del problema para un reporte de Power BI. USAR cuando
-  el usuario va a reunirse con un area, "no sabe que pedir", quiere levantar
-  requerimientos, entender decisiones/dolores/usuarios, o preparar un taller. NO
-  usar si los KPIs ya estan definidos (usar powerbi-kpis).
+  USAR cuando todavia no se sabe QUE medir: "tengo una reunion con el area", "no
+  se que pedirles", "quieren un dashboard pero no se de que", hay que levantar
+  requerimientos, entender decisiones y dolores, identificar usuarios, o preparar
+  un taller. NO usar si ya hay una lista de indicadores sobre la mesa (eso es
+  powerbi-kpis) ni si ya existe un modelo que revisar (powerbi-auditoria).
 ---
 
 # Fase 2 — Descubrimiento (design workshop)
@@ -19,5 +20,15 @@ visuales. Pregunta por decisiones que se deben tomar y dolores actuales, no
   decisiones) que alimenta la Fase 3 (KPIs).
 
 Detalle y guion: `${CLAUDE_PLUGIN_ROOT}/references/fase2-descubrimiento.md`.
+
+
+## Boundaries
+
+Alcance: entender el problema de negocio antes de medirlo — decisiones, dolores,
+usuarios, frecuencia. Termina con un documento de descubrimiento acordado.
+Fuera de alcance: definir la formula o el grain de cada indicador →
+**powerbi-kpis**. Tampoco modela ni escribe DAX.
+Si el usuario ya llega con los KPIs claros, no lo obligues a pasar por aqui:
+es una fase que se puede saltar en un proyecto basico.
 
 Fundamento: Design Sprint (Google Ventures), Design Thinking (IDEO / d.school).

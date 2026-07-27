@@ -1,0 +1,39 @@
+/// Dimension Sede: atributo por el que se corta el negocio. Una fila por miembro.
+table Sede
+	lineageTag: 23431be0-0e1b-4dc7-b2dc-a961aae96705
+
+	column 'ID Sede'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 34cd8acc-3261-4805-b187-987a4aef7440
+		summarizeBy: none
+		sourceColumn: ID Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sede
+		dataType: string
+		lineageTag: 248d9655-720d-46df-a7cc-a36211d0148b
+		summarizeBy: none
+		sourceColumn: Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sede = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Sede.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Sede", Int64.Type},
+				        {"Sede", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

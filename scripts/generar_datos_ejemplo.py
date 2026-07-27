@@ -8,13 +8,21 @@ GENERICO Y MULTI-DOMINIO: elige el dominio con --dominio. Cada dominio define su
 dos dimensiones y sus indicadores; la estructura (modelo estrella con patron
 Num/Den) es la misma. No esta atado a ninguna empresa ni sector.
 
-Que genera (4 CSV + 1 .m):
+Que genera (5 CSV + 1 .m):
   <Calendario>.csv   dimension fecha
   <Dim1>.csv         dimension 1 (p. ej. Region, Sede, Departamento)
   <Dim2>.csv         dimension 2 con columna de agrupacion (p. ej. Producto)
+  Indicador.csv      dimension de indicadores (que mide cada fila del hecho)
   <Hecho>.csv        HECHO con patron Num / Den por indicador
   modelo-ejemplo.m   codigo Power Query M listo para pegar (una seccion por
                      tabla); incluye, comentada, una variante SharePoint.
+
+El hecho es "alto": una fila por Fecha x Dim1 x Dim2 x indicador. Ese diseno
+EXIGE la dimension Indicador — sin ella las medidas suman atravesando
+indicadores y mezclan porcentajes con importes (p. ej. % Margen + Ticket
+Promedio -> 5226%). El catalogo de dominios vive en `dominios.py`, compartido
+con `scaffold_pbip.py` para que los CSV y el .pbip nunca describan modelos
+distintos.
 
 Convencion de nombres (mejor practica Tabular Editor / Microsoft):
   nombres de negocio legibles, con espacios, SIN prefijos dim_/fact_.
@@ -42,126 +50,24 @@ import csv
 import datetime as dt
 import os
 import random
+import sys
+
+# El catalogo de dominios es compartido con scaffold_pbip.py (fuente unica).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from dominios import (  # noqa: E402
+    DOMINIOS, MESES_ES, TABLA_INDICADOR,
+    esquema_csv, filas_indicador, nombres,
+)
 
 
 # --------------------------------------------------------------------------- #
-# Catalogos por dominio
+# Catalogo de dominios: vive en `dominios.py` (importado arriba).
 #
-# Cada dominio define:
-#   desc          : descripcion corta
-#   dim1          : (tabla, filas[(id, nombre)])
-#   dim2          : (tabla, columna_grupo, filas[(id, nombre, grupo)])
-#   hecho         : nombre de la tabla de hechos
-#   indicadores   : [(id, nombre, (num_lo, num_hi), (den_lo, den_hi))]
-#   pct           : set de ids de indicador que son porcentajes (num <= den)
-# La estructura es identica entre dominios; solo cambian los datos y nombres.
+# Estuvo duplicado aqui y en scaffold_pbip.py, y los dos diccionarios
+# divergieron en TODOS los dominios (ventas: 6 productos en los CSV vs 4 en el
+# TMDL). Un solo catalogo compartido hace imposible esa divergencia.
 # --------------------------------------------------------------------------- #
 
-DOMINIOS = {
-    "generico": {
-        "desc": "Modelo neutro (Categoria / Segmento / Hechos) para cualquier area.",
-        "dim1": ("Categoria", [
-            (1, "Categoria A"), (2, "Categoria B"), (3, "Categoria C"),
-        ]),
-        "dim2": ("Segmento", "Grupo", [
-            (1, "Segmento 1", "Grupo X"), (2, "Segmento 2", "Grupo X"),
-            (3, "Segmento 3", "Grupo Y"), (4, "Segmento 4", "Grupo Y"),
-        ]),
-        "hecho": "Hechos",
-        "indicadores": [
-            (1, "% Cumplimiento", (60, 100), (90, 110)),
-            (2, "Volumen",        (500, 2000), (10, 40)),
-            (3, "% Eficiencia",   (30, 90), (95, 105)),
-        ],
-        "pct": {1, 3},
-    },
-    "ventas": {
-        "desc": "Comercial (Region / Producto / Ventas).",
-        "dim1": ("Region", [
-            (1, "Norte"), (2, "Centro"), (3, "Sur"), (4, "Oriente"),
-        ]),
-        "dim2": ("Producto", "Categoria Producto", [
-            (1, "Laptop", "Computo"), (2, "Monitor", "Computo"),
-            (3, "Audifonos", "Accesorios"), (4, "Teclado", "Accesorios"),
-            (5, "Impresora", "Oficina"), (6, "Tablet", "Computo"),
-        ]),
-        "hecho": "Ventas",
-        "indicadores": [
-            (1, "% Margen",           (20, 45), (95, 105)),
-            (2, "% Cumplimiento Meta", (70, 110), (95, 105)),
-            (3, "Ticket Promedio",    (8000, 30000), (80, 260)),
-        ],
-        "pct": {1, 2},
-    },
-    "rrhh": {
-        "desc": "Recursos Humanos (Departamento / Categoria / Personal).",
-        "dim1": ("Departamento", [
-            (1, "Tecnologia"), (2, "Comercial"), (3, "Operaciones"),
-            (4, "Finanzas"), (5, "Recursos Humanos"),
-        ]),
-        "dim2": ("Categoria", "Nivel", [
-            (1, "Analista", "Profesional"), (2, "Especialista", "Profesional"),
-            (3, "Jefe", "Mando"), (4, "Gerente", "Mando"),
-            (5, "Asistente", "Soporte"),
-        ]),
-        "hecho": "Personal",
-        "indicadores": [
-            (1, "% Rotacion",            (2, 15), (95, 115)),
-            (2, "% Ausentismo",          (1, 8), (95, 110)),
-            (3, "% Cobertura Vacantes",  (60, 100), (80, 105)),
-        ],
-        "pct": {1, 2, 3},
-    },
-    "finanzas": {
-        "desc": "Finanzas (Centro de Costo / Cuenta / Movimientos).",
-        "dim1": ("Centro de Costo", [
-            (1, "CC Comercial"), (2, "CC Operaciones"),
-            (3, "CC Administracion"), (4, "CC Tecnologia"),
-        ]),
-        "dim2": ("Cuenta", "Tipo Cuenta", [
-            (1, "Ingresos", "Resultado"), (2, "Gastos Operativos", "Resultado"),
-            (3, "CAPEX", "Inversion"), (4, "Provisiones", "Resultado"),
-        ]),
-        "hecho": "Movimientos",
-        "indicadores": [
-            (1, "% Ejecucion Presupuesto", (70, 110), (95, 105)),
-            (2, "% Margen Operativo",      (5, 35), (95, 105)),
-            (3, "Costo por Unidad",        (1000, 9000), (50, 300)),
-        ],
-        "pct": {1, 2},
-    },
-    "salud": {
-        "desc": "Salud / operaciones clinicas (Sede / Servicio / Indicadores).",
-        "dim1": ("Sede", [
-            (1, "Sede Norte"), (2, "Sede Centro"), (3, "Sede Sur"), (4, "Sede Este"),
-        ]),
-        "dim2": ("Servicio", "Servicio Agrupado", [
-            (1, "Emergencia", "Atencion Critica"),
-            (2, "Hospitalizacion", "Atencion Critica"),
-            (3, "Consulta Externa", "Ambulatorio"),
-            (4, "Quirofano", "Atencion Critica"),
-            (5, "Hemodialisis", "Ambulatorio"),
-            (6, "Farmacia", "Soporte"),
-            (7, "Laboratorio", "Soporte"),
-            (8, "Imagenes", "Soporte"),
-        ]),
-        "hecho": "Indicadores",
-        "indicadores": [
-            (1, "% Ocupacion",          (18, 30), (25, 32)),
-            (2, "% Entregas a tiempo",  (80, 100), (90, 110)),
-            (3, "Tiempo de Estancia",   (120, 360), (40, 90)),
-            (4, "% Cumplimiento Citas", (60, 95), (75, 100)),
-            (5, "Reingresos 30 dias",   (1, 12), (40, 120)),
-        ],
-        "pct": {1, 2, 4},
-    },
-}
-
-# Meses en espanol (indice 1..12)
-MESES_ES = [
-    "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-]
 
 
 # --------------------------------------------------------------------------- #
@@ -213,8 +119,13 @@ def escribir_csv(ruta, cabeceras, filas):
 # --------------------------------------------------------------------------- #
 
 def generar_calendario(desde, hasta):
-    """Una fila por dia: Fecha, Anio, Mes, NumMes, Trimestre, EsDiaHabil."""
-    cabeceras = ["Fecha", "Anio", "Mes", "NumMes", "Trimestre", "EsDiaHabil"]
+    """Una fila por dia: Fecha, Año, Mes, NumMes, Trimestre, EsDiaHabil.
+
+    Las cabeceras se toman del esquema compartido para que coincidan con las
+    columnas que declara el TMDL del scaffold (antes el CSV decia 'Anio' y el
+    modelo 'Año', asi que la particion no habria encontrado la columna).
+    """
+    cabeceras = [c for c, _t in esquema_csv(DOMINIOS["generico"])["Calendario"]]
     filas = []
     for d in rango_dias(desde, hasta):
         trimestre = (d.month - 1) // 3 + 1
@@ -238,6 +149,19 @@ def generar_dim2(dom):
     cabeceras = ["ID " + tabla, tabla, col_grupo]
     filas = [[i, nombre, grupo] for i, nombre, grupo in filas_dom]
     return cabeceras, filas
+
+
+def generar_indicador(dom):
+    """
+    Dimension Indicador: ID Indicador, Indicador, Tipo, Formato.
+
+    NO es opcional. El hecho es alto (una fila por indicador), asi que sin esta
+    tabla la clave `ID Indicador` no apunta a nada y cualquier medida suma
+    porcentajes junto con importes absolutos. Las filas se derivan del catalogo
+    del dominio, de modo que jamas se desincronicen del hecho.
+    """
+    cabeceras = ["ID " + TABLA_INDICADOR, TABLA_INDICADOR, "Tipo", "Formato"]
+    return cabeceras, filas_indicador(dom)
 
 
 def generar_hecho(dom, desde, hasta, limite, rnd):
@@ -343,7 +267,10 @@ def generar_codigo_m(dom, ruta_base):
 //   3) Ajusta RutaBase si moviste los CSV.
 //
 // Convencion: nombres de negocio con espacios, sin prefijos dim_/fact_.
-// Tablas: Calendario, {dim1}, {dim2}, {hecho} (el hecho).
+// Tablas: Calendario, {dim1}, {dim2}, Indicador, {hecho} (el hecho).
+//
+// La tabla Indicador NO es opcional: el hecho guarda una fila por indicador,
+// asi que sin ella las medidas suman % junto con importes absolutos.
 //
 // La variante SharePoint (Excel.Workbook(Web.Contents(...))) esta INCLUIDA
 // COMENTADA al inicio de cada bloque para que la actives cuando migres.
@@ -357,24 +284,15 @@ def generar_codigo_m(dom, ruta_base):
 
 '''.format(dim1=dim1_tabla, dim2=dim2_tabla, hecho=hecho, ruta=ruta_m)
 
+    # Las columnas y tipos salen del esquema compartido (dominios.esquema_csv),
+    # asi el .m, los CSV y el TMDL declaran exactamente lo mismo.
+    esq = esquema_csv(dom)
     bloques = [
-        _bloque_m("Calendario", [
-            ("Fecha", "type date"), ("Anio", "Int64.Type"), ("Mes", "type text"),
-            ("NumMes", "Int64.Type"), ("Trimestre", "type text"),
-            ("EsDiaHabil", "type text"),
-        ], ruta_m, nota_fecha=True),
-        _bloque_m(dim1_tabla, [
-            ("ID " + dim1_tabla, "Int64.Type"), (dim1_tabla, "type text"),
-        ], ruta_m),
-        _bloque_m(dim2_tabla, [
-            ("ID " + dim2_tabla, "Int64.Type"), (dim2_tabla, "type text"),
-            (col_grupo, "type text"),
-        ], ruta_m),
-        _bloque_m(hecho, [
-            ("Fecha", "type date"), ("ID " + dim1_tabla, "Int64.Type"),
-            ("ID " + dim2_tabla, "Int64.Type"), ("ID Indicador", "Int64.Type"),
-            ("Num", "Int64.Type"), ("Den", "Int64.Type"),
-        ], ruta_m, filtro={
+        _bloque_m("Calendario", esq["Calendario"], ruta_m, nota_fecha=True),
+        _bloque_m(dim1_tabla, esq[dim1_tabla], ruta_m),
+        _bloque_m(dim2_tabla, esq[dim2_tabla], ruta_m),
+        _bloque_m(TABLA_INDICADOR, esq[TABLA_INDICADOR], ruta_m),
+        _bloque_m(hecho, esq[hecho], ruta_m, filtro={
             "nota": "descarta registros sin denominador (evita dividir por 0).",
             "expr": "each [Den] <> null and [Den] > 0",
         }),
@@ -453,6 +371,7 @@ def main():
     cal_cab, cal_filas = generar_calendario(desde, hasta)
     dim1_cab, dim1_filas = generar_dim1(dom)
     dim2_cab, dim2_filas = generar_dim2(dom)
+    ind_cab, ind_filas = generar_indicador(dom)
     hecho_cab, hecho_filas = generar_hecho(dom, desde, hasta, args.filas, rnd)
 
     # Validar integridad referencial ANTES de escribir
@@ -471,6 +390,8 @@ def main():
         os.path.join(salida, dim1_tabla + ".csv"), dim1_cab, dim1_filas)
     conteos[dim2_tabla] = escribir_csv(
         os.path.join(salida, dim2_tabla + ".csv"), dim2_cab, dim2_filas)
+    conteos[TABLA_INDICADOR] = escribir_csv(
+        os.path.join(salida, TABLA_INDICADOR + ".csv"), ind_cab, ind_filas)
     conteos[hecho_tabla] = escribir_csv(
         os.path.join(salida, hecho_tabla + ".csv"), hecho_cab, hecho_filas)
 
@@ -496,15 +417,17 @@ def main():
     print("  {:<26}: {:>7} filas  (dimension fecha)".format("Calendario.csv", conteos["Calendario"]))
     print("  {:<26}: {:>7} filas  (dimension)".format(dim1_tabla + ".csv", conteos[dim1_tabla]))
     print("  {:<26}: {:>7} filas  (dimension)".format(dim2_tabla + ".csv", conteos[dim2_tabla]))
+    print("  {:<26}: {:>7} filas  (dimension de indicadores)".format(
+        TABLA_INDICADOR + ".csv", conteos[TABLA_INDICADOR]))
     print("  {:<26}: {:>7} filas  (HECHO Num/Den)".format(hecho_tabla + ".csv", conteos[hecho_tabla]))
-    print("  {:<26}: codigo Power Query M (4 tablas)".format("modelo-ejemplo.m"))
+    print("  {:<26}: codigo Power Query M (5 tablas)".format("modelo-ejemplo.m"))
     print("")
-    print("Integridad referencial: OK (todas las claves del hecho existen).")
+    print("Integridad referencial: OK (todas las claves del hecho existen,")
+    print("incluida ID {} contra su dimension).".format(TABLA_INDICADOR))
     print("")
-    print("Proximos 2 pasos:")
-    print("  1) Importar los 4 CSV en Power BI (Obtener datos > Texto/CSV), o")
-    print("  2) Pegar cada bloque de 'modelo-ejemplo.m' en el Editor avanzado")
-    print("     (una consulta en blanco por tabla) y ajustar RutaBase.")
+    print("Siguiente: si generaste este proyecto con init_proyecto.py, el .pbip ya")
+    print("lee estos CSV. Si vas a conectarlos a mano, pega los bloques de")
+    print("'modelo-ejemplo.m' en el Editor avanzado y ajusta RutaBase.")
     print("=" * 70)
 
 

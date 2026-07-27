@@ -21,6 +21,16 @@ Reglas (severidad [ALTA] bloquea, exit 1):
   P7  [ALTA]  Tema custom NO cableado: hay un theme .json en RegisteredResources
               pero report.json no lo referencia (los colores NO se aplican), o al
               reves: customTheme referenciado pero el archivo del recurso no existe.
+  P8  [ALTA]  Nombre del tema inconsistente: el `name` interno del theme.json,
+              `customTheme.name` y el `name`/`path` del item de resourcePackages
+              deben ser IDENTICOS y terminar en ".json". Sin la extension, Desktop
+              abre bien pero el reporte PUBLICADO EN EL SERVICE aplica mal el tema.
+              Equivale a PBIR_THEME_NAME_MISSING_JSON_EXT y
+              PBIR_THEME_FILE_NAME_MISMATCH del validador oficial de Microsoft.
+  P9  [ALTA]  Visual sin altText (accesibilidad). Es la regla de MAYOR severidad
+              del catalogo de visualizacion: sin alt, un lector de pantalla solo
+              anuncia el tipo de visual y el insight se pierde. Limite 250 chars.
+              Exentos los decorativos (shape, image, actionButton).
 
 Solo librería estándar.
 """
@@ -138,6 +148,36 @@ def main():
             if "name" not in obj:
                 hallazgos.append(("MEDIA", "P5", f"{nombre} sin 'name' ({f.parent.name})"))
 
+        if nombre == "visual.json":
+            # P9 — accesibilidad: alt text en todo visual que transmita informacion.
+            # Es la regla de MAYOR severidad del catalogo de visualizacion
+            # (PBI-A11Y-01): sin alt, un lector de pantalla solo anuncia el tipo de
+            # visual y el insight se pierde. Limite duro de 250 caracteres.
+            # learn.microsoft.com/power-bi/create-reports/desktop-accessibility-creating-reports
+            v = obj.get("visual", {})
+            tipo = v.get("visualType", "?")
+            general = v.get("visualContainerObjects", {}).get("general", [])
+            alt = None
+            for bloque in general:
+                cand = bloque.get("properties", {}).get("altText")
+                if isinstance(cand, dict):
+                    alt = (cand.get("expr", {}).get("Literal", {}).get("Value") or "")
+                    alt = alt.strip("'")
+                    break
+            # Los puramente decorativos (formas e imagenes sin dato) estan exentos.
+            decorativos = {"shape", "image", "actionButton", "basicShape"}
+            if tipo in decorativos:
+                pass
+            elif not alt:
+                hallazgos.append(("ALTA", "P9",
+                    f"visual '{tipo}' sin altText ({f.parent.name}): un lector de "
+                    "pantalla solo anunciara el tipo de visual y el insight se "
+                    "pierde. Describe el hallazgo, no el aspecto"))
+            elif len(alt) > 250:
+                hallazgos.append(("MEDIA", "P9",
+                    f"visual '{tipo}': altText de {len(alt)} caracteres; el limite "
+                    "duro del campo son 250"))
+
         elif f.suffix == ".pbir":
             if "datasetReference" not in obj:
                 hallazgos.append(("MEDIA", "P6", "definition.pbir sin 'datasetReference'"))
@@ -161,9 +201,48 @@ def main():
                 "report.json NO lo referencia (themeCollection.customTheme): los "
                 "colores de la marca NO se estan aplicando"))
 
+        # P8 — identidad del nombre del tema (4 valores que deben coincidir).
+        # Microsoft exige que el `name` interno del theme.json, customTheme.name y
+        # el name/path del item de resourcePackages sean IDENTICOS y terminen en
+        # ".json". Si falta la extension, Power BI Desktop abre bien pero el reporte
+        # PUBLICADO EN EL SERVICE aplica el tema incorrectamente: los colores del
+        # usuario se pierden en silencio justo al llegar a produccion. Si el `name`
+        # interno no coincide con la referencia, el tema no carga.
+        # Equivale a los diagnosticos PBIR_THEME_NAME_MISSING_JSON_EXT y
+        # PBIR_THEME_FILE_NAME_MISMATCH del validador oficial de Microsoft
+        # (@microsoft/powerbi-report-authoring-cli), comprobados empiricamente.
+        if ct:
+            ref = ct.get("name", "")
+            if not ref.lower().endswith(".json"):
+                hallazgos.append(("ALTA", "P8",
+                    f'themeCollection.customTheme.name es "{ref}" y le falta la '
+                    'extension ".json". Power BI Desktop abre bien, pero el reporte '
+                    "publicado en el Service aplica el tema incorrectamente: los "
+                    "colores de la marca se pierden al llegar a produccion"))
+            for i in items:
+                for clave in ("name", "path"):
+                    if i.get(clave) != ref:
+                        hallazgos.append(("ALTA", "P8",
+                            f'resourcePackages item {clave}="{i.get(clave)}" no coincide '
+                            f'con customTheme.name="{ref}"; los cuatro valores '
+                            "(name interno del tema, customTheme.name, item.name e "
+                            "item.path) deben ser identicos"))
+            for t in temas_en_disco:
+                if t.name != ref:
+                    continue
+                try:
+                    with open(t, encoding="utf-8") as fh:
+                        interno = json.load(fh).get("name", "")
+                except (OSError, ValueError):
+                    continue
+                if interno != ref:
+                    hallazgos.append(("ALTA", "P8",
+                        f'el "name" dentro de {t.name} es "{interno}" pero report.json '
+                        f'referencia "{ref}"; si no son identicos el tema no carga'))
+
     print(f"Reporte: {report.name}  |  Archivos JSON/PBIR: {n_ok}")
     if not hallazgos:
-        print("OK  Sin hallazgos en el reporte (P1-P7).")
+        print("OK  Sin hallazgos en el reporte (P1-P9).")
         return 0
     orden = {"ALTA": 0, "MEDIA": 1, "BAJA": 2}
     for sev, regla, msg in sorted(hallazgos, key=lambda h: orden[h[0]]):

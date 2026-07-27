@@ -1,10 +1,11 @@
 ---
 name: powerbi-auditoria
 description: >
-  Auditoria de un proyecto Power BI existente. USAR cuando el usuario sube o
-  apunta a una carpeta PBIP (.pbip + .SemanticModel + .Report) y pide "audita mi
-  proyecto/modelo", "revisa las medidas", "¿esta bien hecho?", "refactoriza", o
-  "valida contra buenas practicas".
+  USAR cuando hay un proyecto existente que revisar: el usuario apunta a una
+  carpeta PBIP (.pbip + .SemanticModel + .Report) y pide "audita mi proyecto",
+  "revisa las medidas", "¿esta bien hecho?", "¿que puedo mejorar?", "refactoriza",
+  "valida contra buenas practicas". NO usar para construir algo nuevo (ve al skill
+  de la fase que toque) ni para un .pbix sin exportar a PBIP.
 ---
 
 # Auditoria de un PBIP existente
@@ -18,7 +19,7 @@ Procedimiento:
    (R1–R12, incl. description para IA). Contrasta con `references/fase4-modelado.md`,
    `references/nomenclatura.md` y `references/preparar-datos-ia.md`.
 3. **Reporte (PBIR)**: `python "${CLAUDE_PLUGIN_ROOT}/scripts/validar_pbip.py" <ruta .Report>`
-   (P1–P7: JSON válido, `$schema`, tema completo y cableado, páginas) — evita la
+   (P1–P9: JSON válido, `$schema`, tema completo y cableado, páginas) — evita la
    corrupción al abrir.
 4. **Rendimiento**: aplica `references/rendimiento-y-mantenimiento.md` (cardinalidad,
    columnas sin uso, bidireccionales, fecha/hora).
@@ -34,3 +35,12 @@ que lea y devuelva solo el veredicto (ahorra tokens).
 **Disciplina Git (antes de refactorizar)**: trabaja en una rama, valida con ambos
 validadores antes y despues, y **nunca hagas commit automatico** — el usuario revisa
 y confirma. Sugiere commit ANTES de cualquier edicion masiva.
+
+## Boundaries
+
+Alcance: revisar un proyecto PBIP existente y entregar hallazgos por severidad
+con el arreglo por archivo. **Reporta; no aplica los cambios** salvo que el
+usuario lo pida explicitamente.
+Fuera de alcance: construir desde cero → el skill de la fase que toque.
+Un `.pbix` sin exportar a PBIP no se puede auditar como texto: pide el PBIP.
+Antes de tocar un PBIP existente, recomienda un commit; nunca commitees tu.

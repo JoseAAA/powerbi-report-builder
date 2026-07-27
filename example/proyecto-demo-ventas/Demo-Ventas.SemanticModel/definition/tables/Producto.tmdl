@@ -1,0 +1,48 @@
+/// Dimension Producto, con la columna Categoria Producto para agrupar y jerarquizar.
+table Producto
+	lineageTag: 7a5693f5-821a-448f-ae90-c77f05ad5245
+
+	column 'ID Producto'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: 03c6970a-9e8e-4e2b-9364-ff6d33b666a0
+		summarizeBy: none
+		sourceColumn: ID Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	column Producto
+		dataType: string
+		lineageTag: c6758962-a2a4-435d-828d-526d11b889f6
+		summarizeBy: none
+		sourceColumn: Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Categoria Producto'
+		dataType: string
+		lineageTag: 6289cd6c-617f-4ace-aba5-b25543e72652
+		summarizeBy: none
+		sourceColumn: Categoria Producto
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Producto = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Producto.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Producto", Int64.Type},
+				        {"Producto", type text},
+				        {"Categoria Producto", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

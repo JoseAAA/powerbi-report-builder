@@ -71,7 +71,7 @@ o las capacidades agénticas de **Fabric/Power BI**). El agente llama funciones
 
 ```bash
 python scripts/validar_modelo.py "<...>.SemanticModel"   # modelo (R1–R12)
-python scripts/validar_pbip.py   "<...>.Report"          # reporte (P1–P7)
+python scripts/validar_pbip.py   "<...>.Report"          # reporte (P1–P9)
 ```
 
 ## Fundamento (oficial)

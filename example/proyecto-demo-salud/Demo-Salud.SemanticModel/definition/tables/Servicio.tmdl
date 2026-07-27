@@ -1,0 +1,48 @@
+/// Dimension Servicio, con la columna Servicio Agrupado para agrupar y jerarquizar.
+table Servicio
+	lineageTag: b5b29f66-a7d5-44a0-a4b0-0e24f756b72a
+
+	column 'ID Servicio'
+		dataType: int64
+		isKey
+		formatString: 0
+		lineageTag: c7ded5a1-a0fa-43b8-9e23-c5c4508309e7
+		summarizeBy: none
+		sourceColumn: ID Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column Servicio
+		dataType: string
+		lineageTag: 46624110-d318-4f91-8c97-adadb337dcef
+		summarizeBy: none
+		sourceColumn: Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Servicio Agrupado'
+		dataType: string
+		lineageTag: 173e38bd-6c13-4b58-be27-f7cea4e3bdf7
+		summarizeBy: none
+		sourceColumn: Servicio Agrupado
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Servicio = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Servicio.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"ID Servicio", Int64.Type},
+				        {"Servicio", type text},
+				        {"Servicio Agrupado", type text}
+				    })
+				in
+				    #"Tipo cambiado"
+
+	annotation PBI_ResultType = Table

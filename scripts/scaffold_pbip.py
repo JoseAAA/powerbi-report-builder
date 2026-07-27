@@ -34,12 +34,22 @@ MODELO ESTRELLA GENERADO (nombres de negocio, sin prefijos dim_/fact_)
   Calendario   tabla de fecha (marcada con dataCategory=Time). NO usa Auto date/time.
   <Dim1>       dimensión 1 (según dominio: Region, Sede, Departamento, …).
   <Dim2>       dimensión 2 con columna de agrupación (Producto, Servicio, …).
+  Indicador    dimensión de indicadores: qué mide cada fila del hecho. NO es
+               opcional — el hecho es "alto" (una fila por indicador), así que
+               sin ella las medidas suman porcentajes junto con importes.
   <Hecho>      hecho: Fecha, claves a las dimensiones, Num, Den (claves ocultas).
-  _ Medidas    tabla de medidas oculta con 3 medidas DAX (Numerador, Denominador,
-               'Indicador %') usando VAR/RETURN y DIVIDE.
+  _ Medidas    tabla de medidas oculta con medidas DAX conscientes del indicador
+               (VAR/RETURN, DIVIDE, guarda HASONEVALUE y una medida principal
+               filtrada con CALCULATE).
 
-Todas las particiones son M en modo import y construyen los datos inline con
-#table(...), así el modelo carga sin ninguna fuente externa.
+ORIGEN DE LOS DATOS (dos modos)
+-------------------------------
+  con --datos <carpeta>  las particiones LEEN los CSV de esa carpeta a través
+                         del parámetro RutaBase (expressions.tmdl). Es el modo
+                         normal: abres el .pbip, refrescas y ves tus datos; si
+                         corriges un CSV y refrescas, el reporte cambia.
+  sin --datos            particiones con #table(...) inline. Esqueleto que abre
+                         sin ninguna fuente externa.
 
 Solo usa la librería estándar de Python (json, os, uuid, argparse, shutil,
 secrets).
@@ -50,7 +60,16 @@ import os
 import re
 import secrets
 import shutil
+import sys
 import uuid
+
+# Catalogo de dominios compartido con generar_datos_ejemplo.py (fuente unica).
+# Antes estaba duplicado en los dos scripts y divergio en TODOS los dominios.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import arquetipos  # noqa: E402
+from dominios import (  # noqa: E402
+    DOMINIOS, TABLA_INDICADOR, esquema_csv, filas_indicador, orden_tablas,
+)
 
 # ---------------------------------------------------------------------------
 # CONSTANTES DE FORMATO — clonadas 1:1 de un proyecto PBIP real CY26
@@ -79,50 +98,151 @@ BASE_THEME_NAME      = "CY26SU02"
 
 
 # ---------------------------------------------------------------------------
-# Catalogo de dominios (compacto: nombres + filas de muestra para el #table).
-# Estructura por dominio:
-#   dim1  : (tabla, [(id, nombre)])
-#   dim2  : (tabla, columna_grupo, [(id, nombre, grupo)])
-#   hecho : nombre de la tabla de hechos
-# La estructura del modelo es identica; solo cambian nombres y datos de muestra.
+# El catalogo de dominios vive en `dominios.py` (importado arriba). Estuvo
+# duplicado aqui y en generar_datos_ejemplo.py, y los dos diccionarios
+# divergieron en TODOS los dominios: ventas declaraba 6 productos en los CSV
+# y 4 en el TMDL, salud 8 servicios vs 4. Resultado: los datos de ejemplo y
+# el .pbip describian modelos distintos.
 # ---------------------------------------------------------------------------
-DOMINIOS = {
-    "generico": {
-        "dim1": ("Categoria", [(1, "Categoria A"), (2, "Categoria B"), (3, "Categoria C")]),
-        "dim2": ("Segmento", "Grupo", [
-            (1, "Segmento 1", "Grupo X"), (2, "Segmento 2", "Grupo X"),
-            (3, "Segmento 3", "Grupo Y"), (4, "Segmento 4", "Grupo Y")]),
-        "hecho": "Hechos",
-    },
-    "ventas": {
-        "dim1": ("Region", [(1, "Norte"), (2, "Centro"), (3, "Sur"), (4, "Oriente")]),
-        "dim2": ("Producto", "Categoria Producto", [
-            (1, "Laptop", "Computo"), (2, "Monitor", "Computo"),
-            (3, "Audifonos", "Accesorios"), (4, "Teclado", "Accesorios")]),
-        "hecho": "Ventas",
-    },
-    "rrhh": {
-        "dim1": ("Departamento", [(1, "Tecnologia"), (2, "Comercial"), (3, "Operaciones"), (4, "Finanzas")]),
-        "dim2": ("Categoria", "Nivel", [
-            (1, "Analista", "Profesional"), (2, "Especialista", "Profesional"),
-            (3, "Jefe", "Mando"), (4, "Gerente", "Mando")]),
-        "hecho": "Personal",
-    },
-    "finanzas": {
-        "dim1": ("Centro de Costo", [(1, "CC Comercial"), (2, "CC Operaciones"), (3, "CC Administracion")]),
-        "dim2": ("Cuenta", "Tipo Cuenta", [
-            (1, "Ingresos", "Resultado"), (2, "Gastos Operativos", "Resultado"),
-            (3, "CAPEX", "Inversion"), (4, "Provisiones", "Resultado")]),
-        "hecho": "Movimientos",
-    },
-    "salud": {
-        "dim1": ("Sede", [(1, "Sede Norte"), (2, "Sede Centro"), (3, "Sede Sur")]),
-        "dim2": ("Servicio", "Servicio Agrupado", [
-            (1, "Emergencia", "Atencion Critica"), (2, "Hospitalizacion", "Atencion Critica"),
-            (3, "Consulta Externa", "Ambulatorio"), (4, "Quirofano", "Atencion Critica")]),
-        "hecho": "Indicadores",
-    },
-}
+
+
+# ---------------------------------------------------------------------------
+# Particiones M: leer los CSV de ejemplo, o datos inline como respaldo
+#
+# El modelo puede nacer de dos maneras:
+#   con --datos  -> las particiones leen los CSV reales via el parametro
+#                   RutaBase. Es el modo normal: el .pbip que abres muestra
+#                   exactamente los datos que hay en la carpeta, y si corriges
+#                   un CSV basta refrescar para ver el cambio.
+#   sin --datos  -> particiones con #table(...) inline (pocas filas). Sirve para
+#                   un esqueleto que abre sin ninguna fuente externa.
+#
+# Antes solo existia el segundo modo, asi que generar datos y generar el .pbip
+# producian artefactos desconectados: el reporte mostraba 6 filas inventadas
+# mientras miles de filas reales quedaban huerfanas en la carpeta de al lado.
+# ---------------------------------------------------------------------------
+M_IND = "\t\t\t\t"  # indentacion de una expresion M dentro de una particion TMDL
+
+# Formato canonico de porcentaje que exige la regla oficial PERCENTAGE_FORMATTING
+# de Microsoft (BPARules.json), literal: no vale "0.0%;-0.0%;0.0%".
+FMT_PORCENTAJE = "#,0.0%;-#,0.0%;#,0.0%"
+
+
+def _nombre_archivo_tema(nombre_tema):
+    """
+    Nombre de archivo para el tema incrustado, derivado del nombre del tema.
+
+    Microsoft exige que el `name` interno del tema, `customTheme.name`, y el
+    `name`/`path` del item de resourcePackages sean IDENTICOS y terminen en
+    ".json". Como ese valor es a la vez nombre de archivo en disco, hay que
+    sanearlo: se quitan los caracteres invalidos en Windows y los separadores de
+    ruta (evita escribir fuera de RegisteredResources).
+    """
+    base = (nombre_tema or "theme_custom").strip()
+    if base.lower().endswith(".json"):
+        base = base[:-5]
+    base = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", base).strip(" .")
+    base = re.sub(r"\s+", " ", base)
+    if not base:
+        base = "theme_custom"
+    return base[:80] + ".json"
+
+
+def m_texto(valor):
+    """
+    Literal de texto para Power Query M.
+
+    OJO: M **no** usa la barra invertida como caracter de escape. En M la ruta
+    se escribe tal cual, `"C:\\Datos\\archivo.csv"` en Python == C:\\Datos... en
+    disco se ve como C:\\Datos\\archivo.csv y M lo lee literal. Por eso NO se
+    puede usar json.dumps() aqui: duplicaria cada barra y el modelo buscaria
+    una ruta inexistente con dobles separadores.
+
+    Lo unico que hay que escapar es la comilla doble, duplicandola, y los
+    caracteres de control, que en M van con la sintaxis #(...).
+    """
+    return '"' + valor.replace('"', '""') + '"'
+
+
+def _particion_encabezado(tabla):
+    return f"\tpartition {tq(tabla)} = m\n\t\tmode: import\n\t\tsource =\n"
+
+
+def particion_csv(tabla, columnas, filtro=None):
+    """
+    Particion que lee '<tabla>.csv' relativo al parametro compartido RutaBase.
+
+    Usa Csv.Document + File.Contents con Encoding=65001 (UTF-8) porque los CSV
+    se escriben con BOM para que Excel y Power BI lean las tildes. Los tipos
+    salen de `dominios.esquema_csv`, la misma fuente que usa el codigo M, de
+    modo que el modelo y los datos no puedan declarar tipos distintos.
+    """
+    tipos = ",\n".join(
+        '{}        {{"{}", {}}}'.format(M_IND, col, tipo) for col, tipo in columnas)
+    paso_final = '#"Tipo cambiado"'
+    extra = ""
+    if filtro:
+        extra = (
+            f',\n{M_IND}    // {filtro["nota"]}\n'
+            f'{M_IND}    #"Filas filtradas" = Table.SelectRows(#"Tipo cambiado", '
+            f'{filtro["expr"]})')
+        paso_final = '#"Filas filtradas"'
+    return (
+        _particion_encabezado(tabla)
+        + f"{M_IND}let\n"
+        + f"{M_IND}    Origen = Csv.Document(\n"
+        + f'{M_IND}        File.Contents(RutaBase & "\\{tabla}.csv"),\n'
+        + f"{M_IND}        [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]\n"
+        + f"{M_IND}    ),\n"
+        + f"{M_IND}    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),\n"
+        + f'{M_IND}    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {{\n'
+        + tipos + "\n"
+        + f"{M_IND}    }}){extra}\n"
+        + f"{M_IND}in\n"
+        + f"{M_IND}    {paso_final}\n"
+    )
+
+
+def particion_inline(tabla, tipo_table, filas):
+    """Particion con datos inline #table(...): esqueleto sin fuente externa."""
+    return (
+        _particion_encabezado(tabla)
+        + f"{M_IND}let\n"
+        + f"{M_IND}    Origen = #table(\n"
+        + f"{M_IND}        type table [{tipo_table}],\n"
+        + f"{M_IND}        {{\n"
+        + filas + "\n"
+        + f"{M_IND}        }}\n"
+        + f"{M_IND}    )\n"
+        + f"{M_IND}in\n"
+        + f"{M_IND}    Origen\n"
+    )
+
+
+def tmdl_expressions(ruta_datos):
+    """
+    expressions.tmdl con el parametro compartido RutaBase.
+
+    Sin este archivo no hay forma de parametrizar la ruta de los CSV: las
+    particiones tendrian que llevar la ruta absoluta incrustada. Es un
+    parametro de Power Query de verdad (IsParameterQuery), asi que el usuario
+    lo cambia desde Inicio > Transformar datos > Administrar parametros sin
+    tocar una sola consulta.
+
+    Sintaxis oficial de TMDL para expresiones compartidas:
+      expression <Nombre> = <valor> meta [IsParameterQuery=true, Type=..., ...]
+    (Microsoft Learn - Tabular Model Definition Language, seccion del ejemplo
+    `expression Server = "localhost" meta [...]`).
+    """
+    valor = m_texto(ruta_datos)
+    return (
+        "/// Carpeta que contiene los CSV de datos. Cambiala desde Inicio >\n"
+        "/// Transformar datos > Administrar parametros; todas las consultas la usan.\n"
+        f"expression RutaBase = {valor} "
+        "meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]\n"
+        "\n"
+        "\tannotation PBI_ResultType = Text\n"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -201,9 +321,14 @@ def escribir_texto(ruta, texto):
 # TMDL — tablas del modelo estrella (parametricas por dominio)
 # Indentación con TAB, una línea en blanco entre objetos hermanos.
 # ---------------------------------------------------------------------------
-def tmdl_calendario():
-    """Tabla Calendario marcada como tabla de fecha (dataCategory=Time).
-    Datos inline con #table(...) para 2 años; sin fuente externa.
+def tmdl_calendario(dom, usar_csv):
+    """
+    Tabla Calendario marcada como tabla de fecha (dataCategory=Time).
+
+    Con usar_csv lee Calendario.csv (rango real de los datos); sin el, construye
+    el calendario inline con List.Dates. Incluye EsDiaHabil porque el CSV la
+    trae: si el modelo no declarara la columna, la particion la cargaria como
+    columna no tipada y el modelo quedaria distinto a los datos.
     """
     lt_tabla = nuevo_guid()
     lt_fecha = nuevo_guid()
@@ -211,7 +336,27 @@ def tmdl_calendario():
     lt_mes = nuevo_guid()
     lt_nummes = nuevo_guid()
     lt_trim = nuevo_guid()
-    return f"""table Calendario
+    lt_habil = nuevo_guid()
+    if usar_csv:
+        particion = particion_csv("Calendario", esquema_csv(dom)["Calendario"])
+    else:
+        particion = (
+            _particion_encabezado("Calendario")
+            + f"{M_IND}let\n"
+            + f"{M_IND}    Fechas = List.Dates(#date(2024, 1, 1), 731, #duration(1, 0, 0, 0)),\n"
+            + f'{M_IND}    Tabla = Table.FromList(Fechas, Splitter.SplitByNothing(), {{"Fecha"}}),\n'
+            + f'{M_IND}    Tipo = Table.TransformColumnTypes(Tabla, {{{{"Fecha", type date}}}}),\n'
+            + f'{M_IND}    Anio = Table.AddColumn(Tipo, "Año", each Date.Year([Fecha]), Int64.Type),\n'
+            + f'{M_IND}    NumMes = Table.AddColumn(Anio, "NumMes", each Date.Month([Fecha]), Int64.Type),\n'
+            + f'{M_IND}    Mes = Table.AddColumn(NumMes, "Mes", each Date.ToText([Fecha], "MMMM", "es-ES"), type text),\n'
+            + f'{M_IND}    Trim = Table.AddColumn(Mes, "Trimestre", each "T" & Text.From(Date.QuarterOfYear([Fecha])), type text),\n'
+            + f'{M_IND}    Habil = Table.AddColumn(Trim, "EsDiaHabil", each if Date.DayOfWeek([Fecha], Day.Monday) < 5 then "Si" else "No", type text)\n'
+            + f"{M_IND}in\n"
+            + f"{M_IND}    Habil\n"
+        )
+    return f"""/// Calendario de fechas continuo, marcado como tabla de fecha. Filtra por esta
+/// tabla y no por la fecha del hecho: es lo que hace funcionar la inteligencia de tiempo.
+table Calendario
 \tdataCategory: Time
 \tlineageTag: {lt_tabla}
 
@@ -262,33 +407,33 @@ def tmdl_calendario():
 
 \t\tannotation SummarizationSetBy = Automatic
 
-\tpartition Calendario = m
-\t\tmode: import
-\t\tsource =
-\t\t\t\tlet
-\t\t\t\t    Fechas = List.Dates(#date(2024, 1, 1), 731, #duration(1, 0, 0, 0)),
-\t\t\t\t    Tabla = Table.FromList(Fechas, Splitter.SplitByNothing(), {{"Fecha"}}),
-\t\t\t\t    Tipo = Table.TransformColumnTypes(Tabla, {{{{"Fecha", type date}}}}),
-\t\t\t\t    Anio = Table.AddColumn(Tipo, "Año", each Date.Year([Fecha]), Int64.Type),
-\t\t\t\t    NumMes = Table.AddColumn(Anio, "NumMes", each Date.Month([Fecha]), Int64.Type),
-\t\t\t\t    Mes = Table.AddColumn(NumMes, "Mes", each Date.ToText([Fecha], "MMM", "es-ES"), type text),
-\t\t\t\t    Trim = Table.AddColumn(Mes, "Trimestre", each "T" & Text.From(Date.QuarterOfYear([Fecha])), type text)
-\t\t\t\tin
-\t\t\t\t    Trim
+\tcolumn EsDiaHabil
+\t\tdataType: string
+\t\tlineageTag: {lt_habil}
+\t\tsummarizeBy: none
+\t\tsourceColumn: EsDiaHabil
 
+\t\tannotation SummarizationSetBy = Automatic
+
+{particion}
 \tannotation PBI_ResultType = Table
 """
 
 
-def tmdl_dim1(dom):
+def tmdl_dim1(dom, usar_csv):
     """Dimensión 1: columnas 'ID <dim1>' (clave) y <dim1>."""
     dim1, filas_dom = dom["dim1"]
     id1 = "ID " + dim1
     lt_tabla, lt_id, lt_nombre = nuevo_guid(), nuevo_guid(), nuevo_guid()
-    filas = ",\n".join(
-        '\t\t\t\t            {%d, "%s"}' % (i, n) for i, n in filas_dom)
-    tipo = "{} = Int64.Type, {} = text".format(mq(id1), mq(dim1))
-    return f"""table {tq(dim1)}
+    if usar_csv:
+        particion = particion_csv(dim1, esquema_csv(dom)[dim1])
+    else:
+        filas = ",\n".join(
+            '%s            {%d, "%s"}' % (M_IND, i, n) for i, n in filas_dom)
+        tipo = "{} = Int64.Type, {} = text".format(mq(id1), mq(dim1))
+        particion = particion_inline(dim1, tipo, filas)
+    return f"""/// Dimension {dim1}: atributo por el que se corta el negocio. Una fila por miembro.
+table {tq(dim1)}
 \tlineageTag: {lt_tabla}
 
 \tcolumn '{id1}'
@@ -309,34 +454,28 @@ def tmdl_dim1(dom):
 
 \t\tannotation SummarizationSetBy = Automatic
 
-\tpartition {tq(dim1)} = m
-\t\tmode: import
-\t\tsource =
-\t\t\t\tlet
-\t\t\t\t    Origen = #table(
-\t\t\t\t        type table [{tipo}],
-\t\t\t\t        {{
-{filas}
-\t\t\t\t        }}
-\t\t\t\t    )
-\t\t\t\tin
-\t\t\t\t    Origen
-
+{particion}
 \tannotation PBI_ResultType = Table
 """
 
 
-def tmdl_dim2(dom):
+def tmdl_dim2(dom, usar_csv):
     """Dimensión 2: 'ID <dim2>' (clave), <dim2> y la columna de agrupación."""
     dim2, col_grupo, filas_dom = dom["dim2"]
     id2 = "ID " + dim2
     lt_tabla, lt_id, lt_nombre, lt_grupo = (nuevo_guid(), nuevo_guid(),
                                             nuevo_guid(), nuevo_guid())
-    filas = ",\n".join(
-        '\t\t\t\t            {%d, "%s", "%s"}' % (i, n, g) for i, n, g in filas_dom)
-    tipo = "{} = Int64.Type, {} = text, {} = text".format(
-        mq(id2), mq(dim2), mq(col_grupo))
-    return f"""table {tq(dim2)}
+    if usar_csv:
+        particion = particion_csv(dim2, esquema_csv(dom)[dim2])
+    else:
+        filas = ",\n".join(
+            '%s            {%d, "%s", "%s"}' % (M_IND, i, n, g)
+            for i, n, g in filas_dom)
+        tipo = "{} = Int64.Type, {} = text, {} = text".format(
+            mq(id2), mq(dim2), mq(col_grupo))
+        particion = particion_inline(dim2, tipo, filas)
+    return f"""/// Dimension {dim2}, con la columna {col_grupo} para agrupar y jerarquizar.
+table {tq(dim2)}
 \tlineageTag: {lt_tabla}
 
 \tcolumn '{id2}'
@@ -365,53 +504,138 @@ def tmdl_dim2(dom):
 
 \t\tannotation SummarizationSetBy = Automatic
 
-\tpartition {tq(dim2)} = m
-\t\tmode: import
-\t\tsource =
-\t\t\t\tlet
-\t\t\t\t    Origen = #table(
-\t\t\t\t        type table [{tipo}],
-\t\t\t\t        {{
-{filas}
-\t\t\t\t        }}
-\t\t\t\t    )
-\t\t\t\tin
-\t\t\t\t    Origen
+{particion}
+\tannotation PBI_ResultType = Table
+"""
 
+
+def tmdl_indicador(dom, usar_csv):
+    """
+    Dimensión Indicador: qué mide cada fila del hecho.
+
+    NO es opcional. El hecho es alto (una fila por indicador), asi que sin esta
+    tabla la clave 'ID Indicador' no apunta a nada y cualquier medida suma
+    porcentajes junto con importes absolutos. En el dominio ventas eso daba
+    DIVIDE(SUM(Num), SUM(Den)) = 5226%, mezclando '% Margen' con
+    'Ticket Promedio'. La columna Formato guarda el formatString sugerido por
+    indicador, util para el patron de medida con formato dinamico.
+    """
+    ind = TABLA_INDICADOR
+    id_ind = "ID " + ind
+    lt_tabla, lt_id, lt_nombre, lt_tipo, lt_fmt = (
+        nuevo_guid(), nuevo_guid(), nuevo_guid(), nuevo_guid(), nuevo_guid())
+    if usar_csv:
+        particion = particion_csv(ind, esquema_csv(dom)[ind])
+    else:
+        filas = ",\n".join(
+            '%s            {%d, "%s", "%s", "%s"}' % (M_IND, i, n, t, f)
+            for i, n, t, f in filas_indicador(dom))
+        tipo = "{} = Int64.Type, {} = text, Tipo = text, Formato = text".format(
+            mq(id_ind), mq(ind))
+        particion = particion_inline(ind, tipo, filas)
+    return f"""/// Que mide cada fila del hecho. Segmenta por esta tabla para leer un indicador a
+/// la vez: sumar varios mezclaria porcentajes con importes absolutos.
+table {tq(ind)}
+\tlineageTag: {lt_tabla}
+
+\tcolumn '{id_ind}'
+\t\tdataType: int64
+\t\tisKey
+\t\tformatString: 0
+\t\tlineageTag: {lt_id}
+\t\tsummarizeBy: none
+\t\tsourceColumn: {id_ind}
+
+\t\tannotation SummarizationSetBy = Automatic
+
+\tcolumn {tq(ind)}
+\t\tdataType: string
+\t\tlineageTag: {lt_nombre}
+\t\tsummarizeBy: none
+\t\tsourceColumn: {ind}
+
+\t\tannotation SummarizationSetBy = Automatic
+
+\tcolumn Tipo
+\t\tdataType: string
+\t\tlineageTag: {lt_tipo}
+\t\tsummarizeBy: none
+\t\tsourceColumn: Tipo
+
+\t\tannotation SummarizationSetBy = Automatic
+
+\tcolumn Formato
+\t\tdataType: string
+\t\tisHidden
+\t\tlineageTag: {lt_fmt}
+\t\tsummarizeBy: none
+\t\tsourceColumn: Formato
+
+\t\tannotation SummarizationSetBy = Automatic
+
+{particion}
 \tannotation PBI_ResultType = Table
 """
 
 
 def _filas_hecho(dom):
-    """Filas de muestra del hecho: (fecha M, id_dim1, id_dim2, Num, Den)."""
+    """
+    Filas de muestra del hecho (solo modo inline, sin --datos):
+    (fecha M, id_dim1, id_dim2, id_indicador, Num, Den).
+
+    Incluye ID Indicador porque el hecho es alto: cada fila mide UN indicador.
+    Se genera una fila por indicador y por fecha para que el modelo de muestra
+    tenga la misma forma que los datos reales.
+    """
     d1_ids = [r[0] for r in dom["dim1"][1]]
     d2_ids = [r[0] for r in dom["dim2"][2]]
     fechas = ["#date(2024, 1, 15)", "#date(2024, 2, 15)", "#date(2024, 3, 15)",
               "#date(2025, 1, 15)", "#date(2025, 2, 15)", "#date(2025, 3, 15)"]
-    nums = [82, 45, 70, 90, 48, 40]
-    dens = [100, 60, 90, 100, 60, 50]
     filas = []
     for i, fecha in enumerate(fechas):
         d1 = d1_ids[i % len(d1_ids)]
         d2 = d2_ids[i % len(d2_ids)]
-        filas.append("\t\t\t\t            {%s, %d, %d, %d, %d}"
-                     % (fecha, d1, d2, nums[i], dens[i]))
+        for ind_id, _nombre, (num_lo, num_hi), (den_lo, den_hi) in dom["indicadores"]:
+            # Valores deterministas dentro del rango del indicador (sin random:
+            # el esqueleto debe ser reproducible byte a byte).
+            den = (den_lo + den_hi) // 2
+            num = (num_lo + num_hi) // 2
+            if ind_id in dom["pct"] and num > den:
+                num = den
+            filas.append("%s            {%s, %d, %d, %d, %d, %d}"
+                         % (M_IND, fecha, d1, d2, ind_id, num, den))
     return ",\n".join(filas)
 
 
-def tmdl_hecho(dom):
-    """Tabla de hechos. Claves 'ID <dim1>' e 'ID <dim2>' ocultas; Num/Den ocultas."""
+def tmdl_hecho(dom, usar_csv):
+    """
+    Tabla de hechos. Claves a las dimensiones ocultas; Num/Den ocultas.
+
+    Grain: una fila por Fecha x dim1 x dim2 x indicador. La clave 'ID Indicador'
+    es parte del grano, no un extra: sin ella no se puede saber que mide cada
+    fila y las medidas suman indicadores incompatibles.
+    """
     dim1 = dom["dim1"][0]
     dim2 = dom["dim2"][0]
     hecho = dom["hecho"]
     id1, id2 = "ID " + dim1, "ID " + dim2
-    lt_tabla, lt_fecha, lt_d1, lt_d2, lt_num, lt_den = (
+    id_ind = "ID " + TABLA_INDICADOR
+    lt_tabla, lt_fecha, lt_d1, lt_d2, lt_ind, lt_num, lt_den = (
         nuevo_guid(), nuevo_guid(), nuevo_guid(), nuevo_guid(),
-        nuevo_guid(), nuevo_guid())
-    filas = _filas_hecho(dom)
-    tipo = "Fecha = date, {} = Int64.Type, {} = Int64.Type, Num = Int64.Type, Den = Int64.Type".format(
-        mq(id1), mq(id2))
-    return f"""table {tq(hecho)}
+        nuevo_guid(), nuevo_guid(), nuevo_guid())
+    if usar_csv:
+        particion = particion_csv(hecho, esquema_csv(dom)[hecho], filtro={
+            "nota": "descarta registros sin denominador (evita dividir por 0).",
+            "expr": "each [Den] <> null and [Den] > 0",
+        })
+    else:
+        tipo = ("Fecha = date, {} = Int64.Type, {} = Int64.Type, "
+                "{} = Int64.Type, Num = Int64.Type, Den = Int64.Type").format(
+            mq(id1), mq(id2), mq(id_ind))
+        particion = particion_inline(hecho, tipo, _filas_hecho(dom))
+    return f"""/// Hecho {hecho}. Grano: una fila por fecha, {dim1}, {dim2} e indicador, con el patron
+/// Num/Den. Las claves y las metricas base van ocultas: consulta el modelo con las medidas.
+table {tq(hecho)}
 \tlineageTag: {lt_tabla}
 
 \tcolumn Fecha
@@ -445,6 +669,16 @@ def tmdl_hecho(dom):
 
 \t\tannotation SummarizationSetBy = Automatic
 
+\tcolumn '{id_ind}'
+\t\tdataType: int64
+\t\tisHidden
+\t\tformatString: 0
+\t\tlineageTag: {lt_ind}
+\t\tsummarizeBy: none
+\t\tsourceColumn: {id_ind}
+
+\t\tannotation SummarizationSetBy = Automatic
+
 \tcolumn Num
 \t\tdataType: int64
 \t\tformatString: 0
@@ -465,30 +699,43 @@ def tmdl_hecho(dom):
 
 \t\tannotation SummarizationSetBy = Automatic
 
-\tpartition {tq(hecho)} = m
-\t\tmode: import
-\t\tsource =
-\t\t\t\tlet
-\t\t\t\t    Origen = #table(
-\t\t\t\t        type table [{tipo}],
-\t\t\t\t        {{
-{filas}
-\t\t\t\t        }}
-\t\t\t\t    )
-\t\t\t\tin
-\t\t\t\t    Origen
-
+{particion}
 \tannotation PBI_ResultType = Table
 """
 
 
+def medida_principal(dom):
+    """Nombre y formato del primer indicador del dominio (el que usan las tarjetas)."""
+    nombre = dom["indicadores"][0][1]
+    formato = filas_indicador(dom)[0][3]
+    return nombre, formato
+
+
 def tmdl_medidas(dom):
-    """Tabla de medidas oculta '_ Medidas' con 3 medidas DAX de ejemplo, que
-    referencian el hecho del dominio. Tabla calculada de una columna en blanco.
+    """
+    Tabla de medidas oculta '_ Medidas'. Tabla calculada de una columna en blanco.
+
+    Las medidas son CONSCIENTES DEL INDICADOR, y eso no es un adorno. El hecho
+    guarda una fila por indicador, asi que un DIVIDE(SUM(Num), SUM(Den)) sin
+    filtrar suma '% Margen' con 'Ticket Promedio' y devuelve 5226%. Dos defensas:
+
+      1. 'Indicador %' exige UN solo indicador en contexto (HASONEVALUE) y
+         devuelve BLANK si hay ambiguedad. Preferimos una celda vacia a un
+         numero falso.
+      2. Una medida explicita por el indicador principal, con CALCULATE, para
+         que las tarjetas muestren siempre un valor correcto sin depender de
+         que el usuario segmente.
+
+    Fundamento: DIVIDE en vez de '/', VAR/RETURN, medidas en lugar de columnas
+    calculadas, descripciones /// para Copilot y agentes (SQLBI, Microsoft,
+    Tabular Editor BPA).
     """
     hecho = dom["hecho"]
+    ind = TABLA_INDICADOR
+    nombre_ppal, formato_ppal = medida_principal(dom)
     lt_tabla, lt_col = nuevo_guid(), nuevo_guid()
-    lt_num, lt_den, lt_ind = nuevo_guid(), nuevo_guid(), nuevo_guid()
+    lt_num, lt_den, lt_ind, lt_ppal = (
+        nuevo_guid(), nuevo_guid(), nuevo_guid(), nuevo_guid())
     return f"""table '_ Medidas'
 \tisHidden
 \tlineageTag: {lt_tabla}
@@ -500,7 +747,8 @@ def tmdl_medidas(dom):
 \t\t\t    Resultado
 \t\t\t```
 \t\tformatString: #,0
-\t\tdisplayFolder: Indicadores
+\t\tdisplayFolder: Base
+\t\tisHidden
 \t\tlineageTag: {lt_num}
 
 \t/// Suma del denominador del indicador (columna Den del hecho). Medida base para construir cocientes; no se muestra sola.
@@ -510,19 +758,34 @@ def tmdl_medidas(dom):
 \t\t\t    Resultado
 \t\t\t```
 \t\tformatString: #,0
-\t\tdisplayFolder: Indicadores
+\t\tdisplayFolder: Base
+\t\tisHidden
 \t\tlineageTag: {lt_den}
 
-\t/// Indicador principal del modelo: cociente Numerador / Denominador con DIVIDE (maneja division por cero). Se agrega correctamente a cualquier nivel.
+\t/// Valor del indicador seleccionado (Numerador / Denominador). Devuelve BLANK si hay mas de un indicador en contexto, porque sumar indicadores distintos (un porcentaje y un importe) daria un numero sin significado. Segmenta por Indicador para verlo.
 \tmeasure 'Indicador %' = ```
-\t\t\tVAR Num = [Numerador]
-\t\t\tVAR Den = [Denominador]
+\t\t\tVAR UnSoloIndicador = HASONEVALUE ( {tq(ind)}[{ind}] )
+\t\t\tVAR Resultado = DIVIDE ( [Numerador], [Denominador] )
 \t\t\tRETURN
-\t\t\t    DIVIDE ( Num, Den )
+\t\t\t    IF ( UnSoloIndicador, Resultado )
 \t\t\t```
-\t\tformatString: 0.0%;-0.0%;0.0%
+\t\tformatString: {FMT_PORCENTAJE}
 \t\tdisplayFolder: Indicadores
 \t\tlineageTag: {lt_ind}
+
+\t/// {nombre_ppal}: indicador principal del reporte, filtrado explicitamente con CALCULATE. Muestra siempre un valor correcto aunque no haya segmentacion por Indicador.
+\tmeasure '{nombre_ppal}' = ```
+\t\t\tVAR Resultado =
+\t\t\t    CALCULATE (
+\t\t\t        DIVIDE ( [Numerador], [Denominador] ),
+\t\t\t        {tq(ind)}[{ind}] = "{nombre_ppal}"
+\t\t\t    )
+\t\t\tRETURN
+\t\t\t    Resultado
+\t\t\t```
+\t\tformatString: {formato_ppal}
+\t\tdisplayFolder: Indicadores
+\t\tlineageTag: {lt_ppal}
 
 \tcolumn Valor
 \t\tisHidden
@@ -562,16 +825,26 @@ def tmdl_relationships(rels):
     return "\n".join(bloques)
 
 
-def tmdl_model(nombre_modelo, tablas_orden):
-    """model.tmdl. Desactiva Auto date/time (__PBI_TimeIntelligenceEnabled = 0)
-    para NO generar LocalDateTable.
+def tmdl_model(nombre_modelo, tablas_orden, cultura, con_expresiones):
+    """
+    model.tmdl. Desactiva Auto date/time (__PBI_TimeIntelligenceEnabled = 0)
+    para NO generar tablas LocalDateTable.
+
+    `cultura` se aplica a culture y sourceQueryCulture. Antes estaba fijo en
+    es-ES / es-PE: una cultura de un pais concreto incrustada en un framework
+    generico, que nadie eligio. Ahora es un parametro con default neutro.
+
+    `con_expresiones` agrega el `ref expression RutaBase` para preservar el
+    orden de la coleccion en los round-trips de TMDL.
     """
     refs = "\n".join(f"ref table {tq(t)}" for t in tablas_orden)
+    if con_expresiones:
+        refs += "\n\nref expression RutaBase"
     orden_json = json.dumps(tablas_orden, ensure_ascii=False)
     return f"""model Model
-\tculture: es-ES
+\tculture: {cultura}
 \tdefaultPowerBIDataSourceVersion: powerBI_V3
-\tsourceQueryCulture: es-PE
+\tsourceQueryCulture: {cultura}
 \tdataAccessOptions
 \t\tlegacyRedirects
 \t\treturnErrorValuesAsNull
@@ -589,6 +862,116 @@ annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode"]
 # ---------------------------------------------------------------------------
 # Reporte PBIR
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Constructor generico de visuales, con altText OBLIGATORIO.
+#
+# `PBI-A11Y-01` (alt text en todo visual que transmita informacion) es la regla de
+# mayor severidad del catalogo de visualizacion, y este generador la incumplia en
+# el 100% de los visuales que producia. Ahora el alt es un parametro requerido:
+# no se puede construir un visual sin el.
+#
+# El alt describe el INSIGHT, no el aspecto — el lector de pantalla ya anuncia
+# titulo y tipo de visual. Limite duro de 250 caracteres.
+# learn.microsoft.com/power-bi/create-reports/desktop-accessibility-creating-reports
+# ---------------------------------------------------------------------------
+
+def _lit(valor):
+    """Propiedad literal de PBIR: el valor de texto va entre comillas simples."""
+    return {"expr": {"Literal": {"Value": f"'{valor}'"}}}
+
+
+def campo_medida(entidad, propiedad):
+    return {
+        "field": {"Measure": {"Expression": {"SourceRef": {"Entity": entidad}},
+                              "Property": propiedad}},
+        "queryRef": f"{entidad}.{propiedad}",
+        "nativeQueryRef": propiedad,
+    }
+
+
+def campo_columna(entidad, propiedad, activo=False):
+    c = {
+        "field": {"Column": {"Expression": {"SourceRef": {"Entity": entidad}},
+                             "Property": propiedad}},
+        "queryRef": f"{entidad}.{propiedad}",
+        "nativeQueryRef": propiedad,
+    }
+    if activo:
+        c["active"] = True
+    return c
+
+
+def visual(tipo, pos, alt, roles=None, titulo=None, orden_desc=None):
+    """
+    Un visual PBIR completo.
+
+    tipo   : visualType (del cookbook de arquetipos.py, no inventado aqui)
+    pos    : (x, y, w, h, tabOrder) — el tabOrder debe seguir el orden de lectura
+             (WCAG 2.4.3)
+    alt    : texto alternativo. OBLIGATORIO.
+    roles  : {"Category": [campo...], "Y": [campo...]} segun el tipo de visual
+    titulo : texto del titulo del visual (usa el mensaje, no el tema)
+    """
+    if not alt or not alt.strip():
+        raise ValueError(
+            f"visual '{tipo}' sin altText. Es la regla de accesibilidad de mayor "
+            "severidad (PBI-A11Y-01): sin alt, un lector de pantalla solo anuncia "
+            "el tipo de visual y el insight se pierde.")
+    x, y, w, h, tab = pos
+    name = nombre_hex()
+    v = {"visualType": tipo, "drillFilterOtherVisuals": True}
+    if roles:
+        v["query"] = {"queryState": {
+            rol: {"projections": campos} for rol, campos in roles.items() if campos}}
+    if orden_desc:
+        entidad, prop = orden_desc
+        v["query"]["sortDefinition"] = {
+            "sort": [{"field": {"Measure": {
+                "Expression": {"SourceRef": {"Entity": entidad}},
+                "Property": prop}}, "direction": "Descending"}],
+            "isDefaultSort": True,
+        }
+    # altText vive en visualContainerObjects.general[].properties.altText
+    objetos = {"general": [{"properties": {"altText": _lit(alt[:250])}}]}
+    if titulo:
+        objetos["title"] = [{"properties": {
+            "show": {"expr": {"Literal": {"Value": "true"}}},
+            "text": _lit(titulo),
+        }}]
+    v["visualContainerObjects"] = objetos
+    return name, {
+        "$schema": SCHEMA_VISUAL,
+        "name": name,
+        "position": {"x": x, "y": y, "z": tab, "height": h, "width": w,
+                     "tabOrder": tab},
+        "visual": v,
+    }
+
+
+def visual_texto(pos, alt, texto, tamano=18):
+    """Cuadro de texto: el titulo/mensaje de la pagina."""
+    x, y, w, h, tab = pos
+    name = nombre_hex()
+    return name, {
+        "$schema": SCHEMA_VISUAL,
+        "name": name,
+        "position": {"x": x, "y": y, "z": tab, "height": h, "width": w,
+                     "tabOrder": tab},
+        "visual": {
+            "visualType": "textbox",
+            "visualContainerObjects": {
+                "general": [{"properties": {"altText": _lit(alt[:250])}}],
+                "title": [{"properties": {
+                    "show": {"expr": {"Literal": {"Value": "true"}}},
+                    "text": _lit(texto),
+                    "fontSize": {"expr": {"Literal": {"Value": f"{tamano}D"}}},
+                }}],
+            },
+            "drillFilterOtherVisuals": True,
+        },
+    }
+
+
 def visual_card(measure_entity, measure_prop):
     """Tarjeta (cardVisual) que muestra una medida."""
     name = nombre_hex()
@@ -710,13 +1093,33 @@ def visual_titulo(titulo):
 # ---------------------------------------------------------------------------
 # Generación completa
 # ---------------------------------------------------------------------------
-def generar(nombre, salida, tema, dominio):
+def generar(nombre, salida, tema, dominio, datos=None, cultura="es-ES",
+            base_en_salida=False, ruta_base=None):
+    """
+    Genera el proyecto PBIP completo.
+
+    datos          : carpeta con los CSV. Si se pasa, las particiones los leen
+                     via el parametro RutaBase y el .pbip muestra los datos
+                     reales al abrirlo. Si es None, datos inline (#table).
+    cultura        : culture / sourceQueryCulture del modelo.
+    base_en_salida : True deja el .pbip directamente en `salida` (estructura
+                     plana, el .pbip en la raiz del proyecto, que es lo que
+                     espera Fabric Git Integration). False mantiene la
+                     subcarpeta <nombre>/.
+    ruta_base      : valor literal para el parametro RutaBase. Por defecto se
+                     usa la ruta absoluta de `datos`, que es lo correcto en la
+                     maquina del usuario (abre y funciona). Para un proyecto que
+                     se va a VERSIONAR como ejemplo publico hay que pasar un
+                     placeholder: una ruta absoluta con el nombre de usuario
+                     dentro de un archivo commiteado es fuga de datos.
+    """
     dom = DOMINIOS[dominio]
     dim1 = dom["dim1"][0]
     dim2 = dom["dim2"][0]
     hecho = dom["hecho"]
+    usar_csv = datos is not None
 
-    base = os.path.join(salida, nombre)
+    base = salida if base_en_salida else os.path.join(salida, nombre)
     report_dir = os.path.join(base, f"{nombre}.Report")
     sm_dir = os.path.join(base, f"{nombre}.SemanticModel")
 
@@ -757,18 +1160,28 @@ def generar(nombre, salida, tema, dominio):
     )
 
     # model.tmdl
-    tablas = ["Calendario", dim1, dim2, hecho, "_ Medidas"]
+    tablas = orden_tablas(dom)
     escribir_texto(
         os.path.join(sm_dir, "definition", "model.tmdl"),
-        tmdl_model(nombre, tablas),
+        tmdl_model(nombre, tablas, cultura, usar_csv),
     )
+
+    # expressions.tmdl — parametro RutaBase (solo si las particiones leen CSV).
+    # Sin este archivo no hay forma de parametrizar la ruta de los datos.
+    if usar_csv:
+        escribir_texto(
+            os.path.join(sm_dir, "definition", "expressions.tmdl"),
+            tmdl_expressions(ruta_base or os.path.abspath(datos)),
+        )
 
     # tablas (nombre de archivo = nombre de tabla)
     tdir = os.path.join(sm_dir, "definition", "tables")
-    escribir_texto(os.path.join(tdir, "Calendario.tmdl"), tmdl_calendario())
-    escribir_texto(os.path.join(tdir, f"{dim1}.tmdl"), tmdl_dim1(dom))
-    escribir_texto(os.path.join(tdir, f"{dim2}.tmdl"), tmdl_dim2(dom))
-    escribir_texto(os.path.join(tdir, f"{hecho}.tmdl"), tmdl_hecho(dom))
+    escribir_texto(os.path.join(tdir, "Calendario.tmdl"), tmdl_calendario(dom, usar_csv))
+    escribir_texto(os.path.join(tdir, f"{dim1}.tmdl"), tmdl_dim1(dom, usar_csv))
+    escribir_texto(os.path.join(tdir, f"{dim2}.tmdl"), tmdl_dim2(dom, usar_csv))
+    escribir_texto(os.path.join(tdir, f"{TABLA_INDICADOR}.tmdl"),
+                   tmdl_indicador(dom, usar_csv))
+    escribir_texto(os.path.join(tdir, f"{hecho}.tmdl"), tmdl_hecho(dom, usar_csv))
     escribir_texto(os.path.join(tdir, "_ Medidas.tmdl"), tmdl_medidas(dom))
 
     # relationships.tmdl — dimensión->hecho (1->*)
@@ -776,6 +1189,8 @@ def generar(nombre, salida, tema, dominio):
         (hecho, "Fecha", "Calendario", "Fecha"),
         (hecho, "ID " + dim1, dim1, "ID " + dim1),
         (hecho, "ID " + dim2, dim2, "ID " + dim2),
+        (hecho, "ID " + TABLA_INDICADOR, TABLA_INDICADOR,
+         "ID " + TABLA_INDICADOR),
     ]
     escribir_texto(
         os.path.join(sm_dir, "definition", "relationships.tmdl"),
@@ -814,17 +1229,35 @@ def generar(nombre, salida, tema, dominio):
     if tema:
         with open(tema, "r", encoding="utf-8") as f:
             tema_obj = json.load(f)
-        tema_name = tema_obj.get("name") or "TemaCustom"
-        tema_filename = "theme_custom.json"
+        # CUATRO valores tienen que ser IDENTICOS y terminar en ".json":
+        #   1. el `name` interno del theme.json incrustado
+        #   2. `themeCollection.customTheme.name` de report.json
+        #   3. `resourcePackages[].items[].name`
+        #   4. `resourcePackages[].items[].path`  (= nombre del archivo en disco)
+        #
+        # Si el `name` no lleva .json, Power BI Desktop abre bien pero **el reporte
+        # publicado en el Service aplica el tema incorrectamente**: los colores del
+        # usuario se pierden en silencio justo al llegar a produccion. Si el `name`
+        # interno del tema no coincide con la referencia, el tema no carga.
+        #
+        # Ambas reglas las verifica el validador oficial de Microsoft
+        # (@microsoft/powerbi-report-authoring-cli): diagnosticos
+        # PBIR_THEME_NAME_MISSING_JSON_EXT y PBIR_THEME_FILE_NAME_MISMATCH.
+        # Comprobado empiricamente: name interno sin extension => falla.
+        #
+        # El theme.json SUELTO conserva su nombre legible ("Tema corporativo");
+        # solo la COPIA incrustada se reescribe para cumplir la regla.
+        tema_ref = _nombre_archivo_tema(tema_obj.get("name"))
+        tema_obj = dict(tema_obj, name=tema_ref)
         rr_dir = os.path.join(report_dir, "StaticResources", "RegisteredResources")
-        ruta_tema = os.path.join(rr_dir, tema_filename)
+        ruta_tema = os.path.join(rr_dir, tema_ref)
         escribir_json(ruta_tema, tema_obj)
         archivos.append(ruta_tema)
         # ThemeMetadata REQUIERE name + reportVersionAtImport + type (schema oficial
         # report/3.x). Omitir reportVersionAtImport corrompe el report.json al abrir.
         report_json["themeCollection"] = {
             "customTheme": {
-                "name": tema_name,
+                "name": tema_ref,
                 "reportVersionAtImport": THEME_REPORT_VERSIONS,
                 "type": "RegisteredResources",
             }
@@ -834,7 +1267,7 @@ def generar(nombre, salida, tema, dominio):
                 "name": "RegisteredResources",
                 "type": "RegisteredResources",
                 "items": [
-                    {"name": tema_name, "path": tema_filename, "type": "CustomTheme"}
+                    {"name": tema_ref, "path": tema_ref, "type": "CustomTheme"}
                 ],
             }
         ]
@@ -868,46 +1301,111 @@ def generar(nombre, salida, tema, dominio):
         "useStylableVisualContainerHeader": True,
         "defaultDrillFilterOtherVisuals": True,
         "useEnhancedTooltips": True,
-        "locale": "es-PE",
+        # Mismo locale que el modelo (antes estaba fijo en es-PE, un pais
+        # concreto incrustado en un framework generico que nadie eligio).
+        "locale": cultura,
     }
     r = os.path.join(report_dir, "definition", "report.json")
     escribir_json(r, report_json)
     archivos.append(r)
 
-    # --- página + visuales ---
-    page_name = nombre_hex()
+    # --- páginas y visuales, construidas desde los ARQUETIPOS ---
+    #
+    # Antes esto eran 3 visuales fijos en una pagina, sin altText y sin ningun
+    # slicer. Dos consecuencias: incumplia la regla de accesibilidad de mayor
+    # severidad en el 100% de los visuales, y la medida 'Indicador %' (defendida
+    # con HASONEVALUE) devolvia BLANK porque no habia forma de elegir un
+    # indicador. Ahora las paginas salen de `arquetipos.py`, que declara ranuras
+    # con su alt y su orden de lectura.
     pages_dir = os.path.join(report_dir, "definition", "pages")
+    nombre_ppal, _fmt = medida_principal(dom)
+    otros = [n for _i, n, _a, _b in dom["indicadores"]][1:3]
+    ind = TABLA_INDICADOR
+
+    paginas = []
+    for clave in ("resumen", "detalle"):
+        arq = arquetipos.arquetipo(clave)
+        page_name = nombre_hex()
+        visuales = []
+        for tab, ranura in enumerate(arq["ranuras"]):
+            rol, pregunta, x, y, w, h, alt_tpl = ranura
+            pos = (x, y, w, h, tab)
+            alt = arquetipos.alt_de(alt_tpl, nombre_ppal, dim1, dim2)
+            tipo = arquetipos.visual_para(pregunta)
+
+            if rol == "titulo":
+                titulo = (f"{arq['titulo']} — {nombre_ppal}" if clave == "resumen"
+                          else f"{arq['titulo']} por {dim2} y mes")
+                visuales.append(visual_texto(pos, alt, titulo))
+            elif rol == "slicer_indicador":
+                # La pieza que faltaba: sin este slicer, 'Indicador %' es BLANK.
+                visuales.append(visual(tipo, pos, alt, titulo=ind,
+                                       roles={"Values": [campo_columna(ind, ind, True)]}))
+            elif rol == "slicer_anio":
+                visuales.append(visual(tipo, pos, alt, titulo="Año",
+                                       roles={"Values": [campo_columna("Calendario", "Año", True)]}))
+            elif rol == "slicer_dim1":
+                visuales.append(visual(tipo, pos, alt, titulo=dim1,
+                                       roles={"Values": [campo_columna(dim1, dim1, True)]}))
+            elif rol.startswith("kpi_"):
+                idx = int(rol[-1]) - 1
+                medida = nombre_ppal if idx == 0 else (
+                    otros[idx - 1] if idx - 1 < len(otros) else nombre_ppal)
+                visuales.append(visual(tipo, pos, alt, titulo=medida,
+                                       roles={"Data": [campo_medida("_ Medidas", medida)]}))
+            elif rol == "tendencia":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por mes",
+                    roles={"Category": [campo_columna("Calendario", "Mes", True)],
+                           "Y": [campo_medida("_ Medidas", nombre_ppal)]}))
+            elif rol == "ranking":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por {dim2}",
+                    roles={"Category": [campo_columna(dim2, dim2, True)],
+                           "Y": [campo_medida("_ Medidas", nombre_ppal)]},
+                    orden_desc=("_ Medidas", nombre_ppal)))
+            elif rol == "detalle":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por {dim1}",
+                    roles={"Values": [campo_columna(dim1, dim1, True),
+                                      campo_medida("_ Medidas", nombre_ppal)]}))
+            elif rol == "matriz":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal}: {dim2} por mes",
+                    roles={"Rows": [campo_columna(dim2, dim2, True)],
+                           "Columns": [campo_columna("Calendario", "Mes", True)],
+                           "Values": [campo_medida("_ Medidas", nombre_ppal)]}))
+            elif rol == "comparacion":
+                visuales.append(visual(
+                    tipo, pos, alt, titulo=f"{nombre_ppal} por {dim1} y año",
+                    roles={"Category": [campo_columna(dim1, dim1, True)],
+                           "Series": [campo_columna("Calendario", "Año")],
+                           "Y": [campo_medida("_ Medidas", nombre_ppal)]}))
+
+        page = {
+            "$schema": SCHEMA_PAGE,
+            "name": page_name,
+            "displayName": arq["titulo"],
+            "displayOption": "FitToPage",
+            "height": arquetipos.CANVAS["height"],
+            "width": arquetipos.CANVAS["width"],
+        }
+        r = os.path.join(pages_dir, page_name, "page.json")
+        escribir_json(r, page)
+        archivos.append(r)
+        for vname, vobj in visuales:
+            r = os.path.join(pages_dir, page_name, "visuals", vname, "visual.json")
+            escribir_json(r, vobj)
+            archivos.append(r)
+        paginas.append(page_name)
 
     r = os.path.join(pages_dir, "pages.json")
     escribir_json(r, {
         "$schema": SCHEMA_PAGES,
-        "pageOrder": [page_name],
-        "activePageName": page_name,
+        "pageOrder": paginas,
+        "activePageName": paginas[0],
     })
     archivos.append(r)
-
-    page = {
-        "$schema": SCHEMA_PAGE,
-        "name": page_name,
-        "displayName": "Resumen",
-        "displayOption": "FitToPage",
-        "height": 720,
-        "width": 1280,
-    }
-    r = os.path.join(pages_dir, page_name, "page.json")
-    escribir_json(r, page)
-    archivos.append(r)
-
-    # 3 visuales: título, card 'Indicador %', barras de 'Indicador %' por <dim2>
-    visuales = [
-        visual_titulo("Resumen de indicadores"),
-        visual_card("_ Medidas", "Indicador %"),
-        visual_barras(dim2, dim2, "_ Medidas", "Indicador %"),
-    ]
-    for vname, vobj in visuales:
-        r = os.path.join(pages_dir, page_name, "visuals", vname, "visual.json")
-        escribir_json(r, vobj)
-        archivos.append(r)
 
     return base, archivos
 
@@ -921,10 +1419,31 @@ def main():
                     help="Dominio del modelo de ejemplo (default: generico).")
     ap.add_argument("--salida", default="./", help="Carpeta destino (default: actual).")
     ap.add_argument("--tema", help="Ruta a theme.json (opcional, tema custom de marca).")
+    ap.add_argument("--datos", help=(
+        "Carpeta con los CSV (la que genera generar_datos_ejemplo.py). Si se pasa, "
+        "las particiones del modelo LEEN esos CSV via el parametro RutaBase, asi el "
+        ".pbip muestra los datos reales al abrirlo. Sin este argumento el modelo "
+        "trae datos inline de muestra."))
+    ap.add_argument("--cultura", default="es-ES", help=(
+        "culture / sourceQueryCulture del modelo (default: es-ES)."))
+    ap.add_argument("--en-raiz", dest="en_raiz", action="store_true", help=(
+        "Deja el .pbip directamente en --salida en vez de crear una subcarpeta "
+        "<nombre>/. Es lo que espera Fabric Git Integration."))
+    ap.add_argument("--ruta-base", dest="ruta_base", help=(
+        "Valor literal del parametro RutaBase (default: la ruta absoluta de "
+        "--datos). Usa un placeholder si el proyecto se va a versionar en "
+        "publico: una ruta con tu nombre de usuario en un archivo commiteado "
+        "es fuga de datos."))
     args = ap.parse_args()
     validar_nombre(args.nombre)
 
-    base, archivos = generar(args.nombre, args.salida, args.tema, args.dominio)
+    if args.datos and not os.path.isdir(args.datos):
+        ap.error(f"--datos no es una carpeta: {args.datos}")
+
+    base, archivos = generar(args.nombre, args.salida, args.tema, args.dominio,
+                             datos=args.datos, cultura=args.cultura,
+                             base_en_salida=args.en_raiz,
+                             ruta_base=args.ruta_base)
 
     # Validación final: cada .json generado debe reparsear
     errores = 0

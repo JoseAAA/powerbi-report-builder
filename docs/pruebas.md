@@ -35,9 +35,9 @@ python scripts/init_proyecto.py --nombre "Demo" --dominio ventas --marca assets/
 #    Variantes: --tema theme.json | --sin-marca (neutro EXPLÍCITO)
 #    Sin elección → error con instrucciones (así nunca se ignoran tus colores).
 
-# 6) Validar modelo (R1–R12) y reporte (P1–P7)
-python scripts/validar_modelo.py "C:/demo/proyecto-demo/06-mvp/Demo/Demo.SemanticModel"
-python scripts/validar_pbip.py   "C:/demo/proyecto-demo/06-mvp/Demo/Demo.Report"
+# 6) Validar modelo (R1–R12) y reporte (P1–P9)
+python scripts/validar_modelo.py "C:/demo/mi-reporte/Demo.SemanticModel"
+python scripts/validar_pbip.py   "C:/demo/mi-reporte/Demo.Report"
 #    Esperado: "OK  Sin hallazgos ..." (exit 0)
 
 # 7) Consistencia del repo (skills, rangos de reglas, TMDL, references)
@@ -66,7 +66,7 @@ python scripts/scaffold_pbip.py --nombre "../fuera" --dominio ventas --salida C:
 
 ## Nivel 2 — El dashboard en Power BI Desktop
 
-1. Abre `example/proyecto-demo-ventas/06-mvp/Demo-Ventas/Demo-Ventas.pbip`.
+1. Abre `example/proyecto-demo-ventas/Demo-Ventas.pbip`.
 2. Pulsa **Actualizar ahora** si lo pide (la tabla calculada `_ Medidas` se llena).
 3. Verifica: modelo estrella (Calendario + Region + Producto + Ventas), tarjeta
    `Indicador %` y barras por Producto **con los colores del tema** (azul navy

@@ -1,0 +1,89 @@
+/// Hecho Indicadores. Grano: una fila por fecha, Sede, Servicio e indicador, con el patron
+/// Num/Den. Las claves y las metricas base van ocultas: consulta el modelo con las medidas.
+table Indicadores
+	lineageTag: a088b1a4-e103-4a91-a174-4e09099a0961
+
+	column Fecha
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 601c9b91-f420-4bea-b8a5-5ecd4f409900
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'ID Sede'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6d58e0b3-c95b-4922-88d1-211eb77c130b
+		summarizeBy: none
+		sourceColumn: ID Sede
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Servicio'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a728d594-ecb2-4605-8fa8-812f83981bbc
+		summarizeBy: none
+		sourceColumn: ID Servicio
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Indicador'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 814c3d48-c162-4f6e-8f7c-22e433899980
+		summarizeBy: none
+		sourceColumn: ID Indicador
+
+		annotation SummarizationSetBy = Automatic
+
+	column Num
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 13e1b481-a636-4530-83a0-6b69c2bc95ef
+		summarizeBy: sum
+		sourceColumn: Num
+
+		annotation SummarizationSetBy = Automatic
+
+	column Den
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 94f2e6c6-9363-4413-b4c4-b5f5a3349726
+		summarizeBy: sum
+		sourceColumn: Den
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Indicadores = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(
+				        File.Contents(RutaBase & "\Indicadores.csv"),
+				        [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]
+				    ),
+				    EncabezadosPromovidos = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    #"Tipo cambiado" = Table.TransformColumnTypes(EncabezadosPromovidos, {
+				        {"Fecha", type date},
+				        {"ID Sede", Int64.Type},
+				        {"ID Servicio", Int64.Type},
+				        {"ID Indicador", Int64.Type},
+				        {"Num", Int64.Type},
+				        {"Den", Int64.Type}
+				    }),
+				    // descarta registros sin denominador (evita dividir por 0).
+				    #"Filas filtradas" = Table.SelectRows(#"Tipo cambiado", each [Den] <> null and [Den] > 0)
+				in
+				    #"Filas filtradas"
+
+	annotation PBI_ResultType = Table

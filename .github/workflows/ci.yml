@@ -30,16 +30,79 @@ jobs:
         run: |
           python scripts/init_proyecto.py --nombre "CI-Demo" --dominio ventas \
             --marca assets/marca/ejemplos/ejemplo-corporativo.json --salida /tmp/ci
-          python scripts/validar_modelo.py "/tmp/ci/proyecto-ci-demo/06-mvp/CI-Demo/CI-Demo.SemanticModel"
-          python scripts/validar_pbip.py   "/tmp/ci/proyecto-ci-demo/06-mvp/CI-Demo/CI-Demo.Report"
+          python scripts/validar_modelo.py "/tmp/ci/ci-demo/CI-Demo.SemanticModel"
+          python scripts/validar_pbip.py   "/tmp/ci/ci-demo/CI-Demo.Report"
 
       - name: Validar ejemplos versionados (modelo R1-R12 + reporte P1-P7)
         run: |
-          python scripts/validar_modelo.py "example/proyecto-demo-ventas/06-mvp/Demo-Ventas/Demo-Ventas.SemanticModel"
-          python scripts/validar_pbip.py   "example/proyecto-demo-ventas/06-mvp/Demo-Ventas/Demo-Ventas.Report"
-          python scripts/validar_modelo.py "example/proyecto-demo-salud/06-mvp/Demo-Salud/Demo-Salud.SemanticModel"
-          python scripts/validar_pbip.py   "example/proyecto-demo-salud/06-mvp/Demo-Salud/Demo-Salud.Report"
+          python scripts/validar_modelo.py "example/proyecto-demo-ventas/Demo-Ventas.SemanticModel"
+          python scripts/validar_pbip.py   "example/proyecto-demo-ventas/Demo-Ventas.Report"
+          python scripts/validar_modelo.py "example/proyecto-demo-salud/Demo-Salud.SemanticModel"
+          python scripts/validar_pbip.py   "example/proyecto-demo-salud/Demo-Salud.Report"
+
+      - name: Catalogo de reglas — toda regla con fuente, y SHA de BPARules fijado
+        run: |
+          python scripts/catalogo_reglas.py
+
+      - name: BPARules.json local vs upstream de Microsoft
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import json, sys, urllib.request
+          U=("https://raw.githubusercontent.com/microsoft/Analysis-Services/"
+             "master/BestPracticeRules/BPARules.json")
+          def norm(b):
+              # Se compara el CONTENIDO parseado, no los bytes: la copia local se
+              # guarda sin BOM, asi que un diff de bytes daria falsa alarma
+              # permanente aunque las 71 reglas fueran identicas.
+              return {r["ID"]: (r.get("Severity"), r.get("Category"),
+                                " ".join(r.get("Expression","").split()),
+                                " ".join(r.get("Description","").split()))
+                      for r in json.loads(b.decode("utf-8-sig"))}
+          loc = norm(open("references/bpa/BPARules.json","rb").read())
+          try:
+              up = norm(urllib.request.urlopen(U, timeout=60).read())
+          except Exception as e:
+              print(f"AVISO: no se pudo consultar upstream ({e}); no bloquea.")
+              sys.exit(0)
+          if loc == up:
+              print(f"BPARules.json: las {len(loc)} reglas locales coinciden con upstream.")
+              sys.exit(0)
+          nuevas, retiradas = set(up)-set(loc), set(loc)-set(up)
+          print("BPARules.json CAMBIO en upstream.")
+          if nuevas:   print("  reglas nuevas:", ", ".join(sorted(nuevas)))
+          if retiradas: print("  reglas retiradas:", ", ".join(sorted(retiradas)))
+          for k in sorted(set(loc) & set(up)):
+              if loc[k] != up[k]:
+                  print(f"  modificada: {k}")
+          print("  Revisa con: python scripts/actualizar_catalogo.py --forzar")
+          sys.exit(1)
+          PY
 
       - name: Sin fugas de datos personales en el repo
         run: |
-          ! grep -rn "C:\\\\Users\\\\" --include="*.m" --include="*.json" example/ scripts/
+          # .tmdl incluido: expressions.tmdl guarda el parametro RutaBase, que en
+          # un proyecto local lleva la ruta absoluta del usuario.
+          ! grep -rn "C:\\\\Users\\\\" --include="*.m" --include="*.json" --include="*.tmdl" example/ scripts/
+
+      - name: Regresion — el .pbip debe LEER los CSV generados, no datos inventados
+        run: |
+          python scripts/verificar_cableado.py "/tmp/ci/ci-demo"
+          python scripts/verificar_cableado.py "example/proyecto-demo-ventas"
+          python scripts/verificar_cableado.py "example/proyecto-demo-salud"
+
+      # Segunda capa: el validador OFICIAL de Microsoft. Nuestros validadores son
+      # stdlib-only y siempre corren; este es una comprobacion independiente contra
+      # la herramienta del fabricante, que detecta cosas semanticas que un schema no
+      # ve (p. ej. que el nombre del tema rompa el reporte al publicarlo en el
+      # Service). No forma parte del contrato stdlib-only del repo: si el paquete no
+      # esta disponible, el paso avisa y no bloquea.
+      - name: Validador oficial de Microsoft (PBIR) — capa independiente
+        continue-on-error: true
+        run: |
+          for r in "/tmp/ci/ci-demo/CI-Demo.Report" \
+                   "example/proyecto-demo-ventas/Demo-Ventas.Report" \
+                   "example/proyecto-demo-salud/Demo-Salud.Report"; do
+            echo "== $r"
+            npx --yes @microsoft/powerbi-report-authoring-cli@0.1.4 validate "$r" || exit 1
+          done
