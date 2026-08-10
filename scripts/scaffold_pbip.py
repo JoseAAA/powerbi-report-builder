@@ -949,7 +949,20 @@ def visual(tipo, pos, alt, roles=None, titulo=None, orden_desc=None):
 
 
 def visual_texto(pos, alt, texto, tamano=18):
-    """Cuadro de texto: el titulo/mensaje de la pagina."""
+    """
+    Cuadro de texto: el MENSAJE de la pagina.
+
+    El contenido de un textbox NO va en el titulo del contenedor: va en
+    `visual.objects.general[].properties.paragraphs`. El catalogo oficial lo
+    confirma — `catalog describe textbox` devuelve `roles: {}` y
+    `formattingObjects: [general, text, values]`, y `formatting search textbox`
+    localiza la propiedad en `general.paragraphs`.
+
+    Poniendo solo `title` se renderiza una **caja vacia con barra de titulo**: el
+    mensaje de la pagina no aparece. Y el mensaje es justo lo que sostiene el
+    storytelling ("el titulo dice la conclusion, no el tema"), asi que el fallo se
+    llevaba por delante lo mas importante de la pagina.
+    """
     x, y, w, h, tab = pos
     name = nombre_hex()
     return name, {
@@ -959,13 +972,23 @@ def visual_texto(pos, alt, texto, tamano=18):
                      "tabOrder": tab},
         "visual": {
             "visualType": "textbox",
+            "objects": {
+                "general": [{
+                    "properties": {
+                        "paragraphs": [{
+                            "textRuns": [{
+                                "value": texto,
+                                "textStyle": {
+                                    "fontSize": f"{tamano}pt",
+                                    "fontWeight": "bold",
+                                },
+                            }],
+                        }],
+                    },
+                }],
+            },
             "visualContainerObjects": {
                 "general": [{"properties": {"altText": _lit(alt[:250])}}],
-                "title": [{"properties": {
-                    "show": {"expr": {"Literal": {"Value": "true"}}},
-                    "text": _lit(texto),
-                    "fontSize": {"expr": {"Literal": {"Value": f"{tamano}D"}}},
-                }}],
             },
             "drillFilterOtherVisuals": True,
         },

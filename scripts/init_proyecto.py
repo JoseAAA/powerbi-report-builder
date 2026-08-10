@@ -188,6 +188,14 @@ def main():
                         "--nombre", "Tema neutro provisional", "--primario", "#2C3E50",
                         "--salida", theme])
 
+    # --- PLAN del reporte, en lenguaje de negocio ---
+    # Se escribe SIEMPRE, y antes que nada, para que el usuario pueda validar la
+    # historia antes de mirar un solo visual. Patron propuesta -> aprobacion de
+    # OpenSpec: revisar media pagina cuesta un minuto, rehacer el reporte una tarde.
+    ok_plan = _run([os.path.join(SCRIPTS, "plan_reporte.py"),
+                    "--nombre", args.nombre, "--dominio", args.dominio,
+                    "--salida", os.path.join(docs, "plan.md")])
+
     # plantillas del proceso, para que el usuario las complete
     for src, destino in [
         (os.path.join("marca", "_plantilla-marca.json"), "marca.json"),
@@ -228,6 +236,7 @@ def main():
     print("=" * 70)
     print(f"Proyecto listo: {base}")
     print(f"  dominio: {args.dominio} | tema: {origen_tema} | cultura: {args.cultura}")
+    print(f"  plan docs/plan.md    : {'OK' if ok_plan else 'ERROR'}  <- LEELO PRIMERO")
     print(f"  tema docs/theme.json : {'OK' if ok_tema else 'ERROR'}")
     print(f"  datos de ejemplo     : {'OK' if ok_datos else 'ERROR'}")
     print(f"  .pbip (en la raiz)   : {'OK' if ok_pbip else 'ERROR'}  [{modo}]")
@@ -241,7 +250,7 @@ def main():
     print("de datos/. Corrige un CSV y vuelve a Actualizar: ese es el bucle de")
     print("mockup rapido. Detalles y como publicar: LEEME.md")
     print("=" * 70)
-    return 0 if (ok_tema and ok_datos and ok_pbip) else 1
+    return 0 if (ok_plan and ok_tema and ok_datos and ok_pbip) else 1
 
 
 if __name__ == "__main__":

@@ -42,6 +42,7 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/generar_conexion_m.py --fuente sql\|sharepoint-archivo\|databricks\|… ` | código Power Query M parametrizado por fuente |
 | `python scripts/generar_datos_ejemplo.py --dominio ventas\|rrhh\|finanzas\|salud\|generico` | CSVs de ejemplo (5 tablas) + `modelo-ejemplo.m` |
 | `python scripts/scaffold_pbip.py --nombre "X" --dominio <d> --tema theme.json [--datos <carpeta>] [--en-raiz]` | proyecto `.pbip` válido (estrella + PBIR). **`--datos` cablea las particiones a los CSV**; `--en-raiz` deja el `.pbip` en la raíz |
+| `python scripts/plan_reporte.py --nombre "X" --dominio <d> [--salida docs/plan.md] [--json]` | **el PLAN en lenguaje de negocio, ANTES de construir**: qué se mide, cómo se corta, la historia de cada página y las decisiones pendientes |
 | `python scripts/init_proyecto.py --nombre "X" --dominio <d> --marca <m>\|--tema <t>\|--sin-marca` | bootstrap completo: `.pbip` en la raíz + `datos/` cableados + `docs/` |
 | `python scripts/validar_modelo.py <ruta .SemanticModel>` | modelo: **R1–R12** propias **+ 26 reglas OFICIALES de Microsoft** (`BPARules.json`), cada hallazgo con su ID oficial y su fuente (exit 1 si hay ALTA) |
 | `python scripts/catalogo_reglas.py` | guarda del catálogo: toda regla con fuente, ninguna ALTA apoyada solo en nivel 5, y el SHA-256 de `BPARules.json` sin tocar |
@@ -90,11 +91,16 @@ deterministas (temas, M, TMDL, PBIR) sin gastar tokens ni inventar formatos.
    framework; el tercero comprueba que el proyecto **describa algo coherente**
    (que el reporte lea los datos que hay al lado). Un modelo puede pasar R1–R12
    y P1–P9 y aun así mostrar cifras falsas: eso ya pasó.
-5. **El MVP no puede mentir**: si generas datos de ejemplo, el `.pbip` los tiene
+5. **El plan se aprueba antes de construir.** Si el usuario va a obtener páginas y
+   visuales NUEVOS, genera `plan_reporte.py`, resúmelo en lenguaje de negocio y
+   **espera su OK**. No construyas con preguntas abiertas sin resolver. Revisar
+   media página cuesta un minuto; rehacer 14 visuales, una tarde.
+   _(Propuesta→aprobación de Fission-AI/OpenSpec; HARD-GATE de obra/superpowers.)_
+6. **El MVP no puede mentir**: si generas datos de ejemplo, el `.pbip` los tiene
    que **leer** (`--datos`). Nunca entregues CSVs junto a un reporte que muestra
    otros números; el usuario corrige un CSV, refresca y espera ver el cambio.
-6. **No inventes datos del negocio** (tablas, colores, metas, grain): pregunta.
-7. **No inventes "mejores prácticas"**: cada recomendación traza a Microsoft o a
+7. **No inventes datos del negocio** (tablas, colores, metas, grain): pregunta.
+8. **No inventes "mejores prácticas"**: cada recomendación traza a Microsoft o a
    un experto reconocido (Kimball, SQLBI/BPA, Chris Webb, IBCS, WCAG). El
    conocimiento citado vive en `references/` — cárgalo por fase, no todo junto.
    Respeta la **jerarquía de autoridad** (`NIVELES_AUTORIDAD` en `scripts/fuentes.py`):
@@ -105,16 +111,16 @@ deterministas (temas, M, TMDL, PBIR) sin gastar tokens ni inventar formatos.
    `check_consistencia.py` (C11) exige que cada reference cite al menos una
    fuente con URL; la deuda pendiente está **declarada** en
    `SIN_CITAS_PENDIENTES` y solo puede encoger.
-8. **Nada privado al repo**: ni marcas/datos reales de empresas, ni rutas locales
+9. **Nada privado al repo**: ni marcas/datos reales de empresas, ni rutas locales
    absolutas, ni `.pbi/` (caché). La marca del usuario vive en SU proyecto.
    Ojo con `expressions.tmdl`: el parámetro `RutaBase` lleva una ruta absoluta
    en el proyecto del usuario (correcto ahí, abre y funciona), pero cualquier
    proyecto que se versione como ejemplo público se genera con
    `--ruta-base "C:\CAMBIA-ESTA-RUTA\datos"`. El CI lo comprueba.
-9. TMDL es sensible a indentación (tabs); JSON siempre válido
+10. TMDL es sensible a indentación (tabs); JSON siempre válido
    (`python -m json.tool`); no edites `.pbi/` ni `localSettings.json`. Las
    descripciones de objeto van con **`///` encima del objeto** (no `description:`).
-10. **Disciplina Git al editar un PBIP existente**: trabaja en una rama (no en
+11. **Disciplina Git al editar un PBIP existente**: trabaja en una rama (no en
    `main`), valida con ambos validadores antes y después, y **nunca hagas commit
    automático** — el usuario revisa y confirma. Recomienda commit ANTES de una
    edición masiva. _(Práctica del repo oficial microsoft/skills-for-fabric.)_
@@ -160,6 +166,28 @@ El cuerpo del skill es un **router**, no un manual: carga las references por
 demanda con una tabla `Tema | Reference | Cuándo cargar` y la instrucción
 explícita de no cargarlas todas de una vez (patrón de
 `microsoft/skills-for-fabric`).
+
+## De dónde sale cada decisión (trazabilidad)
+
+Ninguna pieza de este framework es invención propia sin declararlo. Quién respalda qué:
+
+| Pieza | Origen | Qué se tomó |
+|---|---|---|
+| Catálogo de reglas del modelo | **`BPARules.json` oficial de Microsoft** | Las 71 reglas con ID, severidad y expresión; 26 implementadas, 6 excluidas con motivo |
+| Formato PBIP/TMDL/PBIR | **Microsoft Learn** + `microsoft/json-schemas` | Estructura, límites duros, regla del `$schema` |
+| Roles de cada visual y props de tema | **`@microsoft/powerbi-report-authoring-cli`** (`catalog`, `formatting`) | Nombres de rol exactos por `visualType`; nunca se infieren de memoria |
+| Accesibilidad | **WCAG 2.2 (W3C)** + checklist de Microsoft | `altText`, contraste 4.5:1 / 3:1, `tabOrder`, forma por serie |
+| Modelo dimensional | **Kimball** | Esquema estrella, calendario dedicado |
+| DAX | **Microsoft Learn** + **SQLBI** | `DIVIDE`, VAR/RETURN, medidas sobre columnas calculadas |
+| Plan antes de construir | **Fission-AI/OpenSpec** + **obra/superpowers** | Propuesta→aprobación con artefacto en disco; HARD-GATE de diseño |
+| `description` = solo disparadores | **obra/superpowers** | Hallazgo empírico: si resume el flujo, el agente se salta el cuerpo (C8) |
+| Disparador negativo + `## Boundaries` | **DietrichGebert/ponytail** | "NO usar para X"; alcance dentro/fuera y a dónde enrutar (C9, C10) |
+| Tabla `Tema \| Reference \| Cuándo cargar` | **microsoft/skills-for-fabric** | Progressive disclosure: no cargar todo de una vez |
+| Vigilante de fuentes con TTL | **JoseAAA/power-automate-architect** | Lockfile + gate humano + contrato `--json` |
+| Honestidad sobre lo no medido | **JuliusBrussee/caveman** | Declarar límites y lo que no tiene evidencia |
+
+Lo que **no** tiene respaldo va marcado `[HEURÍSTICO]` o `[NO VERIFICADO]` en la
+reference correspondiente, y no es exigible.
 
 ## Convenciones del proyecto
 

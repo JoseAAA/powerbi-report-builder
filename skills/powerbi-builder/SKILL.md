@@ -57,6 +57,31 @@ independientes (un usuario de negocio puede pedir un dashboard complejo).
 Si llega sin contexto, pregunta en que punto esta y arranca ahi. No fuerces todas
 las fases si solo necesita una.
 
+
+## PARA ANTES DE CONSTRUIR — el plan se aprueba primero
+
+<HARD-GATE>
+Si el usuario va a obtener un reporte NUEVO (paginas y visuales), genera primero
+el PLAN y espera su aprobacion explicita. No crees paginas, visuales ni TMDL
+hasta que diga que si.
+</HARD-GATE>
+
+```
+python "${CLAUDE_PLUGIN_ROOT}/scripts/plan_reporte.py" --nombre "<X>" --dominio <d> --salida <proyecto>/docs/plan.md
+```
+
+El plan esta en **lenguaje de negocio** (cero TMDL, cero PBIR, cero `visualType`
+en la parte que el usuario lee): que se mide, como se corta, la **historia de
+cada pagina**, y las decisiones que faltan. Presentaselo resumido en el chat y
+pregunta que cambiaria.
+
+**No construyas con preguntas abiertas sin resolver.** Si el usuario no sabe algo
+todavia, anotalo como supuesto explicito en el plan y dilo en voz alta.
+
+Por que: revisar media pagina cuesta un minuto; rehacer un reporte de 14 visuales
+porque la historia no era esa, una tarde. _(Patron propuesta→aprobacion de
+Fission-AI/OpenSpec y HARD-GATE de obra/superpowers.)_
+
 ## Principios transversales (aplican a TODOS los skills)
 
 1. **Nunca inventes datos del negocio** (tabla, color, meta, grain): pregunta.

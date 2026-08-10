@@ -13,6 +13,11 @@ description: >
 
 Objetivo: paginas que comunican **UN mensaje cada una**.
 
+<HARD-GATE>
+Si vas a crear paginas o visuales NUEVOS, el plan tiene que estar aprobado antes
+(`scripts/plan_reporte.py`). Ajustar visuales existentes no necesita gate.
+</HARD-GATE>
+
 Reglas de oro (las normativas llevan fuente en la reference):
 - **Accesibilidad primero**, no al final: `altText` en todo visual que informe
   (≤250 caracteres), contraste de texto **≥4.5:1**, forma distinta por serie

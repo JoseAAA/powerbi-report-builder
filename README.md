@@ -18,10 +18,77 @@ que quieren un reporte profesional sin memorizar 71 reglas.
 
 ---
 
+## 🤔 ¿Esto para qué me sirve? (en cristiano)
+
+Si haces reportes en Power BI, probablemente te pasa algo de esto:
+
+- Empiezas de cero cada vez y **nunca sabes si lo estás haciendo bien**.
+- Alguien te pide un tablero y **no sabes qué preguntarle**.
+- Terminas el reporte y **te dicen que no era eso**.
+- Hay 71 reglas oficiales de buenas prácticas y **nadie se las sabe**.
+
+Esto es un ayudante que se sienta contigo: te hace las preguntas correctas,
+**te enseña un plan antes de construir nada**, y cuando construye lo hace
+siguiendo las reglas oficiales de Microsoft — y te dice de dónde salió cada una.
+
+**No necesitas saber programar.** Le hablas en español a tu asistente de IA
+(Claude, Codex, Gemini…) y él hace el trabajo.
+
+---
+
+## 📋 Primero el plan, después el reporte
+
+Esta es la parte que más tiempo te ahorra. **Antes de crear un solo gráfico**,
+recibes un plan en lenguaje de negocio que puedes leer en un minuto:
+
+```text
+# Plan del reporte — Ventas LATAM
+
+> Esto es una propuesta, no el reporte. Léela, dime qué cambiar, y
+> recién ahí lo construyo.
+
+## 1. Qué vamos a medir
+| Indicador            | Tipo       |
+| % Margen ← el principal | Porcentaje |
+| % Cumplimiento Meta  | Porcentaje |
+
+## 3. Las páginas y su historia
+
+### Página 1: Resumen
+Para quien decide y no explora.
+
+Cómo se lee:
+- Entras y lo primero que ves es **cómo vamos** (las tarjetas de arriba).
+- Justo debajo, **si eso mejora o empeora** con el tiempo.
+- Al lado, **quién lo explica**: qué categorías tiran del resultado.
+- Y abajo, **las cifras exactas** por si alguien las pide.
+
+## 4. Lo que necesito que decidas
+- [ ] ¿'% Margen' es de verdad el indicador que abre el reporte?
+- [ ] ¿Hay una meta contra la que comparar?
+```
+
+Si algo no cuadra, lo dices y se cambia **antes** de construir. Corregir el plan
+cuesta un minuto; rehacer un reporte de 14 visuales, una tarde.
+
+*(Patrón de propuesta→aprobación de [OpenSpec](https://github.com/Fission-AI/OpenSpec)
+y del gate de diseño de [superpowers](https://github.com/obra/superpowers).)*
+
+---
+
 ## 👀 Míralo en acción
 
 ```text
 Tú ▸ hazme un dashboard de ventas para arrancar hoy, sin esperar a que TI me dé la base
+
+Agente ▸ Antes de construir, mira el plan (docs/plan.md):
+         · Mide: % Margen (el principal), % Cumplimiento Meta, Ticket Promedio
+         · Cortes: Región, Producto, Indicador, Calendario
+         · Página 1 «Resumen»: cómo vamos → si mejora → quién lo explica → cifras
+         · Página 2 «Detalle»: la matriz que localiza la causa
+         ¿Le cambiamos algo? ¿'% Margen' es el que abre el reporte?
+
+Tú ▸ está bien, dale
 
 Agente ▸ Proyecto listo: mi-reporte/
          dominio: ventas | tema: marca | cultura: es-ES
