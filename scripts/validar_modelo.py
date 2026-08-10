@@ -226,8 +226,12 @@ def main():
     # de Microsoft esta disponible se suprimen: reportar el mismo problema dos
     # veces con codigos distintos es ruido, y la version oficial ademas trae cita.
     # Si el catalogo no carga, se evaluan como respaldo.
+    # R1 NO cede: la regla oficial exime a las medidas de una tabla oculta
+    # (`not Table.IsHidden`), y ocultar la tabla `_ Medidas` es el patron
+    # ESTANDAR — las medidas siguen siendo las que usa el lector. Al cederla,
+    # ninguna medida de un modelo bien construido quedaba cubierta. Detectado
+    # metiendo el fallo a proposito y viendo que no se reportaba.
     SUPERSEDIDAS = {
-        "R1": "PROVIDE_FORMAT_STRING_FOR_MEASURES",
         "R3": "USE_THE_DIVIDE_FUNCTION_FOR_DIVISION",
         "R6": "REMOVE_AUTO-DATE_TABLE",
         "R12": "OBJECTS_WITH_NO_DESCRIPTION",
