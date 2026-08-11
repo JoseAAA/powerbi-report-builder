@@ -49,6 +49,7 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P9** — incluye **P9: `altText` en todo visual**, la regla de accesibilidad de mayor severidad (exit 1 si hay ALTA) |
 | `python scripts/verificar_cableado.py <carpeta del proyecto>` | **datos ↔ modelo**, reglas **E1–E6**: que el `.pbip` lea los CSV, que ninguna clave quede huérfana y que las medidas no mezclen indicadores |
 | `python scripts/actualizar_catalogo.py [--forzar\|--json\|--marcar-revisado]` | vigila las **15 fuentes oficiales** (`scripts/fuentes.py`) y reporta páginas agregadas/eliminadas/**modificadas**. 1 llamada HTTP por fuente, sin token, con TTL por fuente (7/30/90 días) |
+| `python scripts/prueba_rapida.py [--dominio d] [--salida ruta]` | **prueba de extremo a extremo autoverificada** (23 comprobaciones): genera plan + proyecto, corre los 4 validadores, y mete fallos a propósito para confirmar que se detectan. Sin internet |
 | `python scripts/check_consistencia.py` | guarda de invariantes del repo, reglas **C1–C11** (frontmatter, forma de las `description`, `## Boundaries`, skills huérfanos, TMDL, rangos, references, portabilidad) |
 
 `scripts/arquetipos.py` guarda el **conocimiento de diseño como datos**: el

@@ -2,7 +2,7 @@
 
 ![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
 ![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)
-![Funciona con](https://img.shields.io/badge/funciona%20con-Claude%20Code%20·%20Codex%20·%20Gemini%20CLI%20·%20OpenCode-blueviolet)
+![Funciona con](https://img.shields.io/badge/funciona%20con-Claude%20·%20ChatGPT%20·%20Gemini%20·%20Codex%20·%20OpenCode-blueviolet)
 ![Dependencias](https://img.shields.io/badge/dependencias-0%20(solo%20stdlib)-brightgreen)
 ![Reglas](https://img.shields.io/badge/reglas-26%20oficiales%20de%20Microsoft-0078D4)
 
@@ -157,6 +157,24 @@ Igual que Codex: clona y abre la carpeta (`GEMINI.md` → `AGENTS.md`).
 
 Igual que Codex: clona y abre la carpeta (además lee `skills/`).
 
+### ChatGPT · Claude.ai · Gemini (versión web)
+
+No acceden a tu disco, pero **sí tienen sandbox de Python** — y como el proyecto
+no usa ninguna dependencia externa, los scripts corren ahí.
+
+1. Descarga el repo como ZIP (*Code → Download ZIP*) y súbelo al chat o Proyecto.
+2. Pégale esto:
+
+> Descomprime el ZIP. Lee `AGENTS.md`: es la guía canónica de este framework.
+> Ejecuta `python scripts/prueba_rapida.py` para verificar que funciona.
+> Después ayúdame a crear un reporte: **primero el plan**
+> (`scripts/plan_reporte.py`), esperas mi aprobación, y recién luego construyes.
+
+3. Al terminar, pídele el proyecto como ZIP para abrirlo en Power BI Desktop.
+
+Lo único que no funciona ahí es `actualizar_catalogo.py` (necesita internet); el
+catálogo de reglas ya viene en el repo. Detalle: [docs/probar.md](docs/probar.md).
+
 ### Sin agente
 
 Los scripts funcionan solos, sin IA de por medio:
@@ -169,7 +187,17 @@ Guía completa en [docs/guia-de-uso.md](docs/guia-de-uso.md).
 
 ## 🏁 Primeros pasos
 
-Tres formas de usarlo, según lo que necesites hoy:
+**Antes que nada, comprueba que todo funciona en tu máquina:**
+
+```bash
+python scripts/prueba_rapida.py
+```
+
+Ejecuta el flujo completo y **se autoverifica** — incluso mete fallos a propósito
+para confirmar que los detecta. Termina en `TODO CORRECTO — 23 comprobaciones` o
+te dice qué falló. No necesita internet.
+
+Luego, tres formas de usarlo según lo que necesites hoy:
 
 ### A) Ya tengo un reporte y quiero saber si está bien hecho
 
