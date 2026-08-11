@@ -3,6 +3,74 @@
 Registro de cambios de criterio y de plantillas. Cada entrada: fecha · qué cambió
 · fuente que lo respalda. Ver `references/mantenimiento-de-plantillas.md`.
 
+## 2026-07-26 — v0.7.0 · el plan se aprueba antes de construir
+
+Peticion directa del usuario: *"antes de hacer los visuales creemos el plan de
+forma muy facil de entender para que el usuario lo valide"*. Y dos bugs de
+visuales encontrados con el CLI oficial de Microsoft, que hasta ahora no se
+habia usado mas que para `validate`.
+
+### Añadido — el PLAN antes que nada
+
+- **`scripts/plan_reporte.py`**: el plan del reporte en **lenguaje de negocio**.
+  Cero TMDL, cero PBIR, cero `visualType` en lo que el usuario lee. Dice que se
+  mide, como se corta, **la historia de cada pagina** (como se lee de arriba a
+  abajo), y **las decisiones que faltan** como casillas sin marcar.
+  El plan no se aprueba con preguntas abiertas.
+- **HARD-GATE en tres skills** (`powerbi-builder`, `powerbi-mvp`,
+  `powerbi-visualizacion`): si el usuario va a obtener paginas y visuales NUEVOS,
+  primero el plan y su aprobacion explicita.
+  _(Propuesta→aprobacion de Fission-AI/OpenSpec; HARD-GATE de obra/superpowers.)_
+- `init_proyecto.py` escribe `docs/plan.md` **antes** que el tema y los datos, y
+  lo marca en la salida con `<- LEELO PRIMERO`.
+- Regla dura #5 de AGENTS.md.
+
+### Corregido — dos bugs de visuales que ningun schema podia ver
+
+- **El `textbox` renderizaba una caja VACIA.** Su contenido va en
+  `visual.objects.general[].properties.paragraphs`, no en el titulo del
+  contenedor. El catalogo oficial lo confirma: `catalog describe textbox`
+  devuelve `roles: {}` y `formattingObjects: [general, text, values]`.
+  Poniendo solo `title` se veia una barra de titulo sobre una caja sin texto — y
+  ahi es justo donde vive **el mensaje de la pagina**, que es lo que sostiene el
+  storytelling. El fallo se llevaba por delante lo mas importante de la pagina.
+- **Altura del textbox por debajo del minimo**: 40 px con fuente de 18 pt genera
+  scrollbar. El validador oficial pide **≥45**; ahora son 48
+  (`PBIR_TEXTBOX_HEIGHT_BELOW_FLOOR`).
+
+### Verificado con el CLI oficial (mas alla de `validate`)
+
+El `@microsoft/powerbi-report-authoring-cli` tiene mas comandos de los que
+usabamos: `catalog`, `formatting`, `preview-visuals`, `preview-pages`, `doctor`.
+
+- **`catalog describe <visualType>` da los nombres de rol EXACTOS** por visual.
+  Se contrastaron los 7 tipos que genera el scaffold: `cardVisual→Data`,
+  `lineChart→Category/Y`, `pivotTable→Rows/Columns/Values`, `tableEx→Values`,
+  `slicer→Values`… **todos correctos**, incluido el `kind` (Measure vs Grouping).
+- Hallazgo importante para el futuro: **el schema NO valida los nombres de rol**.
+  `queryState` es `additionalProperties`, asi que un rol inventado pasa el schema
+  Y pasa `validate`, pero Power BI lo ignora y el visual sale vacio. La unica
+  fuente autoritativa es `catalog`: **nunca inferir roles de memoria**.
+- `preview-visuals` confirma que el CLI ve los 14 visuales con su tipo correcto.
+
+### Documentacion
+
+- **README**: nueva seccion *"¿Esto para que me sirve? (en cristiano)"* para
+  quien no sabe si esto le sirve, y *"Primero el plan, despues el reporte"* con
+  el plan real de ejemplo. La transcripcion de *Miralo en accion* ahora empieza
+  por el plan y su aprobacion.
+- **AGENTS.md**: tabla de **trazabilidad** — de donde sale cada decision del
+  framework (BPARules de Microsoft, WCAG, Kimball, SQLBI, OpenSpec, superpowers,
+  ponytail, skills-for-fabric, power-automate-architect, caveman), y que va
+  marcado `[HEURISTICO]` por no tener respaldo.
+
+### Portabilidad verificada
+
+Los scripts corren **sin ninguna variable de entorno de agente**. Los 13 skills
+usan `${CLAUDE_PLUGIN_ROOT}` (que resuelve Claude Code); Codex, Gemini CLI,
+OpenCode y Cursor operan por `AGENTS.md`, que usa rutas relativas.
+Los 5 dominios generan plan + 14 visuales con altText y pasan P1-P9.
+
 ## 2026-07-26 — v0.6.0 · el generador produce un reporte, no un esqueleto
 
 La brecha que quedaba no era de codigo: **no existia el conocimiento de diseño**

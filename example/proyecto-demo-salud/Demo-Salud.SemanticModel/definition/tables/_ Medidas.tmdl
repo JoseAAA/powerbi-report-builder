@@ -1,6 +1,6 @@
 table '_ Medidas'
 	isHidden
-	lineageTag: 1b15681f-daab-42f2-8e9e-4946a2d4cbf3
+	lineageTag: 22c3511c-d21e-4fa3-9212-909f28dfd3ba
 
 	/// Suma del numerador del indicador (columna Num del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Numerador = ```
@@ -11,7 +11,7 @@ table '_ Medidas'
 		formatString: #,0
 		displayFolder: Base
 		isHidden
-		lineageTag: c1090d4a-32e0-467d-9f47-d6c3066a5ec9
+		lineageTag: 4a932b9f-85e1-4d59-a81d-a90e73489e0a
 
 	/// Suma del denominador del indicador (columna Den del hecho). Medida base para construir cocientes; no se muestra sola.
 	measure Denominador = ```
@@ -22,7 +22,7 @@ table '_ Medidas'
 		formatString: #,0
 		displayFolder: Base
 		isHidden
-		lineageTag: 2bcedcb1-5477-4d57-a182-73dfcd31e396
+		lineageTag: 6d259103-9792-4c60-b5d2-f057c5b4df0c
 
 	/// Valor del indicador seleccionado (Numerador / Denominador). Devuelve BLANK si hay mas de un indicador en contexto, porque sumar indicadores distintos (un porcentaje y un importe) daria un numero sin significado. Segmenta por Indicador para verlo.
 	measure 'Indicador %' = ```
@@ -33,7 +33,7 @@ table '_ Medidas'
 			```
 		formatString: #,0.0%;-#,0.0%;#,0.0%
 		displayFolder: Indicadores
-		lineageTag: 7f0bdcaf-cd69-4139-9aaa-86f7f64c1ca4
+		lineageTag: 73b016c1-2983-41b0-890a-099f7cb68e30
 
 	/// % Ocupacion: indicador principal del reporte, filtrado explicitamente con CALCULATE. Muestra siempre un valor correcto aunque no haya segmentacion por Indicador.
 	measure '% Ocupacion' = ```
@@ -47,12 +47,12 @@ table '_ Medidas'
 			```
 		formatString: #,0.0%;-#,0.0%;#,0.0%
 		displayFolder: Indicadores
-		lineageTag: 4b45db00-6a52-4494-86f9-bfd68ef41b90
+		lineageTag: 463bbe7c-d422-4ae5-8972-acfa007624da
 
 	column Valor
 		isHidden
 		formatString: 0
-		lineageTag: 5e275f00-2ae1-4027-88c1-882f40ef97c0
+		lineageTag: 1159455d-1c5d-4bf9-8dd3-fc6bad810612
 		summarizeBy: none
 		sourceColumn: [Valor]
 

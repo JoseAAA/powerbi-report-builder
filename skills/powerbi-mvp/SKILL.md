@@ -13,6 +13,20 @@ description: >
 Objetivo: que el usuario abra algo real en minutos y pueda **iterar sobre los
 datos** sin esperar la fuente definitiva.
 
+## Paso 0 — el plan, y su aprobacion
+
+<HARD-GATE>
+Antes de generar nada, escribe el plan y espera el OK del usuario.
+</HARD-GATE>
+
+```
+python "${CLAUDE_PLUGIN_ROOT}/scripts/plan_reporte.py" --nombre "<X>" --dominio <d>
+```
+
+Resumeselo en el chat en lenguaje de negocio y pregunta que cambiaria. `init_proyecto.py`
+lo escribe tambien en `docs/plan.md`, pero **generar el proyecto no sustituye
+aprobar el plan**: si el usuario aun no valido la historia, para y preguntale.
+
 ## Un solo comando (la via recomendada)
 
 ```

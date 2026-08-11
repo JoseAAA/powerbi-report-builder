@@ -2,13 +2,13 @@
 /// tabla y no por la fecha del hecho: es lo que hace funcionar la inteligencia de tiempo.
 table Calendario
 	dataCategory: Time
-	lineageTag: 6dd78192-f589-4359-b261-cdea33e1f49f
+	lineageTag: 0f978688-9d2f-4ba9-a495-8ba01d4f92cc
 
 	column Fecha
 		dataType: dateTime
 		isKey
 		formatString: Short Date
-		lineageTag: 8d8dcffa-fc09-46db-af0d-30b33c7fdb44
+		lineageTag: fac6a5f7-9ad6-43fe-908e-360bb28e7487
 		summarizeBy: none
 		sourceColumn: Fecha
 
@@ -19,7 +19,7 @@ table Calendario
 	column Año
 		dataType: int64
 		formatString: 0
-		lineageTag: 73c19944-32fc-459b-a623-40084f8ba72b
+		lineageTag: 046667d5-8837-43b8-b404-2e5928ff5077
 		summarizeBy: none
 		sourceColumn: Año
 
@@ -27,7 +27,7 @@ table Calendario
 
 	column Mes
 		dataType: string
-		lineageTag: e29f797e-96d7-45c0-8d91-26568e66efe4
+		lineageTag: 95f030cf-06cc-4488-84a5-27f707983e13
 		summarizeBy: none
 		sourceColumn: Mes
 		sortByColumn: NumMes
@@ -37,7 +37,7 @@ table Calendario
 	column NumMes
 		dataType: int64
 		formatString: 0
-		lineageTag: 01b83832-b733-4456-99f0-87648bf1b085
+		lineageTag: fe6e47f2-0961-42fc-8d7d-faa99069717d
 		summarizeBy: none
 		sourceColumn: NumMes
 
@@ -45,7 +45,7 @@ table Calendario
 
 	column Trimestre
 		dataType: string
-		lineageTag: 8ab48224-910a-41b9-a8ee-0f4b88ae086a
+		lineageTag: f760b448-c6e7-46ed-a7b1-8f04c4e4d025
 		summarizeBy: none
 		sourceColumn: Trimestre
 
@@ -53,7 +53,7 @@ table Calendario
 
 	column EsDiaHabil
 		dataType: string
-		lineageTag: 03f30981-e295-4501-a4a1-a4caa7eea8d0
+		lineageTag: e9e4508e-4f9a-4f3d-be36-c860855eebdc
 		summarizeBy: none
 		sourceColumn: EsDiaHabil
 

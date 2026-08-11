@@ -1,7 +1,7 @@
 {
   "name": "powerbi-report-builder",
   "displayName": "Power BI Report Builder",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Framework multi-agente para crear, auditar y entregar dashboards de Power BI como proyecto PBIP (TMDL + PBIR). Valida con las reglas OFICIALES de Best Practice Analyzer de Microsoft, vigila la documentacion oficial que las sustenta, y genera un .pbip que LEE los datos de ejemplo para iterar el mockup en minutos.",
   "author": {
     "name": "JoseAAA",

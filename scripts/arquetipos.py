@@ -45,6 +45,11 @@ MARGEN = 32                                       # [HEURISTICO]
 # learn.microsoft.com/power-bi/guidance/report-page-tooltips
 TOOLTIP = {"width": 320, "height": 240}
 
+# Altura minima de un textbox para que el texto no genere scrollbar: el
+# validador oficial de Microsoft avisa por debajo de 45 px con fuente de 18 pt
+# (padding 8+8). Diagnostico PBIR_TEXTBOX_HEIGHT_BELOW_FLOOR. Usamos 48.
+ALTO_MIN_TEXTBOX = 45
+
 FUENTE_A11Y = ("https://learn.microsoft.com/en-us/power-bi/create-reports/"
                "desktop-accessibility-creating-reports")
 FUENTE_VISUALES = ("https://learn.microsoft.com/en-us/power-bi/visuals/"
@@ -141,7 +146,7 @@ ARQUETIPOS = {
         "base_citada": "Lo mas importante arriba-izquierda (LTR); slicers en la "
                        "misma posicion en todas las paginas; un mensaje por pagina.",
         "ranuras": [
-            ("titulo", "titulo_o_mensaje", MARGEN, 24, 700, 40,
+            ("titulo", "titulo_o_mensaje", MARGEN, 20, 700, 48,
              "Titulo del reporte: {ind} y su desglose."),
             ("slicer_indicador", "filtrar_en_canvas", 780, 24, 210, 56,
              "Segmentador para elegir el indicador que se analiza. "
@@ -173,7 +178,7 @@ ARQUETIPOS = {
         "base_citada": "Slicers en la misma posicion que en la pagina anterior; "
                        "Top N o el filtro mas restrictivo en tablas y matrices.",
         "ranuras": [
-            ("titulo", "titulo_o_mensaje", MARGEN, 24, 700, 40,
+            ("titulo", "titulo_o_mensaje", MARGEN, 20, 700, 48,
              "Titulo de la pagina de detalle."),
             ("slicer_indicador", "filtrar_en_canvas", 780, 24, 210, 56,
              "Segmentador de indicador, en la misma posicion que en Resumen."),
