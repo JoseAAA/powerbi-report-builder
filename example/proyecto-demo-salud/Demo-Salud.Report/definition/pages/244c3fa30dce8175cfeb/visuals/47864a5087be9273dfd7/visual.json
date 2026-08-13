@@ -1,0 +1,73 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "47864a5087be9273dfd7",
+  "position": {
+    "x": 32,
+    "y": 100,
+    "z": 3,
+    "height": 130,
+    "width": 394,
+    "tabOrder": 3
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_ Medidas"
+                    }
+                  },
+                  "Property": "% Ocupacion"
+                }
+              },
+              "queryRef": "_ Medidas.% Ocupacion",
+              "nativeQueryRef": "% Ocupacion"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'% Ocupacion del periodo seleccionado, en total.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'% Ocupacion'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

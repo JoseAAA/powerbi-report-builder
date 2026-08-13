@@ -138,6 +138,42 @@ def visual_para(pregunta):
 _ANCHO_UTIL = CANVAS["width"] - 2 * MARGEN            # 1216
 _COL = (_ANCHO_UTIL - 2 * GAP) // 3                   # 3 columnas de tarjetas
 
+# --------------------------------------------------------------------------- #
+# REGLAS DE DIMENSIONADO
+#
+# Nacen de un fallo observado en un reporte real: las tarjetas mostraban el valor
+# CORTADO ("4..", "-...", "2..") y el titulo se desbordaba. El schema no lo
+# detecta —un visual pequeño es JSON valido— y Power BI no reajusta: recorta.
+#
+# `ALTO_MIN_TEXTBOX` es OFICIAL (el validador de Microsoft avisa por debajo).
+# El resto es geometria defensiva NUESTRA, marcada como tal: mas vale sobrar
+# espacio que cortar una cifra. Un numero cortado no es un detalle estetico —
+# hace el reporte inservible.
+# --------------------------------------------------------------------------- #
+
+# Ancho minimo por tarjeta segun cuantos digitos puede tener el valor. Una cifra
+# de negocio en soles/dolares llega facil a 12 caracteres con separadores
+# ("454,354,649"), y el titulo de la tarjeta va encima. [HEURISTICO]
+ANCHO_MIN_TARJETA = 240
+ALTO_MIN_TARJETA = 120
+
+# Un slicer necesita alto para su cabecera MAS el campo; aplastarlo los solapa,
+# que es lo que se veia en el reporte real. [HEURISTICO]
+ALTO_MIN_SLICER = 60
+
+# Caracteres que caben por pixel de ancho, a 18pt. Sirve para dimensionar el
+# cuadro de titulo segun el texto real en vez de fijar un ancho a ojo.
+# [HEURISTICO] calibrado sobre el desbordamiento observado.
+PX_POR_CARACTER_18PT = 11
+
+
+def ancho_titulo(texto, minimo=420, maximo=None):
+    """Ancho para que un titulo de 18pt no se corte. `maximo` = ancho util."""
+    maximo = maximo or _ANCHO_UTIL
+    return max(minimo, min(maximo, len(texto) * PX_POR_CARACTER_18PT + 40))
+
+
+
 ARQUETIPOS = {
     "resumen": {
         "titulo": "Resumen",
@@ -148,10 +184,10 @@ ARQUETIPOS = {
         "ranuras": [
             ("titulo", "titulo_o_mensaje", MARGEN, 20, 700, 48,
              "Titulo del reporte: {ind} y su desglose."),
-            ("slicer_indicador", "filtrar_en_canvas", 780, 24, 210, 56,
+            ("slicer_indicador", "filtrar_en_canvas", 780, 20, 210, 60,
              "Segmentador para elegir el indicador que se analiza. "
              "Al elegir uno, el resto de la pagina se recalcula para ese indicador."),
-            ("slicer_anio", "filtrar_en_canvas", 1006, 24, 210, 56,
+            ("slicer_anio", "filtrar_en_canvas", 1006, 20, 210, 60,
              "Segmentador de año."),
             ("kpi_1", "un_numero_que_importa", MARGEN, 100, _COL, 130,
              "{ind} del periodo seleccionado, en total."),
@@ -180,9 +216,9 @@ ARQUETIPOS = {
         "ranuras": [
             ("titulo", "titulo_o_mensaje", MARGEN, 20, 700, 48,
              "Titulo de la pagina de detalle."),
-            ("slicer_indicador", "filtrar_en_canvas", 780, 24, 210, 56,
+            ("slicer_indicador", "filtrar_en_canvas", 780, 20, 210, 60,
              "Segmentador de indicador, en la misma posicion que en Resumen."),
-            ("slicer_dim1", "filtrar_en_canvas", 1006, 24, 210, 56,
+            ("slicer_dim1", "filtrar_en_canvas", 1006, 20, 210, 60,
              "Segmentador de {d1}."),
             ("matriz", "cruce_de_dimensiones_con_drill", MARGEN, 100, _ANCHO_UTIL, 380,
              "Matriz de {ind} cruzando {d2} contra los meses. Permite localizar "

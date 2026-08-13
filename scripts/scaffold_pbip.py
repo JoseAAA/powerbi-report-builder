@@ -1359,7 +1359,10 @@ def generar(nombre, salida, tema, dominio, datos=None, cultura="es-ES",
             if rol == "titulo":
                 titulo = (f"{arq['titulo']} — {nombre_ppal}" if clave == "resumen"
                           else f"{arq['titulo']} por {dim2} y mes")
-                visuales.append(visual_texto(pos, alt, titulo))
+                # El ancho sale del TEXTO, no de un numero fijo: con un titulo
+                # largo el cuadro se quedaba corto y Power BI lo recortaba.
+                ancho = arquetipos.ancho_titulo(titulo, maximo=w)
+                visuales.append(visual_texto((x, y, ancho, h, tab), alt, titulo))
             elif rol == "slicer_indicador":
                 # La pieza que faltaba: sin este slicer, 'Indicador %' es BLANK.
                 visuales.append(visual(tipo, pos, alt, titulo=ind,

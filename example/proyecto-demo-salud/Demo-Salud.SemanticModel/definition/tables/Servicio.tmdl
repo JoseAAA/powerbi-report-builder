@@ -1,12 +1,12 @@
 /// Dimension Servicio, con la columna Servicio Agrupado para agrupar y jerarquizar.
 table Servicio
-	lineageTag: 5824eb75-633f-433b-934a-8c10930476f7
+	lineageTag: ec7f4918-c097-478a-9e9c-8bee5a2414ac
 
 	column 'ID Servicio'
 		dataType: int64
 		isKey
 		formatString: 0
-		lineageTag: 9bca2ce0-9a55-42d0-8a9c-53bb2b1e84b4
+		lineageTag: 7f28189c-c023-4c96-b25c-592efe22c149
 		summarizeBy: none
 		sourceColumn: ID Servicio
 
@@ -14,7 +14,7 @@ table Servicio
 
 	column Servicio
 		dataType: string
-		lineageTag: f8d8d73c-bba5-4498-bf8f-dd534948bdd3
+		lineageTag: 3e0eedba-0819-41bf-af7e-4d52cb427e94
 		summarizeBy: none
 		sourceColumn: Servicio
 
@@ -22,7 +22,7 @@ table Servicio
 
 	column 'Servicio Agrupado'
 		dataType: string
-		lineageTag: 5777f9a5-24fa-4500-b4f4-005d4e735f3b
+		lineageTag: 535d98e3-79ec-40d4-84ec-14b743bd99dc
 		summarizeBy: none
 		sourceColumn: Servicio Agrupado
 

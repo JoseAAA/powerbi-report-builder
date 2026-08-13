@@ -44,6 +44,8 @@ Argumentos:
   --tema       ruta a un theme.json YA generado (se usa tal cual).
   --sin-marca  acepta EXPLICITAMENTE un tema neutro provisional.
   --salida     carpeta donde crear el proyecto (default: actual).
+  --aqui       monta el proyecto EN --salida, sin crear la subcarpeta <nombre>.
+               Para cuando ya estas dentro de la carpeta del proyecto.
   --cultura    culture del modelo y locale del reporte (default: es-ES).
   --sin-datos  genera el .pbip con datos inline en vez de leer los CSV.
 
@@ -151,6 +153,9 @@ def main():
     ap.add_argument("--sin-marca", dest="sin_marca", action="store_true",
                     help="acepta explicitamente un tema neutro provisional")
     ap.add_argument("--salida", default="./")
+    ap.add_argument("--aqui", action="store_true", help=(
+        "crea el proyecto EN --salida directamente, sin la subcarpeta <nombre>. "
+        "Usalo cuando ya estas parado en la carpeta del proyecto."))
     ap.add_argument("--cultura", default="es-ES",
                     help="culture del modelo y locale del reporte (default: es-ES)")
     ap.add_argument("--sin-datos", dest="sin_datos", action="store_true",
@@ -165,7 +170,11 @@ def main():
     if sum(bool(x) for x in (args.marca, args.tema, args.sin_marca)) > 1:
         ap.error("usa solo UNO de --marca / --tema / --sin-marca.")
 
-    base = os.path.abspath(os.path.join(args.salida, _slug(args.nombre)))
+    # Por defecto se crea una subcarpeta con el slug del nombre. Con --aqui el
+    # proyecto se monta DIRECTAMENTE en --salida: es lo que se espera cuando el
+    # usuario ya creo la carpeta del proyecto y esta parado dentro de ella.
+    base = (os.path.abspath(args.salida) if args.aqui
+            else os.path.abspath(os.path.join(args.salida, _slug(args.nombre))))
     docs = os.path.join(base, "docs")
     datos = os.path.join(base, "datos")
     for d in (base, docs, datos):

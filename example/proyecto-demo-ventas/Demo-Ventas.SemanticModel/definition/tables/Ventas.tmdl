@@ -1,12 +1,12 @@
 /// Hecho Ventas. Grano: una fila por fecha, Region, Producto e indicador, con el patron
 /// Num/Den. Las claves y las metricas base van ocultas: consulta el modelo con las medidas.
 table Ventas
-	lineageTag: 05d01dbe-a9b0-471c-b279-d473d95dd28d
+	lineageTag: 54d84de6-0b2c-4a4a-be91-f5992ab3bc16
 
 	column Fecha
 		dataType: dateTime
 		formatString: Short Date
-		lineageTag: d05fe7a1-f07b-47c4-b539-54508e44585e
+		lineageTag: 8aa89122-e15e-4f59-92b1-fe30e9e0c6f9
 		summarizeBy: none
 		sourceColumn: Fecha
 
@@ -18,7 +18,7 @@ table Ventas
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: 2e91bec5-205b-4568-946a-ffcfef904873
+		lineageTag: 31eb57ad-31de-4a8d-84b6-516744342933
 		summarizeBy: none
 		sourceColumn: ID Region
 
@@ -28,7 +28,7 @@ table Ventas
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: c34be762-dff4-4b24-bc67-322021b92476
+		lineageTag: 574dc0e0-e332-4d51-85f5-ff3a98ae4c98
 		summarizeBy: none
 		sourceColumn: ID Producto
 
@@ -38,7 +38,7 @@ table Ventas
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: c7d25faa-6a5b-4ab6-9253-834ec659e913
+		lineageTag: 5e9d4e4a-bdca-4dc6-a9de-49a494299816
 		summarizeBy: none
 		sourceColumn: ID Indicador
 
@@ -48,7 +48,7 @@ table Ventas
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: b89e17b2-e9e2-4701-b35e-a8e17c0e3a92
+		lineageTag: e0a17cef-c3a2-4add-a79f-f178e788842b
 		summarizeBy: sum
 		sourceColumn: Num
 
@@ -58,7 +58,7 @@ table Ventas
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: e9687351-1cf3-432d-9ea3-e229b1585385
+		lineageTag: 92eaea3e-c48f-45f6-98d0-086c962f993e
 		summarizeBy: sum
 		sourceColumn: Den
 

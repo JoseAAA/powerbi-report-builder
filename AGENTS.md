@@ -43,10 +43,10 @@ Gradúa la profundidad por nivel: **básico** (1 fuente, 1-2 páginas) /
 | `python scripts/generar_datos_ejemplo.py --dominio ventas\|rrhh\|finanzas\|salud\|generico` | CSVs de ejemplo (5 tablas) + `modelo-ejemplo.m` |
 | `python scripts/scaffold_pbip.py --nombre "X" --dominio <d> --tema theme.json [--datos <carpeta>] [--en-raiz]` | proyecto `.pbip` válido (estrella + PBIR). **`--datos` cablea las particiones a los CSV**; `--en-raiz` deja el `.pbip` en la raíz |
 | `python scripts/plan_reporte.py --nombre "X" --dominio <d> [--salida docs/plan.md] [--json]` | **el PLAN en lenguaje de negocio, ANTES de construir**: qué se mide, cómo se corta, la historia de cada página y las decisiones pendientes |
-| `python scripts/init_proyecto.py --nombre "X" --dominio <d> --marca <m>\|--tema <t>\|--sin-marca` | bootstrap completo: `.pbip` en la raíz + `datos/` cableados + `docs/` |
+| `python scripts/init_proyecto.py --nombre "X" --dominio <d> --marca <m>\|--tema <t>\|--sin-marca [--aqui]` | bootstrap completo: `.pbip` en la raíz + `datos/` cableados + `docs/` |
 | `python scripts/validar_modelo.py <ruta .SemanticModel>` | modelo: **R1–R12** propias **+ 26 reglas OFICIALES de Microsoft** (`BPARules.json`), cada hallazgo con su ID oficial y su fuente (exit 1 si hay ALTA) |
 | `python scripts/catalogo_reglas.py` | guarda del catálogo: toda regla con fuente, ninguna ALTA apoyada solo en nivel 5, y el SHA-256 de `BPARules.json` sin tocar |
-| `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P9** — incluye **P9: `altText` en todo visual**, la regla de accesibilidad de mayor severidad (exit 1 si hay ALTA) |
+| `python scripts/validar_pbip.py <ruta .Report>` | valida el reporte, reglas **P1–P12** — incluye **P9: `altText` en todo visual**, la regla de accesibilidad de mayor severidad (exit 1 si hay ALTA) |
 | `python scripts/verificar_cableado.py <carpeta del proyecto>` | **datos ↔ modelo**, reglas **E1–E6**: que el `.pbip` lea los CSV, que ninguna clave quede huérfana y que las medidas no mezclen indicadores |
 | `python scripts/actualizar_catalogo.py [--forzar\|--json\|--marcar-revisado]` | vigila las **15 fuentes oficiales** (`scripts/fuentes.py`) y reporta páginas agregadas/eliminadas/**modificadas**. 1 llamada HTTP por fuente, sin token, con TTL por fuente (7/30/90 días) |
 | `python scripts/prueba_rapida.py [--dominio d] [--salida ruta]` | **prueba de extremo a extremo autoverificada** (23 comprobaciones): genera plan + proyecto, corre los 4 validadores, y mete fallos a propósito para confirmar que se detectan. Sin internet |
@@ -91,7 +91,7 @@ deterministas (temas, M, TMDL, PBIR) sin gastar tokens ni inventar formatos.
    `verificar_cableado.py` en verde. Los dos primeros comprueban las reglas del
    framework; el tercero comprueba que el proyecto **describa algo coherente**
    (que el reporte lea los datos que hay al lado). Un modelo puede pasar R1–R12
-   y P1–P9 y aun así mostrar cifras falsas: eso ya pasó.
+   y P1–P12 y aun así mostrar cifras falsas: eso ya pasó.
 5. **El plan se aprueba antes de construir.** Si el usuario va a obtener páginas y
    visuales NUEVOS, genera `plan_reporte.py`, resúmelo en lenguaje de negocio y
    **espera su OK**. No construyas con preguntas abiertas sin resolver. Revisar

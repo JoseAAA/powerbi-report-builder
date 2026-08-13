@@ -1,0 +1,73 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "429ce89a25b5972eca6b",
+  "position": {
+    "x": 852,
+    "y": 100,
+    "z": 5,
+    "height": 130,
+    "width": 394,
+    "tabOrder": 5
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_ Medidas"
+                    }
+                  },
+                  "Property": "Tiempo de Estancia"
+                }
+              },
+              "queryRef": "_ Medidas.Tiempo de Estancia",
+              "nativeQueryRef": "Tiempo de Estancia"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Tercer indicador del periodo seleccionado.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Tiempo de Estancia'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

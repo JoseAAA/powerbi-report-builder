@@ -1,15 +1,15 @@
-relationship 65990c6c-fb0b-44d2-a8cf-ab64ca7bf198
+relationship 098abc65-56dc-4850-90ea-ce58f8dda587
 	fromColumn: Indicadores.Fecha
 	toColumn: Calendario.Fecha
 
-relationship 54b5733c-dd29-4a62-87c7-e06b221d754f
+relationship 479905b0-ede2-4137-afe6-6d1dc3579787
 	fromColumn: Indicadores.'ID Sede'
 	toColumn: Sede.'ID Sede'
 
-relationship 7bb60cee-d63a-4901-8f9b-986b51895241
+relationship 8a0b0c1e-790b-4037-b618-83dd6c0bd86d
 	fromColumn: Indicadores.'ID Servicio'
 	toColumn: Servicio.'ID Servicio'
 
-relationship f2578982-dbb7-4cb6-b8e0-3c167ef2189f
+relationship 08166d9f-5f83-4011-bbc7-f76ef566a052
 	fromColumn: Indicadores.'ID Indicador'
 	toColumn: Indicador.'ID Indicador'

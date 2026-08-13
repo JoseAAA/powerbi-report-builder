@@ -31,6 +31,14 @@ Reglas (severidad [ALTA] bloquea, exit 1):
               del catalogo de visualizacion: sin alt, un lector de pantalla solo
               anuncia el tipo de visual y el insight se pierde. Limite 250 chars.
               Exentos los decorativos (shape, image, actionButton).
+  P10 [ALTA]  Visual fuera del lienzo (se sale por la derecha, por abajo, o con
+              posicion negativa). Equivale a PBIR_LAYOUT_OUT_OF_BOUNDS_* del
+              validador oficial de Microsoft. Geometria pura: sin fuente externa.
+  P11 [MEDIA] Visuales que se SOLAPAN mas de un 10% del menor de los dos: uno
+              tapa al otro y el usuario lo ve en cuanto abre el archivo.
+  P12 [ALTA]  Visual mas pequeño que el minimo de su tipo. Power BI NO reajusta:
+              RECORTA. Una tarjeta estrecha muestra "4.." en vez de la cifra, y
+              el reporte queda inservible aunque el JSON sea valido.
 
 Solo librería estándar.
 """
@@ -240,9 +248,91 @@ def main():
                         f'el "name" dentro de {t.name} es "{interno}" pero report.json '
                         f'referencia "{ref}"; si no son identicos el tema no carga'))
 
+
+    # ------------------------------------------------------------------
+    # P10-P11 — GEOMETRIA DEL LAYOUT
+    #
+    # Ni nuestros validadores ni (en parte) el oficial detectaban un reporte
+    # visualmente roto: tarjetas aplastadas, visuales solapados o fuera del
+    # lienzo pasaban como "OK". Son fallos que el usuario ve en cuanto abre el
+    # archivo, asi que valen mas que muchas reglas de modelo.
+    #
+    # Estas dos son GEOMETRIA PURA: no necesitan fuente externa, se deducen del
+    # tamaño de pagina declarado en page.json. P10 coincide con los diagnosticos
+    # PBIR_LAYOUT_OUT_OF_BOUNDS_* del validador oficial de Microsoft.
+    # ------------------------------------------------------------------
+    for pg in sorted(definition.glob("pages/*/page.json")):
+        try:
+            with open(pg, encoding="utf-8") as fh:
+                pobj = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        pw = pobj.get("width", 1280)
+        ph = pobj.get("height", 720)
+        nombre_pg = pobj.get("displayName", pg.parent.name)
+
+        cajas = []
+        for vf in sorted(pg.parent.glob("visuals/*/visual.json")):
+            try:
+                with open(vf, encoding="utf-8") as fh:
+                    vobj = json.load(fh)
+            except (OSError, ValueError):
+                continue
+            pos = vobj.get("position", {})
+            x, y = pos.get("x", 0), pos.get("y", 0)
+            w, h = pos.get("width", 0), pos.get("height", 0)
+            tipo = vobj.get("visual", {}).get("visualType", "?")
+            cajas.append((tipo, x, y, w, h, vf.parent.name))
+
+            # P12 — visual demasiado pequeño para su contenido.
+            # Power BI NO reajusta: recorta. Una tarjeta estrecha muestra
+            # "4.." en vez de "454,354,649", y el reporte queda inservible
+            # aunque el JSON sea perfectamente valido.
+            minimos = {"cardVisual": (240, 120), "card": (240, 120),
+                       "kpi": (240, 120), "slicer": (140, 60),
+                       "lineChart": (280, 180), "clusteredBarChart": (280, 180),
+                       "clusteredColumnChart": (280, 180),
+                       "pivotTable": (320, 160), "tableEx": (320, 120)}
+            mw, mh = minimos.get(tipo, (0, 0))
+            if mw and (w < mw or h < mh):
+                hallazgos.append(("ALTA", "P12",
+                    f"[{nombre_pg}] visual '{tipo}' mide {w}x{h}, por debajo del "
+                    f"minimo {mw}x{mh}: Power BI recorta el contenido en vez de "
+                    "reajustarlo (los valores salen como '4..')"))
+
+            # P10 — fuera del lienzo
+            if x + w > pw:
+                hallazgos.append(("ALTA", "P10",
+                    f"[{nombre_pg}] visual '{tipo}' se sale por la derecha: "
+                    f"x{x} + ancho{w} = {x + w} > {pw} de la pagina"))
+            if y + h > ph:
+                hallazgos.append(("ALTA", "P10",
+                    f"[{nombre_pg}] visual '{tipo}' se sale por abajo: "
+                    f"y{y} + alto{h} = {y + h} > {ph} de la pagina"))
+            if x < 0 or y < 0:
+                hallazgos.append(("ALTA", "P10",
+                    f"[{nombre_pg}] visual '{tipo}' con posicion negativa "
+                    f"(x{x}, y{y}): queda fuera del lienzo"))
+
+        # P11 — visuales solapados (se tapan entre si)
+        for i in range(len(cajas)):
+            t1, x1, y1, w1, h1, n1 = cajas[i]
+            for j in range(i + 1, len(cajas)):
+                t2, x2, y2, w2, h2, n2 = cajas[j]
+                ox = min(x1 + w1, x2 + w2) - max(x1, x2)
+                oy = min(y1 + h1, y2 + h2) - max(y1, y2)
+                if ox > 2 and oy > 2:          # 2px de tolerancia por redondeo
+                    area = ox * oy
+                    menor = min(w1 * h1, w2 * h2) or 1
+                    if area / menor > 0.10:    # solape real, no un borde rozando
+                        hallazgos.append(("MEDIA", "P11",
+                            f"[{nombre_pg}] '{t1}' y '{t2}' se solapan "
+                            f"{ox}x{oy}px ({area * 100 // menor}% del menor): "
+                            "uno tapa al otro"))
+
     print(f"Reporte: {report.name}  |  Archivos JSON/PBIR: {n_ok}")
     if not hallazgos:
-        print("OK  Sin hallazgos en el reporte (P1-P9).")
+        print("OK  Sin hallazgos en el reporte (P1-P12).")
         return 0
     orden = {"ALTA": 0, "MEDIA": 1, "BAJA": 2}
     for sev, regla, msg in sorted(hallazgos, key=lambda h: orden[h[0]]):
